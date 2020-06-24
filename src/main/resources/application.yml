@@ -1,5 +1,4 @@
 server:
-  # TODO: Update server port to a unique value.
-  port: 8080
+  port: 8088
   servlet:
     context-path: /revalidation

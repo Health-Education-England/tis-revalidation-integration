@@ -9,7 +9,7 @@ Revalidation integration service is an integration layer that handle business lo
    during deployment.
  - Add repository to SonarCloud.
  - Add repository to Dependabot.
- - Update the references to `tis-template` and port number in [task-definition].
+ - Update the references to `tis-template` in [task-definition].
 
 ## Workflow
 The `CI/CD Workflow` is triggered on push to any branch.
