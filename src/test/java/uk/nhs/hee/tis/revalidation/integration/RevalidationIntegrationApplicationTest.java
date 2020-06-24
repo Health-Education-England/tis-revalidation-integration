@@ -19,14 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.template;
+package uk.nhs.hee.tis.revalidation.integration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-//TODO: Update package and class name.
-class TemplateApplicationTest {
+class RevalidationIntegrationApplicationTest {
 
   @Test
   void contextLoads() {
