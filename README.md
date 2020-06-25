@@ -6,7 +6,6 @@ Revalidation integration service is an integration layer that handle business lo
 ## TODO
  - Provide `SENTRY_DSN` and `SENTRY_ENVIRONMENT` as environmental variables
    during deployment.
- - Update the references to `tis-template` in [task-definition].
 
 ## Workflow
 The `CI/CD Workflow` is triggered on push to any branch.
