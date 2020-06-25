@@ -189,6 +189,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ github.event.repository.name }
+          service: ${{ github.event.repository.name }}
           cluster: revalidation-preprod
           wait-for-service-stability: true
