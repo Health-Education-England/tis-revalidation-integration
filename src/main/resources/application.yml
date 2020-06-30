@@ -12,3 +12,7 @@ service:
     host: ${CORE_HOST:localhost}
     port: ${CORE_PORT:8080}
       url: https://${service.core.host}:${service.core.port}/revalidation
+  recommendation:
+    host: ${RECOMMENDATION_HOST:localhost}
+    port: ${RECOMMENDATION_PORT:8080}
+      url: https://${service.recommendation.host}:${service.recommendation.port}/revalidation
