@@ -2,3 +2,9 @@ server:
   port: 8088
   servlet:
     context-path: /integration
+
+service:
+  concern:
+    host: ${CONCERN_HOST:localhost}
+    port: ${CONCERN_PORT:8087}
+    url: https://${service.concern.host}:${service.concern.port}/concerns
