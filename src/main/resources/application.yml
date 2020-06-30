@@ -12,6 +12,10 @@ service:
     host: ${CORE_HOST:localhost}
     port: ${CORE_PORT:8080}
     url: https://${service.core.host}:${service.core.port}/revalidation
+  gmc-client:
+    host: ${GMC_CLIENT_HOST:localhost}
+    port: ${GMC_CLIENT_PORT:8081}
+    url: https://${service.gmc-client.host}:${service.gmc-client.port}/gmcclient
   recommendation:
     host: ${RECOMMENDATION_HOST:localhost}
     port: ${RECOMMENDATION_PORT:8080}
