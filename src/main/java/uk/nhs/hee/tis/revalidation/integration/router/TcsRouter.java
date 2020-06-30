@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TcsRouter extends RouteBuilder {
 
-  private static final String API_TRAINEE = "/api/revalidation/trainee/${header.gmcId}";
-  private static final String API_TRAINEES = "/api/revalidation/trainees/${header.gmcId}";
+  private static final String API_TRAINEE = "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_TRAINEES = "/api/revalidation/trainees/${header.gmcId}?bridgeEndpoint=true";
 
   @Value("${server.tcs.url}")
   private static String serviceUrl;
