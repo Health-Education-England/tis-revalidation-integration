@@ -16,3 +16,7 @@ service:
     host: ${RECOMMENDATION_HOST:localhost}
     port: ${RECOMMENDATION_PORT:8080}
       url: https://${service.recommendation.host}:${service.recommendation.port}/revalidation
+  tcs:
+    host: ${TCS_HOST:localhost}
+    port: ${TCS_PORT:8085}
+      url: https://${service.tcs.host}:${service.tcs.port}/tcsmock
