@@ -30,8 +30,8 @@ public class GmcClientRouter extends RouteBuilder {
 
   private static final String API_SYNC = "/api/v1/admin";
 
-  @Value("${server.gmc-client.url}")
-  private static String serviceUrl;
+  @Value("${service.gmc-client.url}")
+  private String serviceUrl;
 
   @Override
   public void configure() {

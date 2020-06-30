@@ -30,8 +30,8 @@ public class ConcernRouter extends RouteBuilder {
 
   private static final String API_DOCTORS = "/api/doctors";
 
-  @Value("${server.concern.url}")
-  private static String serviceUrl;
+  @Value("${service.concern.url}")
+  private String serviceUrl;
 
   @Override
   public void configure() {

@@ -23,13 +23,15 @@ package uk.nhs.hee.tis.revalidation.integration.router;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CoreRouter extends RouteBuilder {
 
   private static final String API_DOCTORS = "/api/doctors";
 
-  @Value("${server.core.url}")
-  private static String serviceUrl;
+  @Value("${service.core.url}")
+  private String serviceUrl;
 
   @Override
   public void configure() {

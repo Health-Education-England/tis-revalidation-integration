@@ -29,11 +29,13 @@ import org.springframework.stereotype.Component;
 public class RecommendationRouter extends RouteBuilder {
 
   private static final String API_RECOMMENDATION = "/api/recommendation";
-  private static final String API_RECOMMENDATION_GMC_ID = "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
-  private static final String API_RECOMMENDATION_SUBMIT = "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
+  private static final String API_RECOMMENDATION_GMC_ID =
+      "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_RECOMMENDATION_SUBMIT =
+      "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
 
-  @Value("${server.recommendation.url}")
-  private static String serviceUrl;
+  @Value("${service.recommendation.url}")
+  private String serviceUrl;
 
   @Override
   public void configure() {
