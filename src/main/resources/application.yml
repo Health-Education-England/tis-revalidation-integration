@@ -8,3 +8,7 @@ service:
     host: ${CONCERN_HOST:localhost}
     port: ${CONCERN_PORT:8087}
     url: https://${service.concern.host}:${service.concern.port}/concerns
+  core:
+    host: ${CORE_HOST:localhost}
+    port: ${CORE_PORT:8080}
+      url: https://${service.core.host}:${service.core.port}/revalidation
