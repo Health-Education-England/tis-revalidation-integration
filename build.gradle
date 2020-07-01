@@ -25,13 +25,15 @@ repositories {
 
 dependencies {
   // Spring Boot starters
-  implementation "org.apache.camel.springboot:camel-spring-boot-starter:3.4.0"
   implementation "org.springframework.boot:spring-boot-starter-actuator"
   implementation "org.springframework.boot:spring-boot-starter-web"
   testImplementation("org.springframework.boot:spring-boot-starter-test") {
     exclude group: "org.junit.vintage", module: "junit-vintage-engine"
   }
 
+  // Apache Camel starters
+  implementation "org.apache.camel.springboot:camel-spring-boot-starter:3.4.0"
+  implementation "org.apache.camel.springboot:camel-http-starter:3.4.0"
 
   // Lombok
   compileOnly "org.projectlombok:lombok"
