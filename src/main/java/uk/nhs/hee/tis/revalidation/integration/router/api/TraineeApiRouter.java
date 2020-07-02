@@ -19,30 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.api;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TcsServiceRouter extends RouteBuilder {
-
-  private static final String API_TRAINEE =
-      "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
-  private static final String API_TRAINEES =
-      "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
-
-  @Value("${service.tcs.url}")
-  private String serviceUrl;
+public class TraineeApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
+    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
-    from("direct:trainee")
-        .toD(serviceUrl + API_TRAINEE);
+    rest("/trainee/{gmcId}")
+        .get().to("direct:trainee");
 
-    from("direct:trainees")
-        .toD(serviceUrl + API_TRAINEES);
+    rest("/trainees/{gmcIds}")
+        .get().to("direct:trainees");
   }
 }
