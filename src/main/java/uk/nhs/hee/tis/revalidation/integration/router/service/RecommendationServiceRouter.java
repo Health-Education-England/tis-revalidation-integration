@@ -19,24 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router;
+package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GmcClientRouter extends RouteBuilder {
+public class RecommendationServiceRouter extends RouteBuilder {
 
-  private static final String API_SYNC = "/api/v1/admin";
+  private static final String API_RECOMMENDATION = "/api/recommendation";
+  private static final String API_RECOMMENDATION_GMC_ID =
+      "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_RECOMMENDATION_SUBMIT =
+      "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
 
-  @Value("${service.gmc-client.url}")
+  @Value("${service.recommendation.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
 
-    from("direct:gmc-client-sync")
-        .to(serviceUrl + API_SYNC);
+    from("direct:recommendation")
+        .to(serviceUrl + API_RECOMMENDATION);
+
+    from("direct:recommendation-gmc-id")
+        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID);
+
+    from("direct:recommendation-submit")
+        .toD(serviceUrl + API_RECOMMENDATION_SUBMIT);
   }
 }

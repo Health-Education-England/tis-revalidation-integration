@@ -19,24 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router;
+package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ConcernRouter extends RouteBuilder {
+public class GmcClientServiceRouter extends RouteBuilder {
 
-  private static final String API_DOCTORS = "/api/doctors";
+  private static final String API_SYNC = "/api/v1/admin";
 
-  @Value("${service.concern.url}")
+  @Value("${service.gmc-client.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
 
-    from("direct:concerns")
-        .to(serviceUrl + API_DOCTORS);
+    from("direct:gmc-client-sync")
+        .to(serviceUrl + API_SYNC);
   }
 }
