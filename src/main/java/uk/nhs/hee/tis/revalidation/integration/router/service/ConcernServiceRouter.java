@@ -22,21 +22,31 @@
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ConcernServiceRouter extends RouteBuilder {
 
-  private static final String API_DOCTORS = "/api/doctors";
+  private static final String API_CONCERNS = "/api/concerns";
 
   @Value("${service.concern.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
+    restConfiguration()
+        .component("servlet")
+        .bindingMode(RestBindingMode.auto);
+
+    rest(API_CONCERNS)
+        .get()
+        .toD("direct:concerns");
 
     from("direct:concerns")
-        .to(serviceUrl + API_DOCTORS);
+        .to(serviceUrl + API_CONCERNS + "?bridgeEndpoint=true")
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }
