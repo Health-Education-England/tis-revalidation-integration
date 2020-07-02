@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router;
+package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RecommendationRouter extends RouteBuilder {
+public class RecommendationServiceRouter extends RouteBuilder {
 
   private static final String API_RECOMMENDATION = "/api/recommendation";
 

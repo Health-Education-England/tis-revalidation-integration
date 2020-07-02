@@ -32,10 +32,11 @@ dependencies {
   }
 
   // Apache Camel starters
-  implementation "org.apache.camel.springboot:camel-spring-boot-starter:3.4.0"
-  implementation "org.apache.camel.springboot:camel-http-starter:3.4.0"
-  implementation 'org.apache.camel.springboot:camel-servlet-starter:3.4.0'
-  implementation 'org.apache.camel.springboot:camel-jackson-starter:3.4.0'
+  ext.camelVersion = "3.4.0"
+  implementation "org.apache.camel.springboot:camel-spring-boot-starter:$camelVersion"
+  implementation "org.apache.camel.springboot:camel-http-starter:$camelVersion"
+  implementation "org.apache.camel.springboot:camel-servlet-starter:$camelVersion"
+  implementation "org.apache.camel.springboot:camel-jackson-starter:$camelVersion"
 
   // Lombok
   compileOnly "org.projectlombok:lombok"

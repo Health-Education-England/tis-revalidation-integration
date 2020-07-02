@@ -19,45 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router;
+package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
-import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TcsRouter extends RouteBuilder {
+public class GmcClientServiceRouter extends RouteBuilder {
 
-  private static final String API_TRAINEE =
-      "/api/revalidation/trainee";
-  private static final String API_TRAINEES =
-      "/api/revalidation/trainees";
+  private static final String API_SYNC = "/api/v1/admin";
 
-  @Value("${service.tcs.url}")
+  @Value("${service.gmc-client.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
-    restConfiguration()
-        .component("servlet")
-        .bindingMode(RestBindingMode.auto);
 
-    rest(API_TRAINEE)
-        .get("/{gmcId}")
-        .toD("direct:trainee");
-
-    rest(API_TRAINEES)
-        .get("/{gmcIds}")
-        .toD("direct:trainees");
-
-    from("direct:trainee")
-        .toD(serviceUrl + API_TRAINEE + "/${header.gmcId}?bridgeEndpoint=true")
-        .unmarshal().json(JsonLibrary.Jackson);
-
-    from("direct:trainees")
-        .toD(serviceUrl + API_TRAINEES + "/${header.gmcId}?bridgeEndpoint=true")
-        .unmarshal().json(JsonLibrary.Jackson);
+    from("direct:gmc-client-sync")
+        .to(serviceUrl + API_SYNC);
   }
 }
