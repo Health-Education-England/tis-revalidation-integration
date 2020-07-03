@@ -33,6 +33,7 @@ public class ConcernsApiRouter extends RouteBuilder {
     restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
     rest("/concerns")
-        .get().to("direct:concerns");
+        .get().to("direct:concerns")
+        .get("/{gmcId}").to("direct:concerns");
   }
 }
