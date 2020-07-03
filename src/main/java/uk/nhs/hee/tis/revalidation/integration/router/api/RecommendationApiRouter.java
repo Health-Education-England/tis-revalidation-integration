@@ -19,24 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.api;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ConcernServiceRouter extends RouteBuilder {
-
-  private static final String API_CONCERNS = "/api/concerns/${header.gmcId}?bridgeEndpoint=true";
-
-  @Value("${service.concern.url}")
-  private String serviceUrl;
+public class RecommendationApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
+    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
-    from("direct:concerns")
-        .toD(serviceUrl + API_CONCERNS);
+    rest("/recommendation")
+        .post().to("direct:recommendation-post")
+        .put().to("direct:recommendation-put");
+
+    rest("/recommendation/{gmcId}")
+        .get().to("direct:recommendation-gmc-id")
+        .post("/submit/{recommendationId}").to("direct:recommendation-submit");
   }
 }

@@ -21,14 +21,16 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GmcClientServiceRouter extends RouteBuilder {
 
-  private static final String API_SYNC = "/api/v1/admin";
+  private static final String API_SYNC = "/api/v1/admin?bridgeEndpoint=true";
 
   @Value("${service.gmc-client.url}")
   private String serviceUrl;
@@ -36,7 +38,8 @@ public class GmcClientServiceRouter extends RouteBuilder {
   @Override
   public void configure() {
 
-    from("direct:gmc-client-sync")
-        .to(serviceUrl + API_SYNC);
+    from("direct:admin")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .toD(serviceUrl + API_SYNC);
   }
 }

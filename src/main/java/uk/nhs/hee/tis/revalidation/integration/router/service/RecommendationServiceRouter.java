@@ -21,14 +21,17 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
 
-  private static final String API_RECOMMENDATION = "/api/recommendation";
+  private static final String API_RECOMMENDATION = "/api/recommendation?bridgeEndpoint=true";
   private static final String API_RECOMMENDATION_GMC_ID =
       "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_RECOMMENDATION_SUBMIT =
@@ -40,13 +43,26 @@ public class RecommendationServiceRouter extends RouteBuilder {
   @Override
   public void configure() {
 
-    from("direct:recommendation")
-        .to(serviceUrl + API_RECOMMENDATION);
+    // TODO: Remove mapping when tis-revalidation-core is deployed.
+    from("direct:temp-doctors")
+        .to(serviceUrl + "/api/v1/doctors/");
+
+    from("direct:recommendation-post")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrl + API_RECOMMENDATION);
+
+    from("direct:recommendation-put")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.PUT))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-gmc-id")
         .toD(serviceUrl + API_RECOMMENDATION_GMC_ID);
 
     from("direct:recommendation-submit")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_RECOMMENDATION_SUBMIT);
   }
 }
