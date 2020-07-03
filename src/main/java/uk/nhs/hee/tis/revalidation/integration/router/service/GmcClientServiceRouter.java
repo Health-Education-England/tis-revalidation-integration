@@ -25,7 +25,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +40,6 @@ public class GmcClientServiceRouter extends RouteBuilder {
 
     from("direct:admin")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_SYNC);
   }
 }
