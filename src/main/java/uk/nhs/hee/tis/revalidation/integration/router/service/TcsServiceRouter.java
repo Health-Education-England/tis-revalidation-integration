@@ -23,7 +23,6 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,33 +30,22 @@ import org.springframework.stereotype.Component;
 public class TcsServiceRouter extends RouteBuilder {
 
   private static final String API_TRAINEE =
-      "/api/revalidation/trainee";
+      "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_TRAINEES =
-      "/api/revalidation/trainees";
+      "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
 
   @Value("${service.tcs.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
-    restConfiguration()
-        .component("servlet")
-        .bindingMode(RestBindingMode.auto);
-
-    rest(API_TRAINEE)
-        .get("/{gmcId}")
-        .toD("direct:trainee");
-
-    rest(API_TRAINEES)
-        .get("/{gmcIds}")
-        .toD("direct:trainees");
 
     from("direct:trainee")
-        .toD(serviceUrl + API_TRAINEE + "/${header.gmcId}?bridgeEndpoint=true")
+        .toD(serviceUrl + API_TRAINEE)
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:trainees")
-        .toD(serviceUrl + API_TRAINEES + "/${header.gmcId}?bridgeEndpoint=true")
+        .toD(serviceUrl + API_TRAINEES)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }

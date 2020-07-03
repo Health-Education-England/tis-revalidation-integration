@@ -24,34 +24,25 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GmcClientServiceRouter extends RouteBuilder {
 
-  private static final String API_SYNC = "/api/v1/admin";
+  private static final String API_SYNC = "/api/v1/admin?bridgeEndpoint=true";
 
   @Value("${service.gmc-client.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
-    restConfiguration()
-        .component("servlet")
-        .bindingMode(RestBindingMode.auto);
 
-    rest(API_SYNC)
-        .post()
-        .route()
+    from("direct:admin")
         .marshal().json(JsonLibrary.Jackson)
         .setHeader(Exchange.HTTP_METHOD, constant("POST"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .to("direct:gmc-client-sync");
-
-    from("direct:gmc-client-sync")
-        .to(serviceUrl + API_SYNC + "?bridgeEndpoint=true")
+        .toD(serviceUrl + API_SYNC)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }

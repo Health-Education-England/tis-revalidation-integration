@@ -24,62 +24,47 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
 
-  private static final String API_RECOMMENDATION = "/api/recommendation";
+  private static final String API_RECOMMENDATION = "/api/recommendation?bridgeEndpoint=true";
+  private static final String API_RECOMMENDATION_GMC_ID =
+      "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_RECOMMENDATION_SUBMIT =
+      "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
 
   @Value("${service.recommendation.url}")
   private String serviceUrl;
 
   @Override
   public void configure() {
-    restConfiguration()
-        .component("servlet")
-        .bindingMode(RestBindingMode.auto);
 
-    rest(API_RECOMMENDATION)
-        .post()
-        .route()
+    from("direct:recommendation-post")
         .marshal().json(JsonLibrary.Jackson)
         .setHeader(Exchange.HTTP_METHOD, constant("POST"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .to("direct:recommendation");
+        .toD(serviceUrl + API_RECOMMENDATION)
+        .unmarshal().json(JsonLibrary.Jackson);
 
-    rest(API_RECOMMENDATION)
-        .put()
-        .route()
+    from("direct:recommendation-put")
         .marshal().json(JsonLibrary.Jackson)
-        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
+        .setHeader(Exchange.HTTP_METHOD, constant("PUT"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .to("direct:recommendation");
-
-    rest(API_RECOMMENDATION)
-        .get("/{gmcId}")
-        .toD("direct:recommendation-gmc-id");
-
-    rest(API_RECOMMENDATION)
-        .post("/{gmcId}/submit/{recommendationId}")
-        .route()
-        .marshal().json(JsonLibrary.Jackson)
-        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
-        .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .to("direct:recommendation-submit");
-
-    from("direct:recommendation")
-        .to(serviceUrl + API_RECOMMENDATION + "?bridgeEndpoint=true")
+        .toD(serviceUrl + API_RECOMMENDATION)
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:recommendation-gmc-id")
-        .toD(serviceUrl + API_RECOMMENDATION + "/${header.gmcId}?bridgeEndpoint=true")
+        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID)
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:recommendation-submit")
-        .toD(serviceUrl + API_RECOMMENDATION + "/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true")
+        .marshal().json(JsonLibrary.Jackson)
+        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
+        .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+        .toD(serviceUrl + API_RECOMMENDATION_SUBMIT)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }
