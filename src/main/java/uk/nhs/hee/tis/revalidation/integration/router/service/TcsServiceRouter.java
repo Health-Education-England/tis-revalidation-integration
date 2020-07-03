@@ -41,11 +41,9 @@ public class TcsServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:trainee")
-        .toD(serviceUrl + API_TRAINEE)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_TRAINEE);
 
     from("direct:trainees")
-        .toD(serviceUrl + API_TRAINEES)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_TRAINEES);
   }
 }

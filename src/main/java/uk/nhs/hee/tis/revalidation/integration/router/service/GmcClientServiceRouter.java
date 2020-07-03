@@ -39,10 +39,8 @@ public class GmcClientServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:admin")
-        .marshal().json(JsonLibrary.Jackson)
         .setHeader(Exchange.HTTP_METHOD, constant("POST"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .toD(serviceUrl + API_SYNC)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_SYNC);
   }
 }

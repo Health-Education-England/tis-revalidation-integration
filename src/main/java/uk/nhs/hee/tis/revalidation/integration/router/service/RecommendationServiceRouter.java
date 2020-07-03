@@ -43,28 +43,21 @@ public class RecommendationServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:recommendation-post")
-        .marshal().json(JsonLibrary.Jackson)
         .setHeader(Exchange.HTTP_METHOD, constant("POST"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .toD(serviceUrl + API_RECOMMENDATION)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-put")
-        .marshal().json(JsonLibrary.Jackson)
         .setHeader(Exchange.HTTP_METHOD, constant("PUT"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .toD(serviceUrl + API_RECOMMENDATION)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-gmc-id")
-        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID);
 
     from("direct:recommendation-submit")
-        .marshal().json(JsonLibrary.Jackson)
         .setHeader(Exchange.HTTP_METHOD, constant("POST"))
         .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-        .toD(serviceUrl + API_RECOMMENDATION_SUBMIT)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_RECOMMENDATION_SUBMIT);
   }
 }

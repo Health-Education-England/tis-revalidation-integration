@@ -38,7 +38,6 @@ public class CoreServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:doctors")
-        .to(serviceUrl + API_DOCTORS)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .to(serviceUrl + API_DOCTORS);
   }
 }

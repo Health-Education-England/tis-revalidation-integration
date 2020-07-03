@@ -38,7 +38,6 @@ public class ConcernServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:concerns")
-        .to(serviceUrl + API_CONCERNS)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .to(serviceUrl + API_CONCERNS);
   }
 }
