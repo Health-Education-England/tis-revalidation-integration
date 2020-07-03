@@ -33,15 +33,11 @@ public class RecommendationApiRouter extends RouteBuilder {
     restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
     rest("/recommendation")
-        .post().to("direct:recommendation-post");
-
-    rest("/recommendation")
+        .post().to("direct:recommendation-post")
         .put().to("direct:recommendation-put");
 
-    rest("/recommendation")
-        .get("/{gmcId}").to("direct:recommendation-gmc-id");
-
-    rest("/recommendation")
-        .post("/{gmcId}/submit/{recommendationId}").to("direct:recommendation-submit");
+    rest("/recommendation/{gmcId}")
+        .get().to("direct:recommendation-gmc-id")
+        .post("/submit/{recommendationId}").to("direct:recommendation-submit");
   }
 }
