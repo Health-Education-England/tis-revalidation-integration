@@ -45,7 +45,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     // TODO: Remove mapping when tis-revalidation-core is deployed.
     from("direct:temp-doctors")
-        .to(serviceUrl + "/api/v1/doctors/");
+        .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true");
 
     from("direct:recommendation-post")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
