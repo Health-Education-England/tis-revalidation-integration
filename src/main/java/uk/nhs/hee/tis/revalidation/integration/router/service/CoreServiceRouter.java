@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CoreServiceRouter extends RouteBuilder {
 
-  private static final String API_DOCTORS = "/api/v1/doctors?bridgeEndpoint=true";
+  private static final String API_DOCTORS = "/api/doctors?bridgeEndpoint=true";
 
   @Value("${service.core.url}")
   private String serviceUrl;
