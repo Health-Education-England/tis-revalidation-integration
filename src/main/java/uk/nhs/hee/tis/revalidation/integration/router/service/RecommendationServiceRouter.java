@@ -23,8 +23,9 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -43,21 +44,21 @@ public class RecommendationServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:recommendation-post")
-        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
-        .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-put")
-        .setHeader(Exchange.HTTP_METHOD, constant("PUT"))
-        .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.PUT))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-gmc-id")
         .toD(serviceUrl + API_RECOMMENDATION_GMC_ID);
 
     from("direct:recommendation-submit")
-        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
-        .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_RECOMMENDATION_SUBMIT);
   }
 }

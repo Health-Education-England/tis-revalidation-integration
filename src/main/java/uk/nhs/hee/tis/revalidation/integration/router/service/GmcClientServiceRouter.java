@@ -23,8 +23,9 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,8 +40,8 @@ public class GmcClientServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:admin")
-        .setHeader(Exchange.HTTP_METHOD, constant("POST"))
-        .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_SYNC);
   }
 }
