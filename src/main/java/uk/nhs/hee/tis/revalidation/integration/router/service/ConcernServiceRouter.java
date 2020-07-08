@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConcernServiceRouter extends RouteBuilder {
 
-  private static final String API_CONCERNS = "/api/concerns?bridgeEndpoint=true&${headers}";
-  private static final String API_CONCERNS_GMCID =
+  private static final String API_CONCERNS = "/api/concerns?bridgeEndpoint=true";
+  private static final String API_CONCERNS_GMC_ID =
       "/api/concerns/${header.gmcId}?bridgeEndpoint=true";
 
   @Value("${service.concern.url}")
@@ -39,9 +39,9 @@ public class ConcernServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:concerns")
-        .toD(serviceUrl + API_CONCERNS);
+        .to(serviceUrl + API_CONCERNS);
 
-    from("direct:concerns-gmcid")
-        .toD(serviceUrl + API_CONCERNS_GMCID);
+    from("direct:concerns-gmc-id")
+        .toD(serviceUrl + API_CONCERNS_GMC_ID);
   }
 }
