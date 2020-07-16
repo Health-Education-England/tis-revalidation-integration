@@ -30,3 +30,7 @@ service:
     host: ${TCS_HOST:localhost}
     port: ${TCS_PORT:8085}
     url: http://${service.tcs.host}:${service.tcs.port}/tcsmock
+  common-upload:
+    host: ${COMMON_UPLOAD_HOST:localhost}
+    port: ${COMMON_UPLOAD_PORT:8089}
+    url: http://${service.common-upload.host}:${service.common-upload.port}/common-upload
