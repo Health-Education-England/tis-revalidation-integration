@@ -19,5 +19,8 @@ public class CommonUploadApiRouter extends RouteBuilder {
 
     rest("/storage/list")
         .get().to("direct:storage-list");
+
+    rest("/storage/delete")
+        .delete().to("direct:storage-delete");
   }
 }
