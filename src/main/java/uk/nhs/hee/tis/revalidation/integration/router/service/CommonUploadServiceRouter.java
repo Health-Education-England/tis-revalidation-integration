@@ -12,6 +12,7 @@ public class CommonUploadServiceRouter extends RouteBuilder {
   private static final String API_STORAGE_UPLOAD = "/api/storage/upload?bridgeEndpoint=true";
   private static final String API_STORAGE_DOWNLOAD = "/api/storage/download?bridgeEndpoint=true";
   private static final String API_STORAGE_LIST = "/api/storage/list?bridgeEndpoint=true";
+  private static final String API_STORAGE_DELETE = "/api/storage/delete?bridgeEndpoint=true";
 
   @Value("${service.common-upload.url}")
   private String serviceUrl;
@@ -29,5 +30,7 @@ public class CommonUploadServiceRouter extends RouteBuilder {
     from("direct:storage-list")
         .to(serviceUrl + API_STORAGE_LIST);
 
+    from("direct:storage-delete")
+        .to(serviceUrl + API_STORAGE_DELETE);
   }
 }
