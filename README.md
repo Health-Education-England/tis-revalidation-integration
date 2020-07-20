@@ -41,8 +41,9 @@ Example:
 ```
 
 ## TODO
- - Provide `SENTRY_DSN` and `SENTRY_ENVIRONMENT` as environmental variables
-   during deployment.
+ - Provide dynamic `SENTRY_ENVIRONMENT` as environmental variable during
+   deployment, this should be set based on where the container is being
+   deployed i.e. `stage` or `prod`.
 
 ## Workflow
 The `CI/CD Workflow` is triggered on push to any branch.
