@@ -19,17 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-//Tests will be created later. There is a ticket for this in sprint backlog.
-/*package uk.nhs.hee.tis.revalidation.integration;
+package uk.nhs.hee.tis.revalidation.integration.config;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.transformuk.hee.tis.security.config.KeycloakClientConfig;
+import org.keycloak.admin.client.Keycloak;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootTest
-class RevalidationIntegrationApplicationTest {
-
-  @Test
-  void contextLoads() {
-
+@Configuration
+public class KeyCloakConfig extends KeycloakClientConfig {
+  @Bean
+  public Keycloak keycloak() {
+    return super.createKeycloak();
   }
-}*/
+
+}

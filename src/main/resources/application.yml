@@ -9,6 +9,15 @@ server:
   servlet:
     context-path: /integration
 
+kc:
+  realm: ${KC_REALM:lin}
+  client:
+    id: ${KC_CLIENT_ID:admin-cli}
+  server:
+    url: ${KC_SERVER_URL:http://localhost:8083/auth/}
+  username: ${KC_USERNAME:reval_kc_user}
+  password: ${KC_PASSWORD:reval_kc_user}
+
 service:
   concern:
     host: ${CONCERN_HOST:localhost}
