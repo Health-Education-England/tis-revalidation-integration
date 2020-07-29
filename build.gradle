@@ -19,8 +19,16 @@ configurations {
   }
 }
 
+
 repositories {
   mavenCentral()
+  maven {
+    url "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/"
+    credentials {
+      username "aws"
+      password System.env.CODEARTIFACT_AUTH_TOKEN
+    }
+  }
 }
 
 dependencies {
@@ -48,6 +56,9 @@ dependencies {
 
   // Sentry reporting
   implementation "io.sentry:sentry-spring:1.7.30"
+
+  // Keycloak
+  implementation "com.transformuk.hee:keycloak-client:3.0.0"
 }
 
 checkstyle {
