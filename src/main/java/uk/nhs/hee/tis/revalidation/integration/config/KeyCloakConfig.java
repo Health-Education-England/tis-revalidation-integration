@@ -19,29 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.config;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import com.transformuk.hee.tis.security.config.KeycloakClientConfig;
+import org.keycloak.admin.client.Keycloak;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-public class CommonUploadApiRouter extends RouteBuilder {
+@Configuration
+public class KeyCloakConfig extends KeycloakClientConfig {
 
-  @Override
-  public void configure() throws Exception {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
-
-    rest("/storage/upload")
-        .post().to("direct:storage-upload");
-
-    rest("/storage/download")
-        .get().to("direct:storage-download");
-
-    rest("/storage/list")
-        .get().to("direct:storage-list");
-
-    rest("/storage/delete")
-        .delete().to("direct:storage-delete");
+  @Bean
+  public Keycloak keycloak() {
+    return super.createKeycloak();
   }
+
 }

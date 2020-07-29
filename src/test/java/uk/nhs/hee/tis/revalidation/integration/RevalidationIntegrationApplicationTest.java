@@ -21,9 +21,11 @@
 
 package uk.nhs.hee.tis.revalidation.integration;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@Disabled("Tests are disabled at the moment for future sprint to be looked after")
 @SpringBootTest
 class RevalidationIntegrationApplicationTest {
 
