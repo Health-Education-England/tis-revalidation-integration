@@ -43,3 +43,7 @@ service:
     host: ${COMMON_UPLOAD_HOST:localhost}
     port: ${COMMON_UPLOAD_PORT:8089}
     url: http://${service.common-upload.host}:${service.common-upload.port}/common-upload
+  reference:
+    host: ${REFERENCE_HOST:localhost}
+    port: ${REFERENCE_PORT:8088}
+    url: http://${service.reference.host}:${service.reference.port}/reference
