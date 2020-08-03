@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2020 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,25 +18,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Component
-public class RecommendationApiRouter extends RouteBuilder {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ConnectionRecordDto {
 
-  @Override
-  public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
-
-    rest("/recommendation")
-        .post().bindingMode(RestBindingMode.off).to("direct:recommendation-post")
-        .put().bindingMode(RestBindingMode.off).to("direct:recommendation-put");
-
-    rest("/recommendation/{gmcId}")
-        .get().to("direct:recommendation-gmc-id")
-        .post("/submit/{recommendationId}").bindingMode(RestBindingMode.off).to("direct:recommendation-submit");
-  }
+  String gmcNumber;
+  String programmeOwner;
+  String connectionStatus;
+  LocalDate programmeMembershipStartDate;
+  LocalDate programmeMembershipEndDate;
 }

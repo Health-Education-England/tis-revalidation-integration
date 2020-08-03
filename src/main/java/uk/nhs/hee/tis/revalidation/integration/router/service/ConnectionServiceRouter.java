@@ -21,24 +21,46 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import java.util.Map;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 
 @Component
-public class CoreServiceRouter extends RouteBuilder {
+public class ConnectionServiceRouter extends RouteBuilder {
 
-  private static final String API_DOCTORS = "/api/doctors?bridgeEndpoint=true";
+  private static final String API_CONNECTION = "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
 
-  @Value("${service.core.url}")
-  private String serviceUrl;
+  @Autowired
+  private GmcIdProcessorBean gmcIdProcessorBean;
+
+  @Autowired
+  private DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
+
+  @Value("${service.tcs.url}")
+  private String tcsServiceUrl;
+
+  @Value("${service.recommendation.url}")
+  private String recommendationServiceUrl;
 
   @Override
   public void configure() {
 
-    from("direct:doctors")
-        .to(serviceUrl + API_DOCTORS)
+    from("direct:connection-summary")
+        .to("direct:v1-doctors")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
+        .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
+
+    from("direct:v1-doctors")
+        .toD(recommendationServiceUrl + "/api/v1/doctors?bridgeEndpoint=true")
         .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:tcs-connection")
+        .toD(tcsServiceUrl + API_CONNECTION)
+        .unmarshal().json(JsonLibrary.Jackson, Map.class);
   }
 }

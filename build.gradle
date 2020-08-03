@@ -44,6 +44,7 @@ dependencies {
   implementation "org.apache.camel.springboot:camel-spring-boot-starter:$camelVersion"
   implementation "org.apache.camel.springboot:camel-http-starter:$camelVersion"
   implementation "org.apache.camel.springboot:camel-servlet-starter:$camelVersion"
+  implementation "org.apache.camel.springboot:camel-jackson-starter:$camelVersion"
 
   // Lombok
   compileOnly "org.projectlombok:lombok"

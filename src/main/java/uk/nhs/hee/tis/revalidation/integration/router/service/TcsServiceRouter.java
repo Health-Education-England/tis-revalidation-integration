@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,9 +41,11 @@ public class TcsServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:trainee")
-        .toD(serviceUrl + API_TRAINEE);
+        .toD(serviceUrl + API_TRAINEE)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:trainees")
-        .toD(serviceUrl + API_TRAINEES);
+        .toD(serviceUrl + API_TRAINEES)
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }
