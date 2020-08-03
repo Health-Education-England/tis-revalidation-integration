@@ -26,18 +26,13 @@ import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RecommendationApiRouter extends RouteBuilder {
+public class ConnectionApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
     restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
-    rest("/recommendation")
-        .post().bindingMode(RestBindingMode.off).to("direct:recommendation-post")
-        .put().bindingMode(RestBindingMode.off).to("direct:recommendation-put");
-
-    rest("/recommendation/{gmcId}")
-        .get().to("direct:recommendation-gmc-id")
-        .post("/submit/{recommendationId}").bindingMode(RestBindingMode.off).to("direct:recommendation-submit");
+    rest("/connection")
+        .get().to("direct:connection-summary");
   }
 }

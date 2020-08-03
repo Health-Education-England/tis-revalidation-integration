@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2020 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,25 +18,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 
-@Component
-public class RecommendationApiRouter extends RouteBuilder {
+@Mapper(componentModel = "spring")
+public interface TraineeConnectionMapper {
 
-  @Override
-  public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
-
-    rest("/recommendation")
-        .post().bindingMode(RestBindingMode.off).to("direct:recommendation-post")
-        .put().bindingMode(RestBindingMode.off).to("direct:recommendation-put");
-
-    rest("/recommendation/{gmcId}")
-        .get().to("direct:recommendation-gmc-id")
-        .post("/submit/{recommendationId}").bindingMode(RestBindingMode.off).to("direct:recommendation-submit");
-  }
+  ConnectionSummaryDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
+      ConnectionRecordDto connectionRecordDto);
 }

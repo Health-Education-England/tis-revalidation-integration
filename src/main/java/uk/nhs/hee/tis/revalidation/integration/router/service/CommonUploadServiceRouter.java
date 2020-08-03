@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -46,10 +47,12 @@ public class CommonUploadServiceRouter extends RouteBuilder {
         .toD(serviceUrl + API_STORAGE_UPLOAD);
 
     from("direct:storage-download")
-        .to(serviceUrl + API_STORAGE_DOWNLOAD);
+        .to(serviceUrl + API_STORAGE_DOWNLOAD)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:storage-list")
-        .to(serviceUrl + API_STORAGE_LIST);
+        .to(serviceUrl + API_STORAGE_LIST)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:storage-delete")
         .to(serviceUrl + API_STORAGE_DELETE);

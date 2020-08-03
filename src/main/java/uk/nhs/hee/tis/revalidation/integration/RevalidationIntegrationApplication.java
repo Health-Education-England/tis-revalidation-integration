@@ -21,13 +21,30 @@
 
 package uk.nhs.hee.tis.revalidation.integration;
 
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES;
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 @SpringBootApplication
 public class RevalidationIntegrationApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(RevalidationIntegrationApplication.class);
+  }
+
+  @Bean
+  @Primary
+  public ObjectMapper mapper() {
+    final var mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
+    mapper.configure(ALLOW_UNQUOTED_FIELD_NAMES, true);
+    return mapper;
   }
 }

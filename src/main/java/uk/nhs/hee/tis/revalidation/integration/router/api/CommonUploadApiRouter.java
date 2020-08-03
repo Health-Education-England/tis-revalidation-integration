@@ -33,7 +33,8 @@ public class CommonUploadApiRouter extends RouteBuilder {
     restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
     rest("/storage/upload")
-        .post().to("direct:storage-upload");
+        .post().bindingMode(RestBindingMode.off)
+        .to("direct:storage-upload");
 
     rest("/storage/download")
         .get().to("direct:storage-download");
@@ -42,6 +43,7 @@ public class CommonUploadApiRouter extends RouteBuilder {
         .get().to("direct:storage-list");
 
     rest("/storage/delete")
-        .delete().to("direct:storage-delete");
+        .delete().bindingMode(RestBindingMode.off)
+        .to("direct:storage-delete");
   }
 }

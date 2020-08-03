@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,9 +40,11 @@ public class ConcernServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:concerns")
-        .to(serviceUrl + API_CONCERNS);
+        .to(serviceUrl + API_CONCERNS)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:concerns-gmc-id")
-        .toD(serviceUrl + API_CONCERNS_GMC_ID);
+        .toD(serviceUrl + API_CONCERNS_GMC_ID)
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }

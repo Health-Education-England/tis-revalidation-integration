@@ -21,8 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -45,7 +47,8 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     // TODO: Remove mapping when tis-revalidation-core is deployed.
     from("direct:temp-doctors")
-        .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true");
+        .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true")
+        .unmarshal().json(JsonLibrary.Jackson);
 
     // TODO: Remove mapping when tis-revalidation-core is deployed.
     from("direct:temp-doctors-assign-admin")
@@ -64,7 +67,8 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-gmc-id")
-        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID);
+        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:recommendation-submit")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
