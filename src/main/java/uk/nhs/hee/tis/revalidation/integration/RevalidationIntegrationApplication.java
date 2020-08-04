@@ -26,10 +26,14 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.HashMap;
+import org.apache.camel.component.jackson.JacksonDataFormat;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 
 @SpringBootApplication
 public class RevalidationIntegrationApplication {
@@ -46,5 +50,11 @@ public class RevalidationIntegrationApplication {
     mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
     mapper.configure(ALLOW_UNQUOTED_FIELD_NAMES, true);
     return mapper;
+  }
+
+  @Bean(name = "json-jackson")
+  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+  public JacksonDataFormat jacksonDataFormat(ObjectMapper mapper) {
+    return new JacksonDataFormat(mapper, HashMap.class);
   }
 }

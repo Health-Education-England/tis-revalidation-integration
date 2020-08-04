@@ -20,22 +20,24 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
+import static java.util.stream.Collectors.toList;
+import static org.mapstruct.factory.Mappers.getMapper;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.ConnectionSummaryMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.TraineeConnectionMapper;
 
 @Slf4j
@@ -54,20 +56,24 @@ public class DoctorConnectionAggregationStrategy implements AggregationStrategy 
     final var traineeSummaryDto = mapper.convertValue(messageBody, TraineeSummaryDto.class);
     final var traineeInfos = traineeSummaryDto.getTraineeInfo();
 
-    final var resultList = traineeInfos.stream().map(traineeInfo -> {
+    final var connectionInfoList = traineeInfos.stream().map(traineeInfo -> {
       return aggregateTraineeWithConnection(newExchange, traineeInfo);
-    }).collect(Collectors.toList());
+    }).collect(toList());
 
-    result.getMessage().setBody(resultList);
+    final var connectionSummaryMapper = getMapper(ConnectionSummaryMapper.class);
+    final var connections = connectionSummaryMapper
+        .mergeConnectionInfo(traineeSummaryDto, connectionInfoList);
+
+    result.getMessage().setBody(connections);
     return result;
   }
 
-  private ConnectionSummaryDto aggregateTraineeWithConnection(Exchange newExchange,
+  private ConnectionInfoDto aggregateTraineeWithConnection(Exchange newExchange,
       TraineeInfoDto traineeInfo) {
 
     final var newMessage = getTcsConnectionRecord(newExchange,
         traineeInfo.getGmcReferenceNumber());
-    final var mapper = Mappers.getMapper(TraineeConnectionMapper.class);
+    final var mapper = getMapper(TraineeConnectionMapper.class);
     return mapper.mergeTraineeConnectionResponses(traineeInfo, newMessage);
   }
 
