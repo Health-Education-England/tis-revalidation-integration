@@ -18,24 +18,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
+import org.mapstruct.Mapper;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ConnectionRecordDto {
+@Mapper(componentModel = "spring")
+public interface ConnectionSummaryMapper {
 
-  String programmeOwner;
-  String connectionStatus;
-  LocalDate programmeMembershipStartDate;
-  LocalDate programmeMembershipEndDate;
+  ConnectionSummaryDto mergeConnectionInfo(final TraineeSummaryDto traineeSummaryDto,
+      final List<ConnectionInfoDto> connections);
 }
