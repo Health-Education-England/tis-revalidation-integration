@@ -32,6 +32,7 @@ public class ConcernServiceRouter extends RouteBuilder {
   private static final String API_CONCERNS = "/api/concerns?bridgeEndpoint=true";
   private static final String API_CONCERNS_GMC_ID =
       "/api/concerns/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_CONCERN_ADMINS = "/api/concerns/admins?bridgeEndpoint=true";
 
   @Value("${service.concern.url}")
   private String serviceUrl;
@@ -45,6 +46,10 @@ public class ConcernServiceRouter extends RouteBuilder {
 
     from("direct:concerns-gmc-id")
         .toD(serviceUrl + API_CONCERNS_GMC_ID)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:concern-admins")
+        .to(serviceUrl + API_CONCERN_ADMINS)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }
