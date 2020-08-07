@@ -19,30 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.processor;
 
-import org.apache.camel.builder.RouteBuilder;
+import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
-public class ReferenceServiceRouter extends RouteBuilder {
-
-  private static final String API_SITES = "/api/sites?bridgeEndpoint=true";
+public class KeycloakBean {
 
   @Autowired
-  private KeycloakBean reference;
+  private Keycloak keycloak;
 
-  @Value("${service.reference.url}")
-  private String serviceUrl;
-
-  @Override
-  public void configure() throws Exception {
-    from("direct:reference-sites")
-        .setHeader("Authorization").method(reference, "getAuthToken")
-        .to(serviceUrl + API_SITES);
-
+  public String getAuthToken() {
+    return "Bearer " + keycloak.tokenManager().getAccessTokenString();
   }
 }
