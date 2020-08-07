@@ -26,15 +26,22 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.transformuk.hee.tis.security.client.KeycloakClientRequestFactory;
+import com.transformuk.hee.tis.security.client.KeycloakRestTemplate;
 import java.util.HashMap;
 import org.apache.camel.component.jackson.JacksonDataFormat;
+import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+import org.springframework.web.client.RestTemplate;
 
+@ComponentScan(basePackages = {"uk.nhs.hee.tis.revalidation.integration",
+    "com.transformuk.hee.tis.reference"})
 @SpringBootApplication
 public class RevalidationIntegrationApplication {
 
@@ -56,5 +63,12 @@ public class RevalidationIntegrationApplication {
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   public JacksonDataFormat jacksonDataFormat(ObjectMapper mapper) {
     return new JacksonDataFormat(mapper, HashMap.class);
+  }
+
+
+  @Bean
+  public RestTemplate restTemplate(final Keycloak keycloak) {
+    final var keycloakClientRequestFactory = new KeycloakClientRequestFactory(keycloak);
+    return new KeycloakRestTemplate(keycloakClientRequestFactory);
   }
 }

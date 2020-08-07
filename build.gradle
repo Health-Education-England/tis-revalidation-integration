@@ -22,6 +22,7 @@ configurations {
 
 repositories {
   mavenCentral()
+  mavenLocal()
   maven {
     url "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/"
     credentials {
