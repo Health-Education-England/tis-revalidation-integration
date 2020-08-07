@@ -45,5 +45,7 @@ public class GmcIdProcessorBean {
     final var traineeSummaryDto = mapper.convertValue(body, TraineeSummaryDto.class);
     return traineeSummaryDto.getTraineeInfo().stream()
         .map(t -> t.getGmcReferenceNumber()).collect(toList());
+
+
   }
 }

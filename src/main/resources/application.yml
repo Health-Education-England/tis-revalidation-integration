@@ -12,11 +12,11 @@ server:
 kc:
   realm: ${KC_REALM:lin}
   client:
-    id: ${KC_CLIENT_ID:admin-cli}
+    id: ${KC_CLIENT_ID:api-tokens}
   server:
-    url: ${KC_SERVER_URL:http://localhost:8083/auth/}
-  username: ${KC_USERNAME:reval_kc_user}
-  password: ${KC_PASSWORD:reval_kc_user}
+    url: ${KC_SERVER_URL:https://stage-apps.tis.nhs.uk/auth}
+  username: ${KC_USERNAME:esr_kc_user}
+  password: ${KC_PASSWORD:bMMcgAxDtwFMFJf2sJvJ}
 
 service:
   concern:
@@ -44,6 +44,17 @@ service:
     port: ${COMMON_UPLOAD_PORT:8089}
     url: http://${service.common-upload.host}:${service.common-upload.port}/common-upload
   reference:
-    host: ${REFERENCE_HOST:localhost}
-    port: ${REFERENCE_PORT:8088}
-    url: http://${service.reference.host}:${service.reference.port}/reference
+    url: https://stage-apps.tis.nhs.uk/reference
+
+reference:
+  server:
+    name: ${REFERENCE_HOST:stage-apps.tis.nhs.uk}
+    port: ${REFERENCE_PORT:8087}
+  service:
+    url: ${REFERENCE_SERVER_URL:https://${reference.server.name}/reference}
+  client:
+    rate:
+      limit: ${REFERENCE_CLIENT_RATE_LIMIT:100}
+    bulk:
+      rate:
+        limit: ${REFERENCE_CLIENT_BULK_RATE_LIMIT:10}
