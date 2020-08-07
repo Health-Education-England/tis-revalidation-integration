@@ -44,8 +44,6 @@ service:
     port: ${COMMON_UPLOAD_PORT:8089}
     url: http://${service.common-upload.host}:${service.common-upload.port}/common-upload
   reference:
-    host: ${REFERENCE_HOST:localhost}
-    port: ${REFERENCE_PORT:8088}
     url: https://stage-apps.tis.nhs.uk/reference
 
 reference:
