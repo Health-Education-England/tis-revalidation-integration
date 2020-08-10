@@ -41,7 +41,7 @@ public class ReferenceServiceRouter extends RouteBuilder {
   @Override
   public void configure() throws Exception {
     from("direct:reference-sites")
-        .setHeader("Authorization").method(reference, "getAuthToken")
+        .setHeader("OIDC_access_token").method(reference, "getAuthToken")
         .to(serviceUrl + API_SITES);
 
   }
