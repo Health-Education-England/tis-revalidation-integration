@@ -32,6 +32,6 @@ public class KeycloakBean {
   private Keycloak keycloak;
 
   public String getAuthToken() {
-    return "Bearer " + keycloak.tokenManager().getAccessTokenString();
+    return keycloak.tokenManager().getAccessTokenString();
   }
 }
