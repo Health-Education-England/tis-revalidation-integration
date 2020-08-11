@@ -34,7 +34,6 @@ public class ConcernsApiRouter extends RouteBuilder {
 
     rest("/concerns")
         .get().to("direct:concerns")
-        .get("/admins").to("direct:concern-admins")
         .get("/{gmcId}").to("direct:concerns-gmc-id");
   }
 }
