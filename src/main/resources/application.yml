@@ -25,7 +25,7 @@ service:
     url: http://${service.concern.host}:${service.concern.port}/concerns
   core:
     host: ${CORE_HOST:localhost}
-    port: ${CORE_PORT:8080}
+    port: ${CORE_PORT:8091}
     url: http://${service.core.host}:${service.core.port}/revalidation
   gmc-client:
     host: ${GMC_CLIENT_HOST:localhost}
