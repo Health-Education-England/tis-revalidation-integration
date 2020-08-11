@@ -34,5 +34,8 @@ public class ReferenceApiRouter extends RouteBuilder {
 
     rest("/reference/sites")
         .get().to("direct:reference-sites");
+
+    rest("/reference/grades")
+        .get().to("direct:reference-grades");
   }
 }

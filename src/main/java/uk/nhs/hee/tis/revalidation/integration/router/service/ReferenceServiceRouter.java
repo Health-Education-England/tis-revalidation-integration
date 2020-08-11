@@ -32,6 +32,10 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 public class ReferenceServiceRouter extends RouteBuilder {
 
   private static final String API_SITES = "/api/sites?bridgeEndpoint=true";
+  private static final String API_GRADES = "/api/current/grades?bridgeEndpoint=true";
+
+  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
+  private static final String GET_TOKEN_METHOD = "getAuthToken";
 
   @Autowired
   private KeycloakBean reference;
@@ -42,8 +46,13 @@ public class ReferenceServiceRouter extends RouteBuilder {
   @Override
   public void configure() throws Exception {
     from("direct:reference-sites")
-        .setHeader("OIDC_access_token").method(reference, "getAuthToken")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(reference, GET_TOKEN_METHOD)
         .to(serviceUrl + API_SITES)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:reference-grades")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(reference, GET_TOKEN_METHOD)
+        .to(serviceUrl + API_GRADES)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }
