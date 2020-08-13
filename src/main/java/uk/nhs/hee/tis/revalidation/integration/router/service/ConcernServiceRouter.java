@@ -43,6 +43,7 @@ public class ConcernServiceRouter extends RouteBuilder {
   private static final String API_SITES = "/api/sites?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
   private static final String API_GRADES = "/api/current/grades?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
   private static final String API_TRUSTS = "/api/trusts?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
+  private static final String API_SOURCES = "/api/sources?bridgeEndpoint=true";
 
   private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
   private static final String GET_TOKEN_METHOD = "getAuthToken";
@@ -74,7 +75,8 @@ public class ConcernServiceRouter extends RouteBuilder {
         .to("direct:concerns-gmc-id")
         .to("direct:reference-sites")
         .to("direct:reference-grades")
-        .to("direct:reference-employers");
+        .to("direct:reference-employers")
+        .to("direct:reference-sources");
     from("direct:concerns-gmc-id")
         .toD(serviceUrlConcern + API_CONCERNS_GMC_ID)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONCERNS);
@@ -90,6 +92,10 @@ public class ConcernServiceRouter extends RouteBuilder {
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(reference, GET_TOKEN_METHOD)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.EMPLOYERS)
         .toD(serviceUrlReference + API_TRUSTS);
+    from("direct:reference-sources")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(reference, GET_TOKEN_METHOD)
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.SOURCES)
+        .toD(serviceUrlReference + API_SOURCES);
 
 
   }
