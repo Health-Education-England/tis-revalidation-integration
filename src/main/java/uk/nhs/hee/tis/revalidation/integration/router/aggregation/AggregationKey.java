@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2020 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,23 +18,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+public class AggregationKey {
 
-@Component
-public class ReferenceApiRouter extends RouteBuilder {
+  public static final String HEADER = "aggregation-key";
+  public static final String CONCERNS = "concerns";
+  public static final String GRADES = "grades";
+  public static final String SITES = "sites";
 
-  @Override
-  public void configure() throws Exception {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
-
-    rest("/reference/sites")
-        .get().to("direct:reference-sites");
-
-    rest("/reference/grades")
-        .get().to("direct:reference-grades");
-  }
 }
