@@ -81,12 +81,16 @@ public class ConcernServiceRouter extends RouteBuilder {
     from("direct:concerns-gmc-id-aggregation")
         .multicast(AGGREGATOR)
         .parallelProcessing()
+        .to("direct:gmc-number")
         .to("direct:concerns-gmc-id")
         .to("direct:reference-sites")
         .to("direct:reference-grades")
         .to("direct:reference-employers")
         .to("direct:reference-sources")
         .to("direct:reference-types");
+    from("direct:gmc-number")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.GMC_NUMBER)
+        .setBody().simple("${header.gmcId}");
     from("direct:concerns-gmc-id")
         .toD(serviceUrlConcern + API_CONCERNS_GMC_ID)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONCERNS);
