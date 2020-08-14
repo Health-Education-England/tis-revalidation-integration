@@ -22,10 +22,13 @@
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.AggregationStrategy;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
@@ -63,6 +66,11 @@ public class ConcernServiceRouter extends RouteBuilder {
     from("direct:concerns")
         .to(serviceUrlConcern + API_CONCERNS)
         .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:concern-save")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .to(serviceUrlConcern + API_CONCERNS);
 
     from("direct:concern-admins")
         .to(serviceUrlConcern + API_CONCERN_ADMINS)
