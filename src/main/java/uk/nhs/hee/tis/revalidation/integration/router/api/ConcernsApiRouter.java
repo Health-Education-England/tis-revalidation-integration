@@ -34,6 +34,7 @@ public class ConcernsApiRouter extends RouteBuilder {
 
     rest("/concerns")
         .get().to("direct:concerns")
+        .post().bindingMode(RestBindingMode.off).to("direct:concern-save")
         .get("/admins").to("direct:concern-admins")
         .get("/{gmcId}").to("direct:concerns-gmc-id-aggregation");
   }
