@@ -27,5 +27,6 @@ public class AggregationKey {
   public static final String GRADES = "grades";
   public static final String SITES = "sites";
   public static final String EMPLOYERS = "employers";
-
+  public static final String SOURCES = "sources";
+  public static final String TYPES = "types";
 }
