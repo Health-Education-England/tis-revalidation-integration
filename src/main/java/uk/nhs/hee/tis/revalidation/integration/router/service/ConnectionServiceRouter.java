@@ -55,8 +55,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
         .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
 
+    // TODO: Change to use tis-revalidation-core when deployed.
     from("direct:v1-doctors")
-        .toD(recommendationServiceUrl + "/api/v1/doctors?bridgeEndpoint=true")
+        .to(recommendationServiceUrl + "/api/v1/doctors?bridgeEndpoint=true")
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:tcs-connection")
