@@ -47,3 +47,9 @@ service:
     host: ${REFERENCE_HOST:localhost}
     port: ${REFERENCE_PORT:8088}
     url: http://${service.reference.host}:${service.reference.port}/reference
+
+logging:
+  level:
+    root: INFO
+    org.apache.camel: DEBUG
+    uk.nhs.hee.tis.revalidation.integration: TRACE
