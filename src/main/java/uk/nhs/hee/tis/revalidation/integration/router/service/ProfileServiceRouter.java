@@ -19,23 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AdminApiRouter extends RouteBuilder {
+public class ProfileServiceRouter extends RouteBuilder {
+
+  private static final String API_ADMIN_PROFILE =
+      "/api/userinfo?OIDC_access_token=${headers.authorization}&bridgeEndpoint=true";
+
+  @Value("${service.profile.url}")
+  private String serviceUrl;
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
 
-    rest("/admin/profile")
-        .get().to("direct:admin-profile");
-
-    rest("/admins")
-        .get().to("direct:admins");
+    from("direct:admin-profile")
+        .toD(serviceUrl + API_ADMIN_PROFILE)
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }
