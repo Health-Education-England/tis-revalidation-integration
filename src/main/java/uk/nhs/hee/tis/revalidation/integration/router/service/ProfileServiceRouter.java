@@ -25,9 +25,13 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class ProfileServiceRouter extends RouteBuilder {
+
+  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
+  private static final String GET_TOKEN_METHOD = "getAuthToken";
 
   private static final String API_ADMIN_PROFILE =
       "/api/userinfo?OIDC_access_token=${headers.authorization}&bridgeEndpoint=true";
@@ -35,10 +39,16 @@ public class ProfileServiceRouter extends RouteBuilder {
   @Value("${service.profile.url}")
   private String serviceUrl;
 
+  private KeycloakBean keycloakBean;
+
+  ProfileServiceRouter(KeycloakBean keycloakBean) {
+    this.keycloakBean = keycloakBean;
+  }
+
   @Override
   public void configure() {
-
     from("direct:admin-profile")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_ADMIN_PROFILE)
         .unmarshal().json(JsonLibrary.Jackson);
   }
