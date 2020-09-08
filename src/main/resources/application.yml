@@ -31,6 +31,10 @@ service:
     host: ${GMC_CLIENT_HOST:localhost}
     port: ${GMC_CLIENT_PORT:8081}
     url: http://${service.gmc-client.host}:${service.gmc-client.port}/gmcclient
+  profile:
+    host: ${PROFILE_HOST:local.tis.com}
+    port: ${PROFILE_PORT:}
+    url: http://${service.profile.host}:${service.profile.port}/profile
   recommendation:
     host: ${RECOMMENDATION_HOST:localhost}
     port: ${RECOMMENDATION_PORT:8080}
