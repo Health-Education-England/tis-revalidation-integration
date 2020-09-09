@@ -19,36 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.processor;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-@Component
-public class ProfileServiceRouter extends RouteBuilder {
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
-  private static final String GET_TOKEN_METHOD = "getAuthToken";
+class UsernameBeanTest {
 
-  private static final String API_ADMIN_PROFILE = "/api/hee-users/${bean:usernameBean}/ignore-case?bridgeEndpoint=true";
+  private UsernameBean bean;
 
-  @Value("${service.profile.url}")
-  private String serviceUrl;
-
-  private KeycloakBean keycloakBean;
-
-  ProfileServiceRouter(KeycloakBean keycloakBean) {
-    this.keycloakBean = keycloakBean;
+  @BeforeEach
+  void setUp() {
+    bean = new UsernameBean();
   }
 
-  @Override
-  public void configure() {
-    from("direct:admin-profile")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrl + API_ADMIN_PROFILE)
-        .unmarshal().json(JsonLibrary.Jackson);
+  @Test
+  void shouldReturnPreferredUsername() throws IOException {
+    String claims = "{\"custom:preferred_username\":\"test-user\"}";
+    String encodedClaims = Base64.getEncoder()
+        .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
+
+    String username = bean.getUsername(String.format("aGVhZGVy.%s.c2lnbmF0dXJl", encodedClaims));
+
+    assertThat("Unexpected username.", username, is("test-user"));
   }
 }

@@ -19,36 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.processor;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Map;
+import org.apache.camel.Header;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
-public class ProfileServiceRouter extends RouteBuilder {
+public class UsernameBean {
 
-  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
-  private static final String GET_TOKEN_METHOD = "getAuthToken";
+  // TODO: replace with non-custom field when userpool recreated.
+  private static final String USERNAME_KEY = "custom:preferred_username";
 
-  private static final String API_ADMIN_PROFILE = "/api/hee-users/${bean:usernameBean}/ignore-case?bridgeEndpoint=true";
+  /**
+   * Get the username from the claims in the authorization token.
+   *
+   * @param token The authorization token from the headers.
+   * @return The preferred username.
+   * @throws IOException If the claims could not be read.
+   */
+  public String getUsername(@Header(HttpHeaders.AUTHORIZATION) String token) throws IOException {
+    String[] tokens = token.split("\\.");
+    byte[] claimsBytes = Base64.getDecoder().decode(tokens[1].getBytes(StandardCharsets.UTF_8));
 
-  @Value("${service.profile.url}")
-  private String serviceUrl;
-
-  private KeycloakBean keycloakBean;
-
-  ProfileServiceRouter(KeycloakBean keycloakBean) {
-    this.keycloakBean = keycloakBean;
-  }
-
-  @Override
-  public void configure() {
-    from("direct:admin-profile")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrl + API_ADMIN_PROFILE)
-        .unmarshal().json(JsonLibrary.Jackson);
+    ObjectMapper mapper = new ObjectMapper();
+    Map claims = mapper.readValue(claimsBytes, Map.class);
+    return (String) claims.get(USERNAME_KEY);
   }
 }
