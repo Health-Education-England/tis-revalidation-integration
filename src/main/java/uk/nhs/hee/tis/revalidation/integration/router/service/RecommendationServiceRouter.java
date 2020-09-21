@@ -25,10 +25,13 @@ import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
@@ -38,6 +41,16 @@ public class RecommendationServiceRouter extends RouteBuilder {
       "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_RECOMMENDATION_SUBMIT =
       "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
+  private static final String API_CONNECTION = "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
+
+  @Autowired
+  private GmcIdProcessorBean gmcIdProcessorBean;
+
+  @Autowired
+  private DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
+
+  @Value("${service.tcs.url}")
+  private String tcsServiceUrl;
 
   @Value("${service.recommendation.url}")
   private String serviceUrl;
@@ -47,8 +60,13 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     // TODO: Remove mapping when tis-revalidation-core is deployed.
     from("direct:temp-doctors")
-        .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true")
-        .unmarshal().json(JsonLibrary.Jackson);
+        .to("direct:v1-doctors")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
+        .enrich("direct:tcs-trainees", doctorRecommendationAggregationStrategy);
+
+    from("direct:tcs-trainees")
+        .toD(tcsServiceUrl + API_CONNECTION)
+        .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     // TODO: Remove mapping when tis-revalidation-core is deployed.
     from("direct:temp-doctors-assign-admin")

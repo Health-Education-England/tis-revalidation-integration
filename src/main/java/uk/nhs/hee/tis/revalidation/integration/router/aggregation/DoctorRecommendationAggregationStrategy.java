@@ -34,55 +34,55 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.ConnectionSummaryMapper;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.TraineeConnectionMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.RecommendationSummaryMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.TraineeRecommendationMapper;
 
 @Slf4j
 @Component
-public class DoctorConnectionAggregationStrategy implements AggregationStrategy {
+public class DoctorRecommendationAggregationStrategy implements AggregationStrategy {
 
   @Autowired
   private ObjectMapper mapper;
 
   @SneakyThrows
   @Override
-  public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
+  public Exchange aggregate(final Exchange oldExchange, final Exchange newExchange) {
     final var result = new DefaultExchange(new DefaultCamelContext());
 
     final var messageBody = oldExchange.getIn().getBody();
     final var traineeSummaryDto = mapper.convertValue(messageBody, TraineeSummaryDto.class);
     final var traineeInfos = traineeSummaryDto.getTraineeInfo();
 
-    final var connectionInfoList = traineeInfos.stream().map(traineeInfo -> {
-      return aggregateTraineeWithConnection(newExchange, traineeInfo);
+    final var recommendationInfoDtos = traineeInfos.stream().map(traineeInfo -> {
+      return aggregateTraineeWithRecommendation(newExchange, traineeInfo);
     }).collect(toList());
 
-    final var connectionSummaryMapper = getMapper(ConnectionSummaryMapper.class);
-    final var connections = connectionSummaryMapper
-        .mergeConnectionInfo(traineeSummaryDto, connectionInfoList);
+    final var recommendationSummaryMapper = getMapper(RecommendationSummaryMapper.class);
+    final var recommendationSummaryDto = recommendationSummaryMapper
+        .mergeConnectionInfo(traineeSummaryDto, recommendationInfoDtos);
 
-    result.getMessage().setBody(connections);
+    result.getMessage().setBody(recommendationSummaryDto);
     return result;
   }
 
-  private ConnectionInfoDto aggregateTraineeWithConnection(Exchange newExchange,
-      TraineeInfoDto traineeInfo) {
+  private RecommendationInfoDto aggregateTraineeWithRecommendation(final Exchange newExchange,
+      final TraineeInfoDto traineeInfo) {
 
-    final var connectionRecordDto = getTcsConnectionRecord(newExchange,
+    final var traineeCoreDto = getTcsCoreRecord(newExchange,
         traineeInfo.getGmcReferenceNumber());
-    final var mapper = getMapper(TraineeConnectionMapper.class);
-    return mapper.mergeTraineeConnectionResponses(traineeInfo, connectionRecordDto);
+    final var mapper = getMapper(TraineeRecommendationMapper.class);
+    return mapper.mergeTraineeRecommendationResponses(traineeInfo, traineeCoreDto);
   }
 
-  private ConnectionRecordDto getTcsConnectionRecord(Exchange exchange, String gmcId) {
+  private TraineeCoreDto getTcsCoreRecord(final Exchange exchange, final String gmcId) {
     final var body = exchange.getIn().getBody();
 
-    final var connectionMapValue = (Map<String, String>) ((Map) body).get(gmcId);
-    return connectionMapValue != null ? mapper
-        .convertValue(connectionMapValue, ConnectionRecordDto.class) : null;
+    final var tcsCoreValue = (Map<String, String>) ((Map) body).get(gmcId);
+    return tcsCoreValue != null ? mapper
+        .convertValue(tcsCoreValue, TraineeCoreDto.class) : null;
   }
 }
