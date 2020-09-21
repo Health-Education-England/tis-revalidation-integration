@@ -39,7 +39,5 @@ public class TraineeInfoDto {
   private String doctorFirstName;
   private String doctorLastName;
   private LocalDate submissionDate;
-  private String programmeName;
-  private String programmeMembershipType;
   private String designatedBody;
 }
