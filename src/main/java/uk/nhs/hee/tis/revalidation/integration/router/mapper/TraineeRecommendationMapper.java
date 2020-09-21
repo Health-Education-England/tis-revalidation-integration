@@ -22,8 +22,6 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import org.mapstruct.Mapper;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;

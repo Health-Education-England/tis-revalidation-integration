@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2020 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,23 +18,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import lombok.Data;
 
-@Component
-public class ConcernsApiRouter extends RouteBuilder {
+@Data
+public class ConcernSummaryDto {
 
-  @Override
-  public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
-
-    rest("/concerns")
-        .get().to("direct:concerns-summary")
-        .post().bindingMode(RestBindingMode.off).to("direct:concern-save")
-        .get("/admins").to("direct:concern-admins")
-        .get("/{gmcId}").to("direct:concerns-gmc-id-aggregation");
-  }
+  private long countTotal;
+  private long totalPages;
+  private long totalResults;
+  private List<ConcernInfoDto> concernTrainees;
 }

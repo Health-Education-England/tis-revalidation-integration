@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import java.util.Map;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -31,7 +32,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConcernAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
@@ -48,10 +51,17 @@ public class ConcernServiceRouter extends RouteBuilder {
   private static final String API_TRUSTS = "/api/trusts?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
   private static final String API_SOURCES = "/api/sources?bridgeEndpoint=true";
   private static final String API_TYPES = "/api/concern-types?bridgeEndpoint=true";
+  private static final String API_CONCERN_MOCK = "/api/revalidation/concern/${header.gmcIds}?bridgeEndpoint=true";
 
   private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
   private static final String GET_TOKEN_METHOD = "getAuthToken";
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
+
+  @Autowired
+  private GmcIdProcessorBean gmcIdProcessorBean;
+
+  @Autowired
+  private DoctorConcernAggregationStrategy doctorConcernAggregationStrategy;
 
   @Autowired
   private KeycloakBean reference;
@@ -62,12 +72,19 @@ public class ConcernServiceRouter extends RouteBuilder {
   @Value("${service.reference.url}")
   private String serviceUrlReference;
 
+  @Value("${service.tcs.url}")
+  private String tcsServiceUrl;
+
   @Override
   public void configure() throws Exception {
 
-    from("direct:concerns")
-        .to(serviceUrlConcern + API_CONCERNS)
-        .unmarshal().json(JsonLibrary.Jackson);
+    from("direct:concerns-summary")
+        .to("direct:v1-doctors")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
+        .enrich("direct:tcs-concern", doctorConcernAggregationStrategy);
+    from("direct:tcs-concern")
+        .toD(tcsServiceUrl + API_CONCERN_MOCK)
+        .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     from("direct:concern-save")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
