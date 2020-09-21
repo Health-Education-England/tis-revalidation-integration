@@ -34,6 +34,9 @@ public class RecommendationInfoDto {
   private String doctorLastName;
   private LocalDate submissionDate;
   private String designatedBody;
+  private String doctorStatus;
+  private String admin;
+  private LocalDate lastUpdatedDate;
   private LocalDate cctDate;
   private String programmeMembershipType;
   private String programmeName;
