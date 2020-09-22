@@ -31,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationSummaryAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 
 @Component
@@ -45,6 +46,9 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
   @Autowired
   private GmcIdProcessorBean gmcIdProcessorBean;
+
+  @Autowired
+  private DoctorRecommendationSummaryAggregationStrategy doctorRecommendationSummaryAggregationStrategy;
 
   @Autowired
   private DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
@@ -62,7 +66,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
     from("direct:temp-doctors")
         .to("direct:v1-doctors")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
-        .enrich("direct:tcs-trainees", doctorRecommendationAggregationStrategy);
+        .enrich("direct:tcs-trainees", doctorRecommendationSummaryAggregationStrategy);
 
     from("direct:tcs-trainees")
         .toD(tcsServiceUrl + API_CONNECTION)
@@ -85,6 +89,11 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .toD(serviceUrl + API_RECOMMENDATION);
 
     from("direct:recommendation-gmc-id")
+        .to("direct:recommendation-trainee-by-gmc-id")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
+        .enrich("direct:tcs-trainees", doctorRecommendationAggregationStrategy);
+
+    from("direct:recommendation-trainee-by-gmc-id")
         .toD(serviceUrl + API_RECOMMENDATION_GMC_ID)
         .unmarshal().json(JsonLibrary.Jackson);
 
