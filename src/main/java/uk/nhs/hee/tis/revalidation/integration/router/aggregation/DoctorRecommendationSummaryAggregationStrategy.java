@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
+import static java.util.stream.Collectors.toList;
+import static org.mapstruct.factory.Mappers.getMapper;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import lombok.SneakyThrows;
@@ -31,12 +34,16 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.RecommendationSummaryMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.TraineeRecommendationMapper;
 
 @Slf4j
 @Component
-public class DoctorRecommendationAggregationStrategy implements AggregationStrategy {
+public class DoctorRecommendationSummaryAggregationStrategy implements AggregationStrategy {
 
   @Autowired
   private ObjectMapper mapper;
@@ -47,19 +54,28 @@ public class DoctorRecommendationAggregationStrategy implements AggregationStrat
     final var result = new DefaultExchange(new DefaultCamelContext());
 
     final var messageBody = oldExchange.getIn().getBody();
-    final var traineeRecommendationDto = mapper
-        .convertValue(messageBody, TraineeRecommendationDto.class);
+    final var traineeSummaryDto = mapper.convertValue(messageBody, TraineeSummaryDto.class);
+    final var traineeInfos = traineeSummaryDto.getTraineeInfo();
+
+    final var recommendationInfoDtos = traineeInfos.stream().map(traineeInfo -> {
+      return aggregateTraineeWithRecommendation(newExchange, traineeInfo);
+    }).collect(toList());
+
+    final var recommendationSummaryMapper = getMapper(RecommendationSummaryMapper.class);
+    final var recommendationSummaryDto = recommendationSummaryMapper
+        .mergeConnectionInfo(traineeSummaryDto, recommendationInfoDtos);
+
+    result.getMessage().setBody(recommendationSummaryDto);
+    return result;
+  }
+
+  private RecommendationInfoDto aggregateTraineeWithRecommendation(final Exchange newExchange,
+      final TraineeInfoDto traineeInfo) {
 
     final var traineeCoreDto = getTcsCoreRecord(newExchange,
-        traineeRecommendationDto.getGmcNumber());
-
-    traineeRecommendationDto.setCurrentGrade(traineeCoreDto.getCurrentGrade());
-    traineeRecommendationDto
-        .setProgrammeMembershipType(traineeCoreDto.getProgrammeMembershipType());
-    traineeRecommendationDto.setCctDate(traineeCoreDto.getCctDate());
-
-    result.getMessage().setBody(traineeRecommendationDto);
-    return result;
+        traineeInfo.getGmcReferenceNumber());
+    final var mapper = getMapper(TraineeRecommendationMapper.class);
+    return mapper.mergeTraineeRecommendationResponses(traineeInfo, traineeCoreDto);
   }
 
   private TraineeCoreDto getTcsCoreRecord(final Exchange exchange, final String gmcId) {
