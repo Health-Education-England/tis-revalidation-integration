@@ -46,12 +46,15 @@ public class ConcernServiceRouter extends RouteBuilder {
   private static final String API_CONCERN_ADMINS = "/api/concerns/admins?bridgeEndpoint=true";
   private static final String API_CONCERNS_GMC_ID =
       "/api/concerns/${header.gmcId}?bridgeEndpoint=true";
-  private static final String API_SITES = "/api/sites?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
-  private static final String API_GRADES = "/api/current/grades?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
-  private static final String API_TRUSTS = "/api/trusts?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
+  private static final String API_SITES =
+      "/api/sites?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
+  private static final String API_GRADES =
+      "/api/current/grades?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
+  private static final String API_TRUSTS =
+      "/api/trusts?size=" + MAX_RECORD_SHOWN + "&bridgeEndpoint=true";
   private static final String API_SOURCES = "/api/sources?bridgeEndpoint=true";
   private static final String API_TYPES = "/api/concern-types?bridgeEndpoint=true";
-  private static final String API_CONCERN_MOCK = "/api/revalidation/concern/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_LATEST_CONCERNS = "/api/concerns/summary/${header.gmcIds}?bridgeEndpoint=true";
 
   private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
   private static final String GET_TOKEN_METHOD = "getAuthToken";
@@ -81,9 +84,10 @@ public class ConcernServiceRouter extends RouteBuilder {
     from("direct:concerns-summary")
         .to("direct:v1-doctors")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
-        .enrich("direct:tcs-concern", doctorConcernAggregationStrategy);
-    from("direct:tcs-concern")
-        .toD(tcsServiceUrl + API_CONCERN_MOCK)
+        .enrich("direct:latest-concern", doctorConcernAggregationStrategy);
+
+    from("direct:latest-concern")
+        .toD(serviceUrlConcern + API_LATEST_CONCERNS)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     from("direct:concern-save")
