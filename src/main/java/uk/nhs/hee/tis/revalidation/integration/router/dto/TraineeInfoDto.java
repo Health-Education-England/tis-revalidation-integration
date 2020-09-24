@@ -43,4 +43,5 @@ public class TraineeInfoDto {
   private String admin;
   private LocalDate lastUpdatedDate;
   private String designatedBody;
+  private LocalDate dateAdded;
 }

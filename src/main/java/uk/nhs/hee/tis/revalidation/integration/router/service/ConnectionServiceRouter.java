@@ -27,8 +27,8 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
