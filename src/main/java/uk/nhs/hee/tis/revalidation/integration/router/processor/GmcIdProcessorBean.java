@@ -47,7 +47,8 @@ public class GmcIdProcessorBean {
         .map(t -> t.getGmcReferenceNumber()).collect(toList());
   }
 
-  public String getGmcIdOfRecommendationTrainee(final Exchange exchange) throws JsonProcessingException {
+  public String getGmcIdOfRecommendationTrainee(final Exchange exchange)
+      throws JsonProcessingException {
     final var body = exchange.getIn().getBody();
     final var traineeRecommendationDto = mapper.convertValue(body, TraineeRecommendationDto.class);
     return traineeRecommendationDto.getGmcNumber();
