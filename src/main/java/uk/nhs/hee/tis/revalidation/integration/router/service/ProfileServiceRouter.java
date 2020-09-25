@@ -33,7 +33,7 @@ public class ProfileServiceRouter extends RouteBuilder {
   private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
   private static final String GET_TOKEN_METHOD = "getAuthToken";
 
-  private static final String API_ADMIN_PROFILE = "/api/hee-users/${bean:usernameBean}/ignore-case?bridgeEndpoint=true";
+  private static final String API_ADMIN_PROFILE = "/api/hee-users/${header:userName}/ignore-case?bridgeEndpoint=true";
 
   @Value("${service.profile.url}")
   private String serviceUrl;
