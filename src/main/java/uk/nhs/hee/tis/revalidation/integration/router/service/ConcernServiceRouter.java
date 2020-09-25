@@ -21,7 +21,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
-import java.util.Map;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -32,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConcernTcsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConcernAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
@@ -67,6 +67,9 @@ public class ConcernServiceRouter extends RouteBuilder {
   private DoctorConcernAggregationStrategy doctorConcernAggregationStrategy;
 
   @Autowired
+  private ConcernTcsAggregationStrategy concernTcsAggregationStrategy;
+
+  @Autowired
   private KeycloakBean reference;
 
   @Value("${service.concern.url}")
@@ -88,7 +91,7 @@ public class ConcernServiceRouter extends RouteBuilder {
 
     from("direct:latest-concern")
         .toD(serviceUrlConcern + API_LATEST_CONCERNS)
-        .unmarshal().json(JsonLibrary.Jackson, Map.class);
+        .enrich("direct:tcs-trainees", concernTcsAggregationStrategy);
 
     from("direct:concern-save")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
