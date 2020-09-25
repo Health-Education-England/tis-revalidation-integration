@@ -10,13 +10,13 @@ server:
     context-path: /integration
 
 kc:
-  realm: ${KC_REALM:lin}
+  realm: ${KC_REALM:}
   client:
-    id: ${KC_CLIENT_ID:admin-cli}
+    id: ${KC_CLIENT_ID:}
   server:
-    url: ${KC_SERVER_URL:http://localhost:8083/auth/}
-  username: ${KC_USERNAME:reval_kc_user}
-  password: ${KC_PASSWORD:reval_kc_user}
+    url: ${KC_SERVER_URL:}
+  username: ${KC_USERNAME:}
+  password: ${KC_PASSWORD:}
 
 service:
   concern:
