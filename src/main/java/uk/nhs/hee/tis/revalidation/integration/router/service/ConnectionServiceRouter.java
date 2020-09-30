@@ -29,11 +29,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
 
   private static final String API_CONNECTION = "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
+  private static final String GET_TOKEN_METHOD = "getAuthToken";
+
+  @Autowired
+  private KeycloakBean keycloakBean;
 
   @Autowired
   private GmcIdProcessorBean gmcIdProcessorBean;
@@ -61,6 +67,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:tcs-connection")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
   }

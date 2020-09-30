@@ -78,9 +78,6 @@ public class ConcernServiceRouter extends RouteBuilder {
   @Value("${service.reference.url}")
   private String serviceUrlReference;
 
-  @Value("${service.tcs.url}")
-  private String tcsServiceUrl;
-
   @Override
   public void configure() throws Exception {
 
