@@ -42,7 +42,7 @@ service:
   tcs:
     host: ${TCS_HOST:localhost}
     port: ${TCS_PORT:8085}
-    url: http://${service.tcs.host}:${service.tcs.port}/tcsmock
+    url: http://${service.tcs.host}:${service.tcs.port}/tcs
   common-upload:
     host: ${COMMON_UPLOAD_HOST:localhost}
     port: ${COMMON_UPLOAD_PORT:8089}
