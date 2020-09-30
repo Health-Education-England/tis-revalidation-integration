@@ -23,8 +23,10 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class TcsServiceRouter extends RouteBuilder {
@@ -33,6 +35,11 @@ public class TcsServiceRouter extends RouteBuilder {
       "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_TRAINEES =
       "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
+  private static final String GET_TOKEN_METHOD = "getAuthToken";
+
+  @Autowired
+  private KeycloakBean keycloakBean;
 
   @Value("${service.tcs.url}")
   private String serviceUrl;
@@ -41,10 +48,12 @@ public class TcsServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:trainee")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_TRAINEE)
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:trainees")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_TRAINEES)
         .unmarshal().json(JsonLibrary.Jackson);
   }

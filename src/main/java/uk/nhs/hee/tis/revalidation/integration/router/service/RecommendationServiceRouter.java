@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationSummaryAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
@@ -43,9 +44,14 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private static final String API_RECOMMENDATION_SUBMIT =
       "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
   private static final String API_CONNECTION = "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
+  private static final String GET_TOKEN_METHOD = "getAuthToken";
 
   @Autowired
   private GmcIdProcessorBean gmcIdProcessorBean;
+
+  @Autowired
+  private KeycloakBean keycloakBean;
 
   @Autowired
   private DoctorRecommendationSummaryAggregationStrategy doctorRecommendationSummaryAggregationStrategy;
@@ -69,6 +75,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .enrich("direct:tcs-trainees", doctorRecommendationSummaryAggregationStrategy);
 
     from("direct:tcs-trainees")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
