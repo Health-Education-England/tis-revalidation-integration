@@ -18,29 +18,29 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import java.util.Set;
 
-@Component
-public class CoreServiceRouter extends RouteBuilder {
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 
-  private static final String API_ADMINS = "/api/admins?bridgeEndpoint=true";
-  private static final String API_DOCTORS = "/api/doctors?bridgeEndpoint=true";
+public class HeeUserDto {
 
-  @Value("${service.core.url}")
-  private String serviceUrl;
+  private String name;
+  private String firstName;
+  private String lastName;
+  private String gmcId;
+  private String emailAddress;
+  private Boolean active;
+  private Set<RoleDto> roles;
 
-  @Override
-  public void configure() {
-
-    from("direct:doctors")
-        .to(serviceUrl + API_DOCTORS)
-        .unmarshal().json(JsonLibrary.Jackson);
-
-    }
 }
+
+class RoleDto {
+  private String name;
+}
+

@@ -38,6 +38,7 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test") {
     exclude group: "org.junit.vintage", module: "junit-vintage-engine"
   }
+  compile group: 'org.springframework.data', name: 'spring-data-commons', version: '2.3.4.RELEASE'
 
   // Apache Camel starters
   ext.camelVersion = "3.4.2"

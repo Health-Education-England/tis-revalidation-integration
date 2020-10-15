@@ -26,14 +26,20 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OI
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AdminsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class ProfileServiceRouter extends RouteBuilder {
 
   private static final String API_ADMIN_PROFILE = "/api/hee-users/${header:userName}/ignore-case?bridgeEndpoint=true";
+  private static final String API_ADMINS = "/api/hee-users?size=300";
+
+  @Autowired
+  AdminsAggregationStrategy adminsAggregationStrategy;
 
   @Value("${service.profile.url}")
   private String serviceUrl;
@@ -50,5 +56,10 @@ public class ProfileServiceRouter extends RouteBuilder {
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_ADMIN_PROFILE)
         .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:admins")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .toD(serviceUrl + API_ADMINS)
+        .enrich("direct:admins-filter", adminsAggregationStrategy);
   }
 }
