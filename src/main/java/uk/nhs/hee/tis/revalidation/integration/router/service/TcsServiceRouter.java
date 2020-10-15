@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
+
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +38,6 @@ public class TcsServiceRouter extends RouteBuilder {
       "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_TRAINEES =
       "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
-  private static final String GET_TOKEN_METHOD = "getAuthToken";
 
   @Autowired
   private KeycloakBean keycloakBean;
