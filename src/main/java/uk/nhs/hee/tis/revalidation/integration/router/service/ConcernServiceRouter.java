@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
+
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -56,8 +59,6 @@ public class ConcernServiceRouter extends RouteBuilder {
   private static final String API_TYPES = "/api/concern-types?bridgeEndpoint=true";
   private static final String API_LATEST_CONCERNS = "/api/concerns/summary/${header.gmcIds}?bridgeEndpoint=true";
 
-  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
-  private static final String GET_TOKEN_METHOD = "getAuthToken";
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
   @Autowired

@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
+
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +32,6 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class ProfileServiceRouter extends RouteBuilder {
-
-  private static final String OIDC_ACCESS_TOKEN_HEADER = "OIDC_access_token";
-  private static final String GET_TOKEN_METHOD = "getAuthToken";
 
   private static final String API_ADMIN_PROFILE = "/api/hee-users/${header:userName}/ignore-case?bridgeEndpoint=true";
 
