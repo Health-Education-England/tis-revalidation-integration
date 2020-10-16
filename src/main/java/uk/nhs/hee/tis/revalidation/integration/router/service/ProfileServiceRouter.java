@@ -42,6 +42,7 @@ public class ProfileServiceRouter extends RouteBuilder {
   //private static final String API_ADMINS = "/api/hee-users?size=300";
   private static final String API_ADMINS = "/api/hee-users?bridgeEndpoint=true";
 
+  @Autowired
   private AdminsProcessorBean adminsProcessorBean;
 
   @Value("${service.profile.url}")
@@ -52,9 +53,9 @@ public class ProfileServiceRouter extends RouteBuilder {
 
   private KeycloakBean keycloakBean;
 
-  ProfileServiceRouter(KeycloakBean keycloakBean, AdminsProcessorBean adminsProcessorBean) {
+
+  ProfileServiceRouter(KeycloakBean keycloakBean) {
     this.keycloakBean = keycloakBean;
-    this.adminsProcessorBean = adminsProcessorBean;
   }
 
   @Override
@@ -65,8 +66,9 @@ public class ProfileServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:admins")
-        .process(adminsProcessorBean)
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(adminsProcessorBean, "process")
         .toD(serviceUrl + API_ADMINS)
         .unmarshal().json(JsonLibrary.Jackson);
+
   }
 }

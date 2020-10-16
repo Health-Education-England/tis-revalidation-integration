@@ -21,13 +21,13 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.processor;
 
-    import static java.util.stream.Collectors.toList;
+
 
     import com.fasterxml.jackson.core.JsonProcessingException;
     import com.fasterxml.jackson.databind.ObjectMapper;
     import java.util.List;
+    import java.util.stream.Collectors;
 
-    import com.sun.xml.bind.v2.schemagen.xmlschema.List;
     import lombok.extern.slf4j.Slf4j;
     import org.apache.camel.Exchange;
     import org.apache.camel.impl.DefaultCamelContext;
@@ -49,7 +49,7 @@ public class AdminsProcessorBean {
   public List<HeeUserDto> process(final Exchange exchange) throws JsonProcessingException {
     final var result = new DefaultExchange(new DefaultCamelContext());
 
-    final var messageBody = oldExchange.getIn().getBody();
+    final var messageBody = exchange.getIn().getBody();
     final Page<HeeUserDto> adminsPage = mapper.convertValue(messageBody, Page.class);
     List<HeeUserDto> heeUserDtoList = adminsPage.getContent()
         .stream()
