@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,13 +37,17 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 public class ProfileServiceRouter extends RouteBuilder {
 
   private static final String API_ADMIN_PROFILE = "/api/hee-users/${header:userName}/ignore-case?bridgeEndpoint=true";
-  private static final String API_ADMINS = "/api/hee-users?size=300";
+  //private static final String API_ADMINS = "/api/hee-users?size=300";
+  private static final String API_ADMINS = "/api/hee-users?bridgeEndpoint=true";
 
   @Autowired
   AdminsAggregationStrategy adminsAggregationStrategy;
 
   @Value("${service.profile.url}")
   private String serviceUrl;
+
+  @Value("${service.tcs.url}")
+  private String serviceUrl1;
 
   private KeycloakBean keycloakBean;
 
@@ -57,9 +62,16 @@ public class ProfileServiceRouter extends RouteBuilder {
         .toD(serviceUrl + API_ADMIN_PROFILE)
         .unmarshal().json(JsonLibrary.Jackson);
 
-    from("direct:admins")
+    /*from("direct:admins")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_ADMINS)
-        .enrich("direct:admins-filter", adminsAggregationStrategy);
+        .enrich("direct:admins-filter", adminsAggregationStrategy);*/
+
+    from("direct:admins")
+    //.setHeader(Exchange.HTTP_METHOD, simple("GET"))
+        //.toD(serviceUrl1 + API_ADMINS)
+        //.unmarshal().json(JsonLibrary.Jackson);
+        //.enrich("direct:admins", adminsAggregationStrategy);
+    .enrich(serviceUrl1 + API_ADMINS, adminsAggregationStrategy);
   }
 }

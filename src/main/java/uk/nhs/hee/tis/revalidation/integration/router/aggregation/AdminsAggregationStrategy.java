@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.AggregationStrategy;
@@ -35,6 +36,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.HeeUserDto;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -49,15 +51,16 @@ public class AdminsAggregationStrategy implements AggregationStrategy {
     final var result = new DefaultExchange(new DefaultCamelContext());
 
     final var messageBody = oldExchange.getIn().getBody();
-    try {
-      final Page<HeeUserDto> heeUserDtosPage = mapper.readValue((byte[]) messageBody, Page.class);
+    log.info("Message Body: {}", messageBody);
+    //try {
+      final Page<HeeUserDto> heeUserDtosPage = mapper.convertValue(messageBody, Page.class);
       List<HeeUserDto> heeUserDtoList = heeUserDtosPage.getContent().stream()
-          .filter(user -> user.getRoles().stream().map(r -> r.getName()).stream().contains("HEE Admin Revalidation"));
+          .filter(user -> user.getRoles().stream().map(r -> r.getName()).equals("HEE Admin Revalidation")).collect(Collectors.toList());
       result.getMessage().setBody(heeUserDtoList);
 
-    } catch (IOException e) {
+    /*} catch (IOException e) {
       e.printStackTrace();
-    }
+    }*/
     return result;
   }
 }

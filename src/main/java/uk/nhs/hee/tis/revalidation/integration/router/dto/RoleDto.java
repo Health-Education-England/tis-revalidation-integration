@@ -28,15 +28,7 @@ import java.util.Set;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class HeeUserDto {
-
+public class RoleDto {
   private String name;
-  private String firstName;
-  private String lastName;
-  private String gmcId;
-  private String emailAddress;
-  private Boolean active;
-  private Set<RoleDto> roles;
-
 }
 
