@@ -31,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AdminsAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.AdminsProcessorBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
@@ -40,8 +42,7 @@ public class ProfileServiceRouter extends RouteBuilder {
   //private static final String API_ADMINS = "/api/hee-users?size=300";
   private static final String API_ADMINS = "/api/hee-users?bridgeEndpoint=true";
 
-  @Autowired
-  AdminsAggregationStrategy adminsAggregationStrategy;
+  private AdminsProcessorBean adminsProcessorBean;
 
   @Value("${service.profile.url}")
   private String serviceUrl;
@@ -51,8 +52,9 @@ public class ProfileServiceRouter extends RouteBuilder {
 
   private KeycloakBean keycloakBean;
 
-  ProfileServiceRouter(KeycloakBean keycloakBean) {
+  ProfileServiceRouter(KeycloakBean keycloakBean, AdminsProcessorBean adminsProcessorBean) {
     this.keycloakBean = keycloakBean;
+    this.adminsProcessorBean = adminsProcessorBean;
   }
 
   @Override
@@ -62,16 +64,9 @@ public class ProfileServiceRouter extends RouteBuilder {
         .toD(serviceUrl + API_ADMIN_PROFILE)
         .unmarshal().json(JsonLibrary.Jackson);
 
-    /*from("direct:admins")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrl + API_ADMINS)
-        .enrich("direct:admins-filter", adminsAggregationStrategy);*/
-
     from("direct:admins")
-    //.setHeader(Exchange.HTTP_METHOD, simple("GET"))
-        //.toD(serviceUrl1 + API_ADMINS)
-        //.unmarshal().json(JsonLibrary.Jackson);
-        //.enrich("direct:admins", adminsAggregationStrategy);
-    .enrich(serviceUrl1 + API_ADMINS, adminsAggregationStrategy);
+        .process(adminsProcessorBean)
+        .toD(serviceUrl + API_ADMINS)
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }
