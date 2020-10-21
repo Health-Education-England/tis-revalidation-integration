@@ -52,6 +52,10 @@ service:
     port: ${REFERENCE_PORT:8088}
     url: http://${service.reference.host}:${service.reference.port}/reference
 
+app:
+  admins:
+    roles: ${ROLE_NAMES:HEE Admin Revalidation, RVAdmin}
+
 logging:
   level:
     root: INFO
