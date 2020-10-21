@@ -19,27 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.processor;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-public class CoreServiceRouter extends RouteBuilder {
+public class RoleNameBean {
 
-  private static final String API_DOCTORS = "/api/doctors?bridgeEndpoint=true";
+  @Value("${app.admins.roles}")
+  private List<String> roleNames;
 
-  @Value("${service.core.url}")
-  private String serviceUrl;
+  public String getRoles() {
 
-  @Override
-  public void configure() {
-
-    from("direct:doctors")
-        .to(serviceUrl + API_DOCTORS)
-        .unmarshal().json(JsonLibrary.Jackson);
+    return StringUtils.join(roleNames, ',');
 
   }
 }

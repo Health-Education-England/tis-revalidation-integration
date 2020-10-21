@@ -21,24 +21,29 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
-import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
-import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
-
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.RoleNameBean;
+
+import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.*;
 
 @Component
 public class ProfileServiceRouter extends RouteBuilder {
 
-  private static final String API_ADMIN_PROFILE = "/api/hee-users/${header:userName}/ignore-case?bridgeEndpoint=true";
-
   @Value("${service.profile.url}")
   private String serviceUrl;
 
+
+  private static final String API_ADMIN_PROFILE = "/api/hee-users/${header:userName}/ignore-case?bridgeEndpoint=true";
+  private static final String API_ASSIGN_REVAL_ADMINS = "/api/hee-users-with-roles/${header:roleNames}?bridgeEndpoint=true";
+
   private KeycloakBean keycloakBean;
+  @Autowired
+  private RoleNameBean roleNameBean;
 
   ProfileServiceRouter(KeycloakBean keycloakBean) {
     this.keycloakBean = keycloakBean;
@@ -49,6 +54,12 @@ public class ProfileServiceRouter extends RouteBuilder {
     from("direct:admin-profile")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_ADMIN_PROFILE)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:admins")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .setHeader(GET_ROLE_NAMES_HEADER).method(roleNameBean, GET_ROLE_NAMES_METHOD)
+        .toD(serviceUrl + API_ASSIGN_REVAL_ADMINS)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }
