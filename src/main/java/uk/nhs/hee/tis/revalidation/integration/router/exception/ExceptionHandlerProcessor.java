@@ -15,7 +15,7 @@ public class ExceptionHandlerProcessor implements Processor {
         exchange.getProperty(Exchange.EXCEPTION_CAUGHT, HttpOperationFailedException.class);
     final var responseBody = e.getResponseBody();
     exchange.removeProperties(Exchange.EXCEPTION_CAUGHT);
-    exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.SC_BAD_REQUEST);
+    exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.SC_NOT_ACCEPTABLE);
     exchange.getMessage().setBody(responseBody);
   }
 }
