@@ -26,16 +26,18 @@ import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AdminApiRouter extends RouteBuilder {
+public class ProfileApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/admin/profile")
-        .get().to("direct:admin-profile");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:admin-profile");
 
     rest("/admins")
-        .get().to("direct:admins");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:admins");
   }
 }

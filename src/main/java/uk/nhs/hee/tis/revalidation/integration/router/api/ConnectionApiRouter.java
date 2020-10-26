@@ -30,9 +30,10 @@ public class ConnectionApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/connection")
-        .get().to("direct:connection-summary");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:connection-summary");
   }
 }

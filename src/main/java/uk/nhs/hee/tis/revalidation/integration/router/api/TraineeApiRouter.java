@@ -30,12 +30,14 @@ public class TraineeApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/trainee/{gmcId}")
-        .get().to("direct:trainee");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:trainee");
 
     rest("/trainees/{gmcIds}")
-        .get().to("direct:trainees");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:trainees");
   }
 }

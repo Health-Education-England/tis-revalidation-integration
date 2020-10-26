@@ -50,8 +50,7 @@ public class CommonUploadServiceRouter extends RouteBuilder {
         .to(serviceUrl + API_STORAGE_DOWNLOAD);
 
     from("direct:storage-list")
-        .to(serviceUrl + API_STORAGE_LIST)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .to(serviceUrl + API_STORAGE_LIST);
 
     from("direct:storage-delete")
         .to(serviceUrl + API_STORAGE_DELETE);

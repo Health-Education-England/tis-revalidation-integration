@@ -30,18 +30,21 @@ public class V1ApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/v1/admin")
-        .post().bindingMode(RestBindingMode.off).to("direct:admin");
+        .post().bindingMode(RestBindingMode.off)
+        .to("direct:admin");
 
     // TODO: Change to direct:doctors when tis-revalidation-core is deployed.
     rest("/v1/doctors")
-        .get().to("direct:temp-doctors");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:temp-doctors");
 
     // TODO: Change to use tis-revalidation-core when deployed.
     rest("/v1/doctors/assign-admin")
-        .post().bindingMode(RestBindingMode.off).to("direct:temp-doctors-assign-admin");
+        .post().bindingMode(RestBindingMode.off)
+        .to("direct:temp-doctors-assign-admin");
   }
 }
 
