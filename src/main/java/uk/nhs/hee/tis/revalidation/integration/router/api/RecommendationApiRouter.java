@@ -30,14 +30,14 @@ public class RecommendationApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/recommendation")
         .post().bindingMode(RestBindingMode.off).to("direct:recommendation-post")
         .put().bindingMode(RestBindingMode.off).to("direct:recommendation-put");
 
     rest("/recommendation/{gmcId}")
-        .get().to("direct:recommendation-gmc-id")
+        .get().bindingMode(RestBindingMode.off).to("direct:recommendation-gmc-id")
         .post("/submit/{recommendationId}").bindingMode(RestBindingMode.off)
         .to("direct:recommendation-submit");
   }

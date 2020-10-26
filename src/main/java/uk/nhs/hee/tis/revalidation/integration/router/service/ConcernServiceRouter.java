@@ -27,7 +27,6 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OI
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -44,9 +43,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 public class ConcernServiceRouter extends RouteBuilder {
 
   private static final int MAX_RECORD_SHOWN = 5;
-
   private static final String API_CONCERNS = "/api/concerns?bridgeEndpoint=true";
-  private static final String API_CONCERN_ADMINS = "/api/concerns/admins?bridgeEndpoint=true";
   private static final String API_CONCERNS_GMC_ID =
       "/api/concerns/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_SITES =
@@ -95,10 +92,6 @@ public class ConcernServiceRouter extends RouteBuilder {
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .to(serviceUrlConcern + API_CONCERNS);
-
-    from("direct:concern-admins")
-        .to(serviceUrlConcern + API_CONCERN_ADMINS)
-        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:concerns-gmc-id-aggregation")
         .multicast(AGGREGATOR)

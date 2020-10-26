@@ -30,7 +30,7 @@ public class CommonUploadApiRouter extends RouteBuilder {
 
   @Override
   public void configure() throws Exception {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/storage/upload")
         .post().bindingMode(RestBindingMode.off)
@@ -40,7 +40,8 @@ public class CommonUploadApiRouter extends RouteBuilder {
         .get().to("direct:storage-download");
 
     rest("/storage/list")
-        .get().to("direct:storage-list");
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:storage-list");
 
     rest("/storage/delete")
         .delete().bindingMode(RestBindingMode.off)

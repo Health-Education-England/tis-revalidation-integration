@@ -30,12 +30,11 @@ public class ConcernsApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-    restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+    restConfiguration().component("servlet");
 
     rest("/concerns")
         .get().to("direct:concerns-summary")
         .post().bindingMode(RestBindingMode.off).to("direct:concern-save")
-        .get("/admins").to("direct:concern-admins")
         .get("/{gmcId}").to("direct:concerns-gmc-id-aggregation");
   }
 }
