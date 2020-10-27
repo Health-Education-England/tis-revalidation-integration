@@ -19,28 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.service;
+package uk.nhs.hee.tis.revalidation.integration.router.api;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CoreServiceRouter extends RouteBuilder {
-
-  private static final String API_DOCTORS = "/api/doctors?bridgeEndpoint=true";
-  private static final String API_ENVIRONMENT = "/api/environment?bridgeEndpoint=true";
-
-  @Value("${service.core.url}")
-  private String serviceUrl;
+public class EnvironmentApiRouter extends RouteBuilder {
 
   @Override
   public void configure() {
+    restConfiguration().component("servlet");
 
-    from("direct:doctors")
-        .to(serviceUrl + API_DOCTORS);
-
-    from("direct:environment")
-        .to(serviceUrl + API_ENVIRONMENT);
+    rest("/environment")
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:environment");
   }
 }
