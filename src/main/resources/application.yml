@@ -61,3 +61,8 @@ logging:
     root: INFO
     org.apache.camel: DEBUG
     uk.nhs.hee.tis.revalidation.integration: TRACE
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:}
+
