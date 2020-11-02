@@ -115,6 +115,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:recommendation-submit")
+        .to("direct:reval-officer")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrl + API_RECOMMENDATION_SUBMIT);
