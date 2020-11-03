@@ -11,6 +11,7 @@ public class TraineeRecommendationDto {
 
   private String fullName;
   private String gmcNumber;
+  private String designatedBody;
   private String programmeMembershipType;
   private String currentGrade;
   private LocalDate cctDate;
