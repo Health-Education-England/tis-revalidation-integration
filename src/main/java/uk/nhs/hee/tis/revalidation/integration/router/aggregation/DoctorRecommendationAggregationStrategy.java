@@ -52,12 +52,12 @@ public class DoctorRecommendationAggregationStrategy implements AggregationStrat
 
     final var traineeCoreDto = getTcsCoreRecord(newExchange,
         traineeRecommendationDto.getGmcNumber());
-
-    traineeRecommendationDto.setCurrentGrade(traineeCoreDto.getCurrentGrade());
-    traineeRecommendationDto
-        .setProgrammeMembershipType(traineeCoreDto.getProgrammeMembershipType());
-    traineeRecommendationDto.setCctDate(traineeCoreDto.getCctDate());
-
+    if (traineeCoreDto != null) {
+      traineeRecommendationDto.setCurrentGrade(traineeCoreDto.getCurrentGrade());
+      traineeRecommendationDto
+          .setProgrammeMembershipType(traineeCoreDto.getProgrammeMembershipType());
+      traineeRecommendationDto.setCctDate(traineeCoreDto.getCctDate());
+    }
     result.getMessage().setBody(traineeRecommendationDto);
     return result;
   }
