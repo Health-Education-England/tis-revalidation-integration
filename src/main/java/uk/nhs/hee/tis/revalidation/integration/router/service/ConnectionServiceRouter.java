@@ -25,12 +25,15 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GE
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
 import java.util.Map;
+import org.apache.camel.AggregationStrategy;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
@@ -38,6 +41,10 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 public class ConnectionServiceRouter extends RouteBuilder {
 
   private static final String API_CONNECTION = "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_CONNECTION_GMC_ID = "/api/revalidation/connection/detail/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_DBCS = "/api/dbcs?bridgeEndpoint=true";
+
+  private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
   @Autowired
   private KeycloakBean keycloakBean;
@@ -53,6 +60,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Value("${service.recommendation.url}")
   private String recommendationServiceUrl;
+
+  @Value("${service.reference.url}")
+  private String serviceUrlReference;
 
   @Override
   public void configure() {
@@ -71,5 +81,21 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
+
+    from("direct:connection-gmc-id-aggregation")
+        .multicast(AGGREGATOR)
+        .parallelProcessing()
+        .to("direct:connection-gmc-id")
+        .to("direct:reference-dbcs");
+
+    from("direct:connection-gmc-id")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
+        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID);
+
+    from("direct:reference-dbcs")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.DBCS)
+        .toD(serviceUrlReference + API_DBCS);
   }
 }

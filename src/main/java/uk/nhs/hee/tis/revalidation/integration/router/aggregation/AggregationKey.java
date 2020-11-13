@@ -30,4 +30,6 @@ public class AggregationKey {
   public static final String SOURCES = "sources";
   public static final String TYPES = "types";
   public static final String GMC_NUMBER = "gmcNumber";
+  public static final String DBCS = "dbcs";
+  public static final String CONNECTION = "connection";
 }

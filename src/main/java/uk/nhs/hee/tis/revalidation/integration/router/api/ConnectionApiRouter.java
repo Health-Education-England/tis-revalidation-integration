@@ -33,7 +33,7 @@ public class ConnectionApiRouter extends RouteBuilder {
     restConfiguration().component("servlet");
 
     rest("/connection")
-        .get().bindingMode(RestBindingMode.auto)
-        .to("direct:connection-summary");
+        .get().bindingMode(RestBindingMode.auto).to("direct:connection-summary")
+        .get("/{gmcId}").bindingMode(RestBindingMode.auto).to("direct:connection-gmc-id-aggregation");
   }
 }
