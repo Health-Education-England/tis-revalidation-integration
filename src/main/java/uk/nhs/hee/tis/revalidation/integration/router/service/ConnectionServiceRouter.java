@@ -26,10 +26,13 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OI
 
 import java.util.Map;
 import org.apache.camel.AggregationStrategy;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
@@ -43,6 +46,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION = "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_GMC_ID = "/api/revalidation/connection/detail/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_DBCS = "/api/dbcs?bridgeEndpoint=true";
+  private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
+  private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
 
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
@@ -63,6 +68,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Value("${service.reference.url}")
   private String serviceUrlReference;
+
+  @Value("${service.connection.url}")
+  private String serviceUrlConnection;
 
   @Override
   public void configure() {
@@ -97,5 +105,15 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DBCS)
         .toD(serviceUrlReference + API_DBCS);
+
+    from("direct:connection-add")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_ADD);
+
+    from("direct:connection-remove")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_REMOVE);
   }
 }
