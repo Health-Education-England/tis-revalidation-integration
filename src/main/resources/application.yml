@@ -51,6 +51,10 @@ service:
     host: ${REFERENCE_HOST:localhost}
     port: ${REFERENCE_PORT:8088}
     url: http://${service.reference.host}:${service.reference.port}/reference
+  connection:
+    host: ${CONNECTION_HOST:localhost}
+    port: ${CONNECTION_PORT:8090}
+    url: http://${service.connection.host}:${service.connection.port}/connection
 
 app:
   admins:
