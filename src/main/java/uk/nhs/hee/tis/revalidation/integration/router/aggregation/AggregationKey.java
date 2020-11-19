@@ -32,4 +32,5 @@ public class AggregationKey {
   public static final String GMC_NUMBER = "gmcNumber";
   public static final String DBCS = "dbcs";
   public static final String CONNECTION = "connection";
+  public static final String DESIGNATED_BODY_CODE = "designatedBodyCode";
 }
