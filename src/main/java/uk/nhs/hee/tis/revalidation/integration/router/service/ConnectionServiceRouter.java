@@ -48,6 +48,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_DBCS = "/api/dbcs?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
+  private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
 
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
@@ -94,12 +95,17 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .multicast(AGGREGATOR)
         .parallelProcessing()
         .to("direct:connection-gmc-id")
+        .to("direct:doctor-designated-body")
         .to("direct:reference-dbcs");
 
     from("direct:connection-gmc-id")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
         .toD(tcsServiceUrl + API_CONNECTION_GMC_ID);
+
+    from("direct:doctor-designated-body")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
+        .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
 
     from("direct:reference-dbcs")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
