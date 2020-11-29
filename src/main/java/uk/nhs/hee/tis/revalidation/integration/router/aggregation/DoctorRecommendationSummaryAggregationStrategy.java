@@ -81,7 +81,7 @@ public class DoctorRecommendationSummaryAggregationStrategy implements Aggregati
   private TraineeCoreDto getTcsCoreRecord(final Exchange exchange, final String gmcId) {
     final var body = exchange.getIn().getBody();
 
-    final var tcsCoreValue = (Map<String, String>) ((Map) body).get(gmcId);
+    final var tcsCoreValue = ((Map) body).get(gmcId);
     return tcsCoreValue != null ? mapper
         .convertValue(tcsCoreValue, TraineeCoreDto.class) : null;
   }

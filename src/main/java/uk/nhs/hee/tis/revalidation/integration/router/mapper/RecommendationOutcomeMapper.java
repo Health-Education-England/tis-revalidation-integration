@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2020 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,19 +18,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import lombok.Data;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationTcsDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 
-@Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeCoreDto {
+@Mapper(componentModel = "spring")
+public interface RecommendationOutcomeMapper {
 
-  private LocalDate cctDate;
-  private String programmeMembershipType;
-  private String programmeName;
-  private String currentGrade;
-  private String gmcOutcome;
+  @Mapping(target = "cctDate", source = "recommendationTcsDto.cctDate")
+  @Mapping(target = "programmeMembershipType", source = "recommendationTcsDto.programmeMembershipType")
+  @Mapping(target = "programmeName", source = "recommendationTcsDto.programmeName")
+  @Mapping(target = "currentGrade", source = "recommendationTcsDto.currentGrade")
+  @Mapping(target = "gmcOutcome", source = "recommendationInfoDto.gmcOutcome")
+  TraineeCoreDto mergeRecommendationOutcomeResponses(TraineeCoreDto recommendationInfoDto,
+      RecommendationTcsDto recommendationTcsDto);
 }
