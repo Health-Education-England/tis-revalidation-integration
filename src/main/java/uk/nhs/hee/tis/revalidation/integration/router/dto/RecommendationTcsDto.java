@@ -27,11 +27,18 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeCoreDto {
+public class RecommendationTcsDto {
 
+  private String gmcReferenceNumber;
+  private String doctorFirstName;
+  private String doctorLastName;
+  private LocalDate submissionDate;
+  private String designatedBody;
+  private String doctorStatus;
+  private String admin;
+  private LocalDate lastUpdatedDate;
   private LocalDate cctDate;
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;
-  private String gmcOutcome;
 }
