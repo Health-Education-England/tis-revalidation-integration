@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ExceptionResponseDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 
@@ -52,5 +53,13 @@ public class GmcIdProcessorBean {
     final var body = exchange.getIn().getBody();
     final var traineeRecommendationDto = mapper.convertValue(body, TraineeRecommendationDto.class);
     return traineeRecommendationDto.getGmcNumber();
+  }
+
+  public List<String> getConnectionExceptionGmcIds(final Exchange exchange)
+      throws JsonProcessingException {
+    final var body = exchange.getIn().getBody();
+    final var exceptionResponseDto = mapper.convertValue(body, ExceptionResponseDto.class);
+    return exceptionResponseDto.getExceptionRecord().stream().map(e -> e.getGmcId())
+        .collect(toList());
   }
 }
