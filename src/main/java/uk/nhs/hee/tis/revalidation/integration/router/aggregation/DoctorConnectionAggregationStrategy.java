@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.ConnectionSummaryMapper;
@@ -57,15 +58,19 @@ public class DoctorConnectionAggregationStrategy implements AggregationStrategy 
     final var traineeSummaryDto = mapper.convertValue(messageBody, TraineeSummaryDto.class);
     final var traineeInfos = traineeSummaryDto.getTraineeInfo();
 
-    final var connectionInfoList = traineeInfos.stream().map(traineeInfo -> {
-      return aggregateTraineeWithConnection(newExchange, traineeInfo);
-    }).collect(toList());
+    if (traineeInfos != null) {
+      final var connectionInfoList = traineeInfos.stream().map(traineeInfo -> {
+        return aggregateTraineeWithConnection(newExchange, traineeInfo);
+      }).collect(toList());
 
-    final var connectionSummaryMapper = getMapper(ConnectionSummaryMapper.class);
-    final var connections = connectionSummaryMapper
-        .mergeConnectionInfo(traineeSummaryDto, connectionInfoList);
+      final var connectionSummaryMapper = getMapper(ConnectionSummaryMapper.class);
+      final var connections = connectionSummaryMapper
+          .mergeConnectionInfo(traineeSummaryDto, connectionInfoList);
 
-    result.getMessage().setBody(connections);
+      result.getMessage().setBody(connections);
+    } else {
+      result.getMessage().setBody(new ConnectionSummaryDto());
+    }
     return result;
   }
 

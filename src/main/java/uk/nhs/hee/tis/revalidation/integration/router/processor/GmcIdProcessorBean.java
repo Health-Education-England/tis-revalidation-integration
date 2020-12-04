@@ -44,8 +44,12 @@ public class GmcIdProcessorBean {
   public List<String> process(final Exchange exchange) throws JsonProcessingException {
     final var body = exchange.getIn().getBody();
     final var traineeSummaryDto = mapper.convertValue(body, TraineeSummaryDto.class);
-    return traineeSummaryDto.getTraineeInfo().stream()
-        .map(t -> t.getGmcReferenceNumber()).collect(toList());
+    if (traineeSummaryDto.getTraineeInfo() != null) {
+      return traineeSummaryDto.getTraineeInfo().stream().map(t -> t.getGmcReferenceNumber())
+          .collect(toList());
+    }
+    return List.of();
+
   }
 
   public String getGmcIdOfRecommendationTrainee(final Exchange exchange)
