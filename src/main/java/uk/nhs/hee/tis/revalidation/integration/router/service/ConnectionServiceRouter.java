@@ -99,7 +99,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .parallelProcessing()
         .to("direct:connection-gmc-id")
         .to("direct:doctor-designated-body")
-        .to("direct:reference-dbcs");
+        .to("direct:reference-dbcs")
+        .to("direct:connection-history");
 
     from("direct:connection-gmc-id")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
@@ -141,7 +142,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:connection-history")
-        .toD(serviceUrlConnection + API_CONNECTION_HISTORY)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION_HISTORY)
+        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
   }
 }
