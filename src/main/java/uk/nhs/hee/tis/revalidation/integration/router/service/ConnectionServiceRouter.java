@@ -51,6 +51,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final String CONNECTION_EXCEPTION_API = "/api/exception?bridgeEndpoint=true";
+  private static final String API_CONNECTION_HISTORY = "/api/connections/${header.gmcId}?bridgeEndpoint=true";
 
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
@@ -98,7 +99,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .parallelProcessing()
         .to("direct:connection-gmc-id")
         .to("direct:doctor-designated-body")
-        .to("direct:reference-dbcs");
+        .to("direct:reference-dbcs")
+        .to("direct:connection-history");
 
     from("direct:connection-gmc-id")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
@@ -138,5 +140,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
         .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:connection-history")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION_HISTORY)
+        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
   }
 }
