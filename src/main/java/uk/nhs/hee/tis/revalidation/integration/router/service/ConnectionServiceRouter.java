@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ProgrammeConnectionHistoryAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
@@ -63,6 +64,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Autowired
   private DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
+
+  @Autowired
+  private ProgrammeConnectionHistoryAggregationStrategy programmeConnectionHistoryAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
@@ -94,18 +98,34 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
+////    It works with internal aggregation only
+//    from("direct:connection-gmc-id-aggregation")
+//        .to("direct:tcs-connection-gmc-id")
+//        .enrich("direct:connection-history", programmeConnectionHistoryAggregationStrategy)
+//        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION);
+
+    // wrong datetime format when putting the internal aggregation inside the multicast
     from("direct:connection-gmc-id-aggregation")
         .multicast(AGGREGATOR)
         .parallelProcessing()
-        .to("direct:connection-gmc-id")
-        .to("direct:doctor-designated-body")
-        .to("direct:reference-dbcs")
-        .to("direct:connection-history");
+        .to("direct:connection-history-merge");
+//        .to("direct:doctor-designated-body")
+//        .to("direct:reference-dbcs");
 
-    from("direct:connection-gmc-id")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+    from("direct:connection-history-merge")
+        .to("direct:tcs-connection-gmc-id")
+        .enrich("direct:connection-history", programmeConnectionHistoryAggregationStrategy)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
-        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID);
+        .marshal().json(JsonLibrary.Jackson);
+
+    from("direct:tcs-connection-gmc-id")
+//        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:connection-history")
+        .toD(serviceUrlConnection + API_CONNECTION_HISTORY)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:doctor-designated-body")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
@@ -140,9 +160,5 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
         .unmarshal().json(JsonLibrary.Jackson);
-
-    from("direct:connection-history")
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION_HISTORY)
-        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
   }
 }

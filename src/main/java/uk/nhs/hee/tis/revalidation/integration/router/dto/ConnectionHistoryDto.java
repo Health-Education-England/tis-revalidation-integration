@@ -22,24 +22,22 @@
 package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import java.time.LocalDateTime;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ConnectionRecordDto {
+public class ConnectionHistoryDto {
 
-  String programmeName;
-  String programmeMembershipType;
-  String programmeOwner;
-  String connectionStatus;
-  String designatedBodyCode;
-  LocalDate programmeMembershipStartDate;
-  LocalDate programmeMembershipEndDate;
+  String connectionId;
+  String gmcId;
+  String gmcClientId;
+  String newDesignatedBodyCode;
+  String previousDesignatedBodyCode;
+  String reason;
+  String reasonMessage;
+  String requestType;
+  LocalDateTime requestTime;
+  String responseCode;
+  String responseMessage;
 }

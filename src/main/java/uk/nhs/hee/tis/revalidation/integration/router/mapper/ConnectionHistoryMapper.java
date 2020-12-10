@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2020 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,27 +18,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
+import org.mapstruct.Mapper;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionDetailDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionHistoryDto;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ConnectionRecordDto {
+@Mapper(componentModel = "spring")
+public interface ConnectionHistoryMapper {
 
-  String programmeName;
-  String programmeMembershipType;
-  String programmeOwner;
-  String connectionStatus;
-  String designatedBodyCode;
-  LocalDate programmeMembershipStartDate;
-  LocalDate programmeMembershipEndDate;
+  ConnectionDetailDto mergeConnectionHistory(final ConnectionDetailDto connectionDetailDto, final
+  List<ConnectionHistoryDto> connectionHistory);
 }
