@@ -99,12 +99,11 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .parallelProcessing()
         .to("direct:connection-gmc-id")
         .to("direct:doctor-designated-body")
-        .to("direct:reference-dbcs")
         .to("direct:connection-history");
 
     from("direct:connection-gmc-id")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.PROGRAMME)
         .toD(tcsServiceUrl + API_CONNECTION_GMC_ID);
 
     from("direct:doctor-designated-body")
@@ -115,6 +114,10 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DBCS)
         .toD(serviceUrlReference + API_DBCS);
+
+    from("direct:connection-history")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
+        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
 
     from("direct:connection-add")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
@@ -140,9 +143,5 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
         .unmarshal().json(JsonLibrary.Jackson);
-
-    from("direct:connection-history")
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION_HISTORY)
-        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
   }
 }
