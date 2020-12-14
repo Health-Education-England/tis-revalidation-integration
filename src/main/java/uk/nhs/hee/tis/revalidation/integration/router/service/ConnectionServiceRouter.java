@@ -110,11 +110,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
         .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
 
-    from("direct:reference-dbcs")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.DBCS)
-        .toD(serviceUrlReference + API_DBCS);
-
     from("direct:connection-history")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
         .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
