@@ -48,6 +48,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_DBCS = "/api/dbcs?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
+  private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final String CONNECTION_EXCEPTION_API = "/api/exception?bridgeEndpoint=true";
@@ -123,6 +124,11 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_CONNECTION_REMOVE);
+
+    from("direct:connection-hide")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_HIDE);
 
     from("direct:connection-exception-summary")
         .to("direct:connection-exception")
