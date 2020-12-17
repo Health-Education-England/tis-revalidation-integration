@@ -45,10 +45,11 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   private static final String API_CONNECTION = "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_GMC_ID = "/api/revalidation/connection/detail/${header.gmcId}?bridgeEndpoint=true";
-  private static final String API_DBCS = "/api/dbcs?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
+  private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
+  private static final String API_CONNECTION_TCS_HIDDEN = "/api/revalidation/connection/hidden/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final String CONNECTION_EXCEPTION_API = "/api/exception?bridgeEndpoint=true";
@@ -143,6 +144,13 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
     from("direct:v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:connection-hidden")
+        .to(serviceUrlConnection + API_CONNECTION_HIDDEN)
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .toD(tcsServiceUrl + API_CONNECTION_TCS_HIDDEN)
         .unmarshal().json(JsonLibrary.Jackson);
   }
 }

@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.router.processor;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -65,5 +66,12 @@ public class GmcIdProcessorBean {
     final var exceptionResponseDto = mapper.convertValue(body, ExceptionResponseDto.class);
     return exceptionResponseDto.getExceptionRecord().stream().map(e -> e.getGmcId())
         .collect(toList());
+  }
+
+  public List<String> getHiddenGmcIds(final Exchange exchange)
+      throws JsonProcessingException {
+    final var body = exchange.getIn().getBody(String.class);
+    List<String> gmcIds = mapper.readValue(body, new TypeReference<List<String>>(){});
+    return gmcIds;
   }
 }
