@@ -39,6 +39,7 @@ public class ConnectionApiRouter extends RouteBuilder {
         .get("/hidden").bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
-        .post("/hide").bindingMode(RestBindingMode.off).to("direct:connection-hide");
+        .post("/hide").bindingMode(RestBindingMode.off).to("direct:connection-hide")
+        .post("/unhide").bindingMode(RestBindingMode.off).to("direct:connection-unhide");
   }
 }
