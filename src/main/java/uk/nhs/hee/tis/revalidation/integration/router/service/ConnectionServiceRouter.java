@@ -52,6 +52,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_UNHIDE = "/api/connections/unhide?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_TCS_HIDDEN = "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}&bridgeEndpoint=true";
+  private static final String API_CONNECTION_DOCTOR_UNHIDDEN = "/api/v1/doctors/unhidden/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final String CONNECTION_EXCEPTION_API = "/api/exception?bridgeEndpoint=true";
@@ -87,9 +88,19 @@ public class ConnectionServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:connection-summary")
-        .to("direct:v1-doctors")
+        .to("direct:connection-hidden-manually")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
+        .to("direct:v1-doctors-all-unhidden")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
         .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
+
+    from("direct:connection-hidden-manually")
+        .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
+
+    from("direct:v1-doctors-all-unhidden")
+        .toD(recommendationServiceUrl + API_CONNECTION_DOCTOR_UNHIDDEN)
+        .streamCaching()
+        .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     // TODO: Change to use tis-revalidation-core when deployed.
     from("direct:v1-doctors")

@@ -46,8 +46,11 @@ public class ReferenceServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:reference-dbcs")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrlReference + API_DBCS)
+        //.setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .toD("direct:testing")
         .unmarshal().json(JsonLibrary.Jackson);
+
+    from("direct:testing")
+        .to(serviceUrlReference + API_DBCS);
   }
 }

@@ -27,10 +27,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import javax.swing.event.ListDataEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ExceptionResponseDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
@@ -71,7 +73,11 @@ public class GmcIdProcessorBean {
   public List<String> getHiddenGmcIds(final Exchange exchange)
       throws JsonProcessingException {
     final var body = exchange.getIn().getBody(String.class);
-    List<String> gmcIds = mapper.readValue(body, new TypeReference<List<String>>(){});
-    return gmcIds;
+    if(!(StringUtils.isEmpty(body))) {
+      return mapper.readValue(body, new TypeReference<List<String>>() {
+      });
+
+    }
+    return List.of();
   }
 }

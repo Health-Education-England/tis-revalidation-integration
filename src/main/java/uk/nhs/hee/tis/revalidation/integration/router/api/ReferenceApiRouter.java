@@ -33,6 +33,6 @@ public class ReferenceApiRouter extends RouteBuilder {
     restConfiguration().component("servlet");
 
     rest("/reference")
-        .get("/dbcs").bindingMode(RestBindingMode.auto).to("direct:reference-dbcs");
+        .get("/dbcs").bindingMode(RestBindingMode.auto).id("getReferenceDbcs").to("direct:reference-dbcs");
   }
 }
