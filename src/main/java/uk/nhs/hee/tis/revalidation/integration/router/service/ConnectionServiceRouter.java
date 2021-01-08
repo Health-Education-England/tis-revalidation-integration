@@ -87,6 +87,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   @Override
   public void configure() {
 
+    // Connection summary - All, Connected, Disconnected tab
     from("direct:connection-summary")
         .to("direct:connection-hidden-manually")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
@@ -152,6 +153,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_CONNECTION_UNHIDE);
 
+    // Connection summary - Exceptions queue tab
     from("direct:connection-exception-summary")
         .to("direct:connection-exception")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "getConnectionExceptionGmcIds")
@@ -167,6 +169,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
         .unmarshal().json(JsonLibrary.Jackson);
 
+    // Connection summary - Hidden tab
     from("direct:connection-hidden")
         .to("direct:connection-hidden-gmcIds")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
