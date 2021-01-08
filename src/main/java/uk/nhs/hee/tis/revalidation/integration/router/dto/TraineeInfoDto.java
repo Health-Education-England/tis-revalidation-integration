@@ -44,4 +44,5 @@ public class TraineeInfoDto {
   private LocalDate lastUpdatedDate;
   private String designatedBody;
   private LocalDate dateAdded;
+  private String connectionStatus;
 }

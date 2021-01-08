@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
@@ -29,6 +30,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 @Mapper(componentModel = "spring")
 public interface TraineeConnectionMapper {
 
+  @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
   ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
       ConnectionRecordDto connectionRecordDto);
 }

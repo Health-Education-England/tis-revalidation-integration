@@ -53,11 +53,17 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
         conn.setSubmissionDate(trainee.getSubmissionDate());
         conn.setDesignatedBody(trainee.getDesignatedBody());
       }
+
+      conn.setConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
       return conn;
     }).collect(toList());
 
     connectionHiddenDto.setConnections(connectionHiddenRecordDtos);
     return connectionHiddenDto;
+  }
+
+  private String getConnectionStatus(final String designatedBody) {
+    return (designatedBody == null || designatedBody.equals("")) ? "No" : "Yes";
   }
 
 }
