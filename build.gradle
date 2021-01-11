@@ -62,7 +62,7 @@ dependencies {
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.0"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1"
 }
 
 checkstyle {
