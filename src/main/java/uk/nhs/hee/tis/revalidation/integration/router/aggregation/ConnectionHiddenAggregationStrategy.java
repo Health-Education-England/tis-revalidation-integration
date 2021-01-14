@@ -34,7 +34,9 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
       final var connectionHiddenDto = aggregateTraineeWithConnection(traineeInfos, newExchange);
       result.getMessage().setBody(connectionHiddenDto);
     } else {
-      result.getMessage().setBody(new ConnectionHiddenDto());
+      final var connectionHiddenDto = aggregateTraineeWithConnectionAllowNull(newExchange);
+      log.info("The hidden connections from tcs when reval does not have hidden connection :{}", connectionHiddenDto);
+      result.getMessage().setBody(connectionHiddenDto);
     }
     return result;
   }
@@ -60,6 +62,13 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
 
     connectionHiddenDto.setConnections(connectionHiddenRecordDtos);
     return connectionHiddenDto;
+  }
+
+  private ConnectionHiddenDto aggregateTraineeWithConnectionAllowNull(Exchange newExchange) {
+    final var body = newExchange.getIn().getBody();
+    final var connectionHiddenDto = mapper.convertValue(body, ConnectionHiddenDto.class);
+    return connectionHiddenDto;
+
   }
 
   private String getConnectionStatus(final String designatedBody) {

@@ -51,7 +51,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
   private static final String API_CONNECTION_UNHIDE = "/api/connections/unhide?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
-  private static final String API_CONNECTION_TCS_HIDDEN = "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}&bridgeEndpoint=true";
+  private static final String API_CONNECTION_TCS_HIDDEN = "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}&pageNumber=${header.pageNumber}&bridgeEndpoint=true";
   private static final String API_CONNECTION_DOCTOR_UNHIDDEN = "/api/v1/doctors/unhidden/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
