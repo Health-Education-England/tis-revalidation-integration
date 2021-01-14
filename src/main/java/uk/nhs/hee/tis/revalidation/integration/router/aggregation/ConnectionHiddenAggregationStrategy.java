@@ -67,6 +67,13 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
   private ConnectionHiddenDto aggregateTraineeWithConnectionAllowNull(Exchange newExchange) {
     final var body = newExchange.getIn().getBody();
     final var connectionHiddenDto = mapper.convertValue(body, ConnectionHiddenDto.class);
+    final var connections = connectionHiddenDto.getConnections();
+    final var connectionHiddenRecordDtos = connections.stream().map(conn -> {
+      conn.setConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
+      return conn;
+    }).collect(toList());
+
+    connectionHiddenDto.setConnections(connectionHiddenRecordDtos);
     return connectionHiddenDto;
 
   }
