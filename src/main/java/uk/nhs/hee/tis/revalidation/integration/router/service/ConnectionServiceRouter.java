@@ -87,101 +87,98 @@ public class ConnectionServiceRouter extends RouteBuilder {
   @Override
   public void configure() {
 
-    // Connection summary - All, Connected, Disconnected tab
+    // Connection summary page - All, Connected, Disconnected tab
     from("direct:connection-summary")
         .to("direct:connection-hidden-manually")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
         .to("direct:v1-doctors-all-unhidden")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
         .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
-
     from("direct:connection-hidden-manually")
         .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
-
     from("direct:v1-doctors-all-unhidden")
         .toD(recommendationServiceUrl + API_CONNECTION_DOCTOR_UNHIDDEN)
         .streamCaching()
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
-
-    // TODO: Change to use tis-revalidation-core when deployed.
-    from("direct:v1-doctors")
-        .to(recommendationServiceUrl + "/api/v1/doctors?bridgeEndpoint=true")
-        .unmarshal().json(JsonLibrary.Jackson);
-
     from("direct:tcs-connection")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
-    from("direct:connection-gmc-id-aggregation")
-        .multicast(AGGREGATOR)
-        .parallelProcessing()
-        .to("direct:connection-gmc-id")
-        .to("direct:doctor-designated-body")
-        .to("direct:connection-history");
-
-    from("direct:connection-gmc-id")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.PROGRAMME)
-        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID);
-
-    from("direct:doctor-designated-body")
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
-        .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
-
-    from("direct:connection-history")
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
-        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
-
-    from("direct:connection-add")
-        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_CONNECTION_ADD);
-
-    from("direct:connection-remove")
-        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_CONNECTION_REMOVE);
-
-    from("direct:connection-hide")
-        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_CONNECTION_HIDE);
-
-    from("direct:connection-unhide")
-        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_CONNECTION_UNHIDE);
-
-    // Connection summary - Exceptions queue tab
+    // Connection summary page - Exceptions queue tab
     from("direct:connection-exception-summary")
         .to("direct:connection-exception")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "getConnectionExceptionGmcIds")
         .to("direct:v1-doctors-by-ids")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
         .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
-
     from("direct:connection-exception")
         .to(serviceUrlConnection + CONNECTION_EXCEPTION_API)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    // Connection summary page - Hidden tab
+    from("direct:connection-hidden")
+        .to("direct:connection-hidden-gmcIds")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
+        .to("direct:v1-doctors-by-ids")
+        .enrich("direct:connection-tcs-hidden", connectionHiddenAggregationStrategy);
+    from("direct:connection-hidden-gmcIds")
+        .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
+    from("direct:connection-tcs-hidden")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .toD(tcsServiceUrl + API_CONNECTION_TCS_HIDDEN)
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
         .unmarshal().json(JsonLibrary.Jackson);
 
-    // Connection summary - Hidden tab
-    from("direct:connection-hidden")
-        .to("direct:connection-hidden-gmcIds")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
-        .to("direct:v1-doctors-by-ids")
-        .enrich("direct:connection-tcs-hidden", connectionHiddenAggregationStrategy);
-
-    from("direct:connection-hidden-gmcIds")
-        .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
-
-    from("direct:connection-tcs-hidden")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(tcsServiceUrl + API_CONNECTION_TCS_HIDDEN)
+    // TODO: Change to use tis-revalidation-core when deployed.
+    from("direct:v1-doctors")
+        .to(recommendationServiceUrl + "/api/v1/doctors?bridgeEndpoint=true")
         .unmarshal().json(JsonLibrary.Jackson);
+
+    // Connection Details page
+    from("direct:connection-gmc-id-aggregation")
+        .multicast(AGGREGATOR)
+        .parallelProcessing()
+        .to("direct:connection-gmc-id")
+        .to("direct:doctor-designated-body")
+        .to("direct:connection-history");
+    from("direct:connection-gmc-id")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.PROGRAMME)
+        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID);
+    from("direct:doctor-designated-body")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
+        .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
+    from("direct:connection-history")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
+        .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
+
+    // Add connection
+    from("direct:connection-add")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_ADD);
+
+    // Remove connection
+    from("direct:connection-remove")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_REMOVE);
+
+    // Hide connection
+    from("direct:connection-hide")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_HIDE);
+
+    // Unhide connection
+    from("direct:connection-unhide")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .toD(serviceUrlConnection + API_CONNECTION_UNHIDE);
+
   }
 }
