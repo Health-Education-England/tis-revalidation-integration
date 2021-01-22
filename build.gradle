@@ -40,7 +40,7 @@ dependencies {
   }
 
   // Apache Camel starters
-  ext.camelVersion = "3.6.0"
+  ext.camelVersion = "3.7.1"
   implementation "org.apache.camel.springboot:camel-spring-boot-starter:$camelVersion"
   implementation "org.apache.camel.springboot:camel-http-starter:$camelVersion"
   implementation "org.apache.camel.springboot:camel-servlet-starter:$camelVersion"
