@@ -35,6 +35,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionExceptionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionHiddenAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
@@ -52,6 +53,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_UNHIDE = "/api/connections/unhide?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_TCS_HIDDEN = "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}&pageNumber=${header.pageNumber}&bridgeEndpoint=true";
+  private static final String API_CONNECTION_TCS_EXCEPTION = "/api/revalidation/connection/exception/${header.gmcIds}?searchQuery=${header.searchQuery}&pageNumber=${header.pageNumber}&dbcs=${header.dbcs}&bridgeEndpoint=true";
   private static final String API_CONNECTION_DOCTOR_UNHIDDEN = "/api/v1/doctors/unhidden/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
@@ -71,6 +73,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Autowired
   private ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
+
+  @Autowired
+  private ConnectionExceptionAggregationStrategy connectionExceptionAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
@@ -110,10 +115,13 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .to("direct:connection-exception")
         .setHeader("gmcIds").method(gmcIdProcessorBean, "getConnectionExceptionGmcIds")
         .to("direct:v1-doctors-by-ids")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
-        .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
+        .enrich("direct:tcs-connection-exception", connectionExceptionAggregationStrategy);
     from("direct:connection-exception")
         .to(serviceUrlConnection + CONNECTION_EXCEPTION_API)
+        .unmarshal().json(JsonLibrary.Jackson);
+    from("direct:tcs-connection-exception")
+        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .toD(tcsServiceUrl + API_CONNECTION_TCS_EXCEPTION)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Hidden tab
