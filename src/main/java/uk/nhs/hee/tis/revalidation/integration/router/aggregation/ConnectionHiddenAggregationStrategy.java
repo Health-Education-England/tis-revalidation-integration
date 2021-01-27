@@ -11,7 +11,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionHiddenDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionTcsDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 
@@ -41,10 +41,10 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
     return result;
   }
 
-  private ConnectionHiddenDto aggregateTraineeWithConnection(List<TraineeInfoDto> traineeInfos,
+  private ConnectionTcsDto aggregateTraineeWithConnection(List<TraineeInfoDto> traineeInfos,
       Exchange newExchange) {
     final var body = newExchange.getIn().getBody();
-    final var connectionHiddenDto = mapper.convertValue(body, ConnectionHiddenDto.class);
+    final var connectionHiddenDto = mapper.convertValue(body, ConnectionTcsDto.class);
     final var connections = connectionHiddenDto.getConnections();
 
     final var connectionHiddenRecordDtos = connections.stream().map(conn -> {
@@ -64,9 +64,9 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
     return connectionHiddenDto;
   }
 
-  private ConnectionHiddenDto aggregateTraineeWithConnectionAllowNull(Exchange newExchange) {
+  private ConnectionTcsDto aggregateTraineeWithConnectionAllowNull(Exchange newExchange) {
     final var body = newExchange.getIn().getBody();
-    final var connectionHiddenDto = mapper.convertValue(body, ConnectionHiddenDto.class);
+    final var connectionHiddenDto = mapper.convertValue(body, ConnectionTcsDto.class);
     final var connections = connectionHiddenDto.getConnections();
     final var connectionHiddenRecordDtos = connections.stream().map(conn -> {
       conn.setConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
