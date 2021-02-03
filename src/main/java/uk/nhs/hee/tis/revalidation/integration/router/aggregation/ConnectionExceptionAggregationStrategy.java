@@ -72,6 +72,7 @@ public class ConnectionExceptionAggregationStrategy implements AggregationStrate
       final var traineeInfoDto = traineeInfos.stream()
           .filter(t -> t.getGmcReferenceNumber().equals(conn.getGmcReferenceNumber())).findFirst();
 
+      conn.setTcsDesignatedBody(conn.getDesignatedBody());
       conn.setDesignatedBody(null);
       conn.setConnectionStatus(getConnectionStatus(null));
       if (traineeInfoDto.isPresent()) {
@@ -94,6 +95,7 @@ public class ConnectionExceptionAggregationStrategy implements AggregationStrate
     final var connectionExceptionRecordDtos = connections.stream().map(conn -> {
       // Designated Body and connectionStatus should base on data from  GMC
       // where it does not exist here
+      conn.setTcsDesignatedBody(conn.getDesignatedBody());
       conn.setDesignatedBody(null);
       conn.setConnectionStatus(getConnectionStatus(null));
       return conn;

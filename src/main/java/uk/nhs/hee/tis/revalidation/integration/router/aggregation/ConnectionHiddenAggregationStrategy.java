@@ -50,6 +50,8 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
     final var connectionHiddenRecordDtos = connections.stream().map(conn -> {
       final var traineeInfoDto = traineeInfos.stream()
           .filter(t -> t.getGmcReferenceNumber().equals(conn.getGmcReferenceNumber())).findFirst();
+
+      conn.setTcsDesignatedBody(conn.getDesignatedBody());
       if (traineeInfoDto.isPresent()) {
         final var trainee = traineeInfoDto.get();
         conn.setSubmissionDate(trainee.getSubmissionDate());
@@ -69,6 +71,7 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
     final var connectionHiddenDto = mapper.convertValue(body, ConnectionTcsDto.class);
     final var connections = connectionHiddenDto.getConnections();
     final var connectionHiddenRecordDtos = connections.stream().map(conn -> {
+      conn.setTcsDesignatedBody(conn.getDesignatedBody());
       conn.setConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
       return conn;
     }).collect(toList());
