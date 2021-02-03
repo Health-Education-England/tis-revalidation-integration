@@ -31,6 +31,8 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 public interface TraineeConnectionMapper {
 
   @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
+  @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
+  @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
   ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
       ConnectionRecordDto connectionRecordDto);
 }

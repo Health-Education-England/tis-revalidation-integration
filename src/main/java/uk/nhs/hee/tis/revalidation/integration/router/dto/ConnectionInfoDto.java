@@ -36,6 +36,7 @@ public class ConnectionInfoDto {
   String programmeName;
   String programmeMembershipType;
   String designatedBody;
+  String tcsDesignatedBody;
   String programmeOwner;
   String connectionStatus;
   LocalDate programmeMembershipStartDate;

@@ -39,6 +39,7 @@ public class ConnectionRecordDto {
   String programmeMembershipType;
   String programmeOwner;
   String connectionStatus;
+  String designatedBodyCode;
   LocalDate programmeMembershipStartDate;
   LocalDate programmeMembershipEndDate;
 }
