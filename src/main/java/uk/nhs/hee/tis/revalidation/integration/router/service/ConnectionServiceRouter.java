@@ -45,20 +45,28 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
 
-  private static final String API_CONNECTION = "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_CONNECTION_GMC_ID = "/api/revalidation/connection/detail/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_CONNECTION =
+      "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_CONNECTION_GMC_ID =
+      "/api/revalidation/connection/detail/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
   private static final String API_CONNECTION_UNHIDE = "/api/connections/unhide?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
-  private static final String API_CONNECTION_TCS_HIDDEN = "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}&pageNumber=${header.pageNumber}&bridgeEndpoint=true";
-  private static final String API_CONNECTION_TCS_EXCEPTION = "/api/revalidation/connection/exception/${header.gmcIds}?searchQuery=${header.searchQuery}&pageNumber=${header.pageNumber}&dbcs=${header.dbcs}&bridgeEndpoint=true";
-  private static final String API_CONNECTION_DOCTOR_UNHIDDEN = "/api/v1/doctors/unhidden/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID = "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
-  private static final String GET_DOCTORS_BY_GMC_IDS = "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String CONNECTION_EXCEPTION_API = "/api/exception?bridgeEndpoint=true";
-  private static final String API_CONNECTION_HISTORY = "/api/connections/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_CONNECTION_EXCEPTION =
+      "/api/connections/exception?bridgeEndpoint=true";
+  private static final String API_CONNECTION_TCS_HIDDEN =
+      "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}"
+          + "&pageNumber=${header.pageNumber}&bridgeEndpoint=true";
+  private static final String API_CONNECTION_DOCTOR_UNHIDDEN =
+      "/api/v1/doctors/unhidden/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID =
+      "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
+  private static final String GET_DOCTORS_BY_GMC_IDS =
+      "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_CONNECTION_HISTORY =
+      "/api/connections/${header.gmcId}?bridgeEndpoint=true";
 
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
@@ -112,16 +120,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
     // Connection summary page - Exceptions queue tab
     from("direct:connection-exception-summary")
-        .to("direct:connection-exception")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "getConnectionExceptionGmcIds")
-        .to("direct:v1-doctors-by-ids")
-        .enrich("direct:tcs-connection-exception", connectionExceptionAggregationStrategy);
-    from("direct:connection-exception")
-        .to(serviceUrlConnection + CONNECTION_EXCEPTION_API)
-        .unmarshal().json(JsonLibrary.Jackson);
-    from("direct:tcs-connection-exception")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(tcsServiceUrl + API_CONNECTION_TCS_EXCEPTION)
+        .to(serviceUrlConnection + API_CONNECTION_EXCEPTION)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Hidden tab
