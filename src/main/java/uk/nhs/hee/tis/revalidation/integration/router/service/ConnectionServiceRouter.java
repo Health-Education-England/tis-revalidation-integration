@@ -56,6 +56,10 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
+  private static final String API_CONNECTION_CONNECTED =
+      "/api/connections/connected?bridgeEndpoint=true";
+  private static final String API_CONNECTION_DISCONNECTED =
+      "/api/connections/disconnected?bridgeEndpoint=true";
   private static final String API_CONNECTION_TCS_HIDDEN =
       "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}"
           + "&pageNumber=${header.pageNumber}&bridgeEndpoint=true";
@@ -121,6 +125,16 @@ public class ConnectionServiceRouter extends RouteBuilder {
     // Connection summary page - Exceptions queue tab
     from("direct:connection-exception-summary")
         .to(serviceUrlConnection + API_CONNECTION_EXCEPTION)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    // Connection summary page - Connected queue tab
+    from("direct:connection-connected-summary")
+        .to(serviceUrlConnection + API_CONNECTION_CONNECTED)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    // Disconnection summary page - Disconnected queue tab
+    from("direct:connection-disconnected-summary")
+        .to(serviceUrlConnection + API_CONNECTION_DISCONNECTED)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Hidden tab
