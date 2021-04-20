@@ -23,14 +23,10 @@ package uk.nhs.hee.tis.revalidation.integration.config;
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 
 @Configuration
 public class AwsSqsQueueConfig {
@@ -46,13 +42,4 @@ public class AwsSqsQueueConfig {
     return AmazonSQSAsyncClientBuilder.defaultClient();
   }
 
-  @Bean
-  public MappingJackson2MessageConverter mappingJackson2MessageConverter(
-      ObjectMapper objectMapper) {
-    MappingJackson2MessageConverter jackson2MessageConverter = new MappingJackson2MessageConverter();
-    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-    objectMapper.setDateFormat(df);
-    jackson2MessageConverter.setObjectMapper(objectMapper);
-    return jackson2MessageConverter;
-  }
 }
