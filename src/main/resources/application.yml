@@ -1,3 +1,7 @@
+spring:
+  elasticsearch:
+    rest:
+      uris: ${ES_URLS:http://localhost:9200}
 camel:
   component:
     servlet:
@@ -5,7 +9,7 @@ camel:
         context-path: /api/*
 
 server:
-  port: 8088
+  port: 8089
   servlet:
     context-path: /integration
 
@@ -69,4 +73,9 @@ logging:
 sentry:
   dsn: ${SENTRY_DSN:}
   environment: ${SENTRY_ENVIRONMENT:}
+
+cloud:
+  aws:
+    end-point:
+      uri: ${QUEUE_NAME:}
 
