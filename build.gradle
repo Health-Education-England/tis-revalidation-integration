@@ -62,6 +62,10 @@ dependencies {
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2"
+
+  //RabbitMQ
+  implementation 'org.apache.camel:camel-rabbitmq:3.6.0'
   implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3"
 
   // AWS cloud
