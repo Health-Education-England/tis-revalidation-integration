@@ -61,8 +61,8 @@ public class GmcDoctorMessageListener {
         .tcsDesignatedBody("No TCS DBC")
         .programmeOwner("No Programme Owner")
         .connectionStatus(getConnectionStatus(doctor))
-        .membershipStartDate(null)
-        .membershipEndDate(null)
+        //.membershipStartDate(null)
+        //.membershipEndDate(null)
         .build();
 
     doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);

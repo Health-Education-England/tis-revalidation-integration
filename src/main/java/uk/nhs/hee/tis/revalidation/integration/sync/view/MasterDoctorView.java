@@ -62,6 +62,7 @@ public class MasterDoctorView {
   private String tcsDesignatedBody;
   private String programmeOwner;
   private String connectionStatus;
+  private String programmeMembershipType;
   @Nullable
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
