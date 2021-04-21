@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -42,15 +43,15 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @ExtendWith(MockitoExtension.class)
 class GmcDoctorMessageListenerTest {
 
-  DoctorsForDB doctorsForDB;
+  private DoctorsForDB doctorsForDB;
 
-  @Mock
+  @InjectMocks
   private GmcDoctorMessageListener gmcDoctorMessageListener;
   @Mock
   DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     doctorsForDB = DoctorsForDB.builder()
         .gmcReferenceNumber("101")
         .doctorFirstName("AAA")
@@ -67,32 +68,21 @@ class GmcDoctorMessageListenerTest {
   }
 
   @Test
-  public void testMessagesAreReceivedFromSqsQueue() throws Exception {
-
+  void testMessagesAreReceivedFromSqsQueue() {
     setField(gmcDoctorMessageListener, "sqsEndPoint", "sqsEndPoint");
 
-    ArgumentCaptor<DoctorsForDB> doctorsForDBArgumentCaptor = ArgumentCaptor
-        .forClass(DoctorsForDB.class);
     gmcDoctorMessageListener.getMessage(doctorsForDB);
-    verify(gmcDoctorMessageListener).getMessage(doctorsForDBArgumentCaptor.capture());
 
-    DoctorsForDB doctorsForDB = doctorsForDBArgumentCaptor.getValue();
-
-    assertThat(doctorsForDB.getGmcReferenceNumber(), is("101"));
-    assertThat(doctorsForDB.getDoctorFirstName(), is("AAA"));
-    assertThat(doctorsForDB.getDoctorLastName(), is("BBB"));
-    assertThat(doctorsForDB.getSubmissionDate(), is(LocalDate.now()));
-    assertThat(doctorsForDB.getDateAdded(), is(LocalDate.now()));
-    assertThat(doctorsForDB.getUnderNotice(), is(UnderNotice.NO));
-    assertThat(doctorsForDB.getDesignatedBodyCode(), is("PQR"));
-
-    ArgumentCaptor<MasterDoctorView> masterDoctorViewArgumentCaptor = ArgumentCaptor
+    ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
         .forClass(MasterDoctorView.class);
-    doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorViewArgumentCaptor.capture());
+    verify(doctorUpsertElasticSearchService).populateMasterIndex(masterDoctorViewCaptor.capture());
+    MasterDoctorView masterDoctorView = masterDoctorViewCaptor.getValue();
 
-    verify(doctorUpsertElasticSearchService)
-        .populateMasterIndex(masterDoctorViewArgumentCaptor.capture());
-
+    assertThat(masterDoctorView.getGmcReferenceNumber(), is("101"));
+    assertThat(masterDoctorView.getDoctorFirstName(), is("AAA"));
+    assertThat(masterDoctorView.getDoctorLastName(), is("BBB"));
+    assertThat(masterDoctorView.getSubmissionDate(), is(LocalDate.now()));
+    assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
+    assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
   }
-
 }
