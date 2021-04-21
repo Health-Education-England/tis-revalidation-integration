@@ -6,11 +6,10 @@ import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import org.apache.camel.*;
 import org.apache.camel.builder.ExchangeBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.spi.UnitOfWork;
-import org.apache.camel.support.DefaultExchange;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +20,8 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-import java.time.LocalDate;
-import java.util.Map;
-
 @ExtendWith(MockitoExtension.class)
-public class SyncDataHandlerTest {
+class SyncDataHandlerTest {
 
   private static Exchange exchange;
   private static ConnectionInfoDto connectionInfo;
@@ -81,7 +77,7 @@ public class SyncDataHandlerTest {
   }
 
   @Test
-  public void shouldInsertTraineeConnectionInfoIntoElasticSearch() throws JsonProcessingException {
+  void shouldInsertTraineeConnectionInfoIntoElasticSearch() throws JsonProcessingException {
     doNothing().when(doctorUpsertElasticSearchService).populateMasterIndex(masterDoctorView);
 
     syncDataHandler.updateMasterIndex(exchange);

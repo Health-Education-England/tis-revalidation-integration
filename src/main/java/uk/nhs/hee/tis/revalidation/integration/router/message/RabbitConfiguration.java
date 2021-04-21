@@ -22,26 +22,28 @@
 package uk.nhs.hee.tis.revalidation.integration.router.message;
 
 import com.rabbitmq.client.ConnectionFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class RabbitConfiguration {
 
   private final String OPTIONS = "&skipQueueDeclare=true"
       +"&autoDelete=false";
 
-  @Value("rabbitmq.host")
+  @Value("${rabbitmq.host}")
   private String rabbitHost;
 
-  @Value("rabbitmq.port")
+  @Value("${rabbitmq.port}")
   private String rabbitPort;
 
-  @Value("rabbitmq.username")
+  @Value("${rabbitmq.username}")
   private String rabbitUser;
 
-  @Value("rabbitmq.password")
+  @Value("${rabbitmq.password}")
   private String rabbitPassword;
 
   @Value("${app.rabbit.reval.queue.connection.update}")
@@ -69,10 +71,10 @@ public class RabbitConfiguration {
   public ConnectionFactory rabbitConnectionFactory() {
     //TODO get values from app config - currently claiming to be null
     ConnectionFactory connectionFactory = new ConnectionFactory();
-    connectionFactory.setHost("localhost");
-        connectionFactory.setPort(5672);
-    connectionFactory.setUsername("guest");
-    connectionFactory.setPassword("guest");
+    connectionFactory.setHost(rabbitHost);
+    connectionFactory.setPort(Integer.valueOf(rabbitPort));
+    connectionFactory.setUsername(rabbitUser);
+    connectionFactory.setPassword(rabbitPassword);
 
     return connectionFactory;
   }

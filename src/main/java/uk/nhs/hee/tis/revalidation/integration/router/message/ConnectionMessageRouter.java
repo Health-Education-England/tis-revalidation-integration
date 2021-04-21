@@ -22,14 +22,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.message;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.Handler;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 
 @Component
 public class ConnectionMessageRouter extends RouteBuilder {
@@ -39,7 +33,6 @@ public class ConnectionMessageRouter extends RouteBuilder {
   private final String revalSyncDataRoute;
   private final String revalConnectionUpdateRoute;
   private final String revalSyncStartRoute;
-  private Processor syncProcessor;
 
   public ConnectionMessageRouter(RabbitConfiguration rabbitConfiguration) {
     super();
