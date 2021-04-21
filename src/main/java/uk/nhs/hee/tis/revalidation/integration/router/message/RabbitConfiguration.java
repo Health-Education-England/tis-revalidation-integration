@@ -67,7 +67,7 @@ public class RabbitConfiguration {
 
   @Bean
   public ConnectionFactory rabbitConnectionFactory() {
-    //TODO get values from app config
+    //TODO get values from app config - currently claiming to be null
     ConnectionFactory connectionFactory = new ConnectionFactory();
     connectionFactory.setHost("localhost");
         connectionFactory.setPort(5672);
