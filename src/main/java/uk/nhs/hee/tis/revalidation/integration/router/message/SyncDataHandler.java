@@ -24,10 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.router.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
@@ -45,12 +43,18 @@ public class SyncDataHandler {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
   }
 
+
+  /**
+   * Updates Master ElasticSearch index with data from connection sync data router.
+   *
+   * @param exchange routed exchanged containing ConnectionInfoDto
+   */
   @Handler
-  public void updateMasterIndex(Exchange message) throws JsonProcessingException {
-    final String body = message.getIn().getBody(String.class);
+  public void updateMasterIndex(Exchange exchange) throws JsonProcessingException {
+    final String body = exchange.getIn().getBody(String.class);
     final ConnectionInfoDto connectionInfo = objectMapper.readValue(body, ConnectionInfoDto.class);
 
-    MasterDoctorView masterDoctorView = getMasterDoctorView(connectionInfo);
+    var masterDoctorView = getMasterDoctorView(connectionInfo);
 
     doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
   }
