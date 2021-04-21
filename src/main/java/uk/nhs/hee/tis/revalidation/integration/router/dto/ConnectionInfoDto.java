@@ -23,15 +23,29 @@ package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ConnectionInfoDto {
 
+  Long tcsPersonId;
   String gmcReferenceNumber;
   String doctorFirstName;
   String doctorLastName;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate submissionDate;
   String programmeName;
   String programmeMembershipType;
@@ -39,6 +53,10 @@ public class ConnectionInfoDto {
   String tcsDesignatedBody;
   String programmeOwner;
   String connectionStatus;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate programmeMembershipStartDate;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate programmeMembershipEndDate;
 }
