@@ -41,7 +41,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @AllArgsConstructor
 @Builder
 @Data
-@Document(indexName = "masterdoctorview")
+@Document(indexName = "masterdoctorindex")
 public class MasterDoctorView {
 
   @Id

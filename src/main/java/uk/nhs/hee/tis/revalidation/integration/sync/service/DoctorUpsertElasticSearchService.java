@@ -21,12 +21,15 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
+import static org.mapstruct.factory.Mappers.getMapper;
+
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -48,7 +51,7 @@ public class DoctorUpsertElasticSearchService {
     // find trainee record from Exception ES index
     Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcReferenceNumber(masterDoctorDocumentToSave);
 
-    // if trainee already exists in ES index, then update the existing record
+    // if doctor already exists in ES index, then update the existing record
     if (Iterables.size(existingRecords) > 0) {
       updateMasterDoctorViews(existingRecords, masterDoctorDocumentToSave);
     }
@@ -73,11 +76,9 @@ public class DoctorUpsertElasticSearchService {
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
     existingRecords.forEach(currentDoctorView -> {
-      //updating trick is here, as id is unique we need to update the record with this
-      dataToSave.setId(currentDoctorView.getId());
-      dataToSave.setGmcReferenceNumber(currentDoctorView.getGmcReferenceNumber());
-      dataToSave.setProgrammeName("London LMF");
-      masterDoctorElasticSearchRepository.save(dataToSave);
+      final var masterDoctorViewMapper = getMapper(MasterDoctorViewMapper.class);
+      masterDoctorElasticSearchRepository
+          .save(masterDoctorViewMapper.updateMasterDoctorView(currentDoctorView, dataToSave));
     });
   }
 

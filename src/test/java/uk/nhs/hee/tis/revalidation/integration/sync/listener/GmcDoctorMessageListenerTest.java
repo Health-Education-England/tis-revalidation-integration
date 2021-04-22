@@ -24,7 +24,6 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +47,7 @@ class GmcDoctorMessageListenerTest {
   @InjectMocks
   private GmcDoctorMessageListener gmcDoctorMessageListener;
   @Mock
-  DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
+  private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
   @BeforeEach
   void setUp() {
@@ -69,8 +68,6 @@ class GmcDoctorMessageListenerTest {
 
   @Test
   void testMessagesAreReceivedFromSqsQueue() {
-    setField(gmcDoctorMessageListener, "sqsEndPoint", "sqsEndPoint");
-
     gmcDoctorMessageListener.getMessage(doctorsForDB);
 
     ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
@@ -85,4 +82,5 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
     assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
   }
+
 }
