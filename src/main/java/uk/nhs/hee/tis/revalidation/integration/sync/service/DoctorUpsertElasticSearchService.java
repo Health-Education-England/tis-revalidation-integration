@@ -35,7 +35,8 @@ public class DoctorUpsertElasticSearchService {
   private MasterDoctorElasticSearchRepository repository;
   private MasterDoctorViewMapper mapper;
 
-  DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository, MasterDoctorViewMapper mapper) {
+  public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
+      MasterDoctorViewMapper mapper) {
     this.repository = repository;
     this.mapper = mapper;
   }
@@ -75,4 +76,5 @@ public class DoctorUpsertElasticSearchService {
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
     repository.save(dataToSave);
   }
+
 }

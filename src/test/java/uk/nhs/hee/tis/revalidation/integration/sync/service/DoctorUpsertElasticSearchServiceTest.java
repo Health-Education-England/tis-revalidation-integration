@@ -23,21 +23,18 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -45,14 +42,14 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 class DoctorUpsertElasticSearchServiceTest {
 
   @Mock
-  private MasterDoctorElasticSearchRepository masterDoctorElasticSearchRepository;
+  private MasterDoctorElasticSearchRepository repository;
 
-  @InjectMocks
-  private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
+  private DoctorUpsertElasticSearchService service;
   private MasterDoctorView currentDoctorView, dataToSave;
 
   @BeforeEach
   void setUp() {
+    service = new DoctorUpsertElasticSearchService(repository, new MasterDoctorViewMapperImpl());
     currentDoctorView = MasterDoctorView.builder()
         .tcsPersonId(1001L)
         .gmcReferenceNumber("56789")
@@ -89,7 +86,7 @@ class DoctorUpsertElasticSearchServiceTest {
     currentDoctorView.setId("1a2b3c");
     recordsAlreadyInEs.add(currentDoctorView);
 
-    when(masterDoctorElasticSearchRepository
+    when(repository
         .findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
         .thenReturn(recordsAlreadyInEs);
 
@@ -97,15 +94,21 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setId(recordsAlreadyInEs.get(0).getId());
 
     //this will lead to updateMasterDoctorViews() as record is there already in the ES
-    doctorUpsertElasticSearchService.populateMasterIndex(dataToSave);
+    service.populateMasterIndex(dataToSave);
 
     assertThat(dataToSave.getId(), is("1a2b3c"));
     assertThat(dataToSave.getTcsPersonId(), is(1001L));
+
     //mapper will make sure all the TIS data fields are populated
     assertThat(dataToSave.getProgrammeName(), is("Medicine"));
     assertThat(dataToSave.getMembershipType(), is("Visitor"));
     assertThat(dataToSave.getTcsDesignatedBody(), is("KSS"));
     assertThat(dataToSave.getProgrammeOwner(), is("East of England"));
+
+    //gmc fields will remain same
+    assertThat(dataToSave.getGmcReferenceNumber(), is("56789"));
+    assertThat(dataToSave.getDoctorFirstName(), is("AAAAA"));
+    assertThat(dataToSave.getDoctorLastName(), is("BBBB"));
   }
 
   @Test
@@ -114,14 +117,14 @@ class DoctorUpsertElasticSearchServiceTest {
     List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
 
     //this is a new record, so query will return nothing
-    when(masterDoctorElasticSearchRepository
+    when(repository
         .findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
         .thenReturn(recordsAlreadyInEs);
 
     //this will lead to addMasterDoctorViews() as no record found
-    doctorUpsertElasticSearchService.populateMasterIndex(dataToSave);
+    service.populateMasterIndex(dataToSave);
 
-    verify(masterDoctorElasticSearchRepository).save(dataToSave);
+    verify(repository).save(dataToSave);
 
     assertThat(dataToSave.getGmcReferenceNumber(), is("56789"));
     assertThat(dataToSave.getDoctorFirstName(), is("AAAAA"));
