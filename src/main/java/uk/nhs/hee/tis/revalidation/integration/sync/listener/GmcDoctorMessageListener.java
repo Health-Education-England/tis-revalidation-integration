@@ -33,11 +33,9 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class GmcDoctorMessageListener {
 
+  private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
-
-
-  private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
   public GmcDoctorMessageListener(
       DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
@@ -46,7 +44,7 @@ public class GmcDoctorMessageListener {
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
   public void getMessage(DoctorsForDB doctor) {
-    log.info("Message received from AWS SQS Queue - {}" , doctor.getGmcReferenceNumber());
+    log.info("Message received from AWS SQS Queue - {}", doctor.getGmcReferenceNumber());
 
     //prepare the MasterDoctorView and call the service method
     MasterDoctorView masterDoctorView = MasterDoctorView.builder()

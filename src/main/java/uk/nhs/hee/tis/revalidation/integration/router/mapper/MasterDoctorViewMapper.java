@@ -1,6 +1,5 @@
 /*
  * The MIT License (MIT)
- *
  * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -19,16 +18,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.sync.repository;
+package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
-import java.util.List;
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
-import org.springframework.stereotype.Repository;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Repository
-public interface MasterDoctorElasticSearchRepository extends
-    ElasticsearchRepository<MasterDoctorView, String> {
+@Mapper(componentModel = "spring")
+public interface MasterDoctorViewMapper {
 
-  List<MasterDoctorView> findByGmcReferenceNumber(String gmcReferenceNumber);
+  @Mapping(target = "gmcReferenceNumber", ignore = true)
+  @Mapping(target = "doctorFirstName", ignore = true)
+  @Mapping(target = "doctorLastName", ignore = true)
+  @Mapping(target = "designatedBody", ignore = true)
+  @Mapping(target = "connectionStatus", ignore = true)
+  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
+      @MappingTarget MasterDoctorView target);
+
 }

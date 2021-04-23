@@ -21,14 +21,15 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
-import static org.hamcrest.CoreMatchers.is;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,15 +42,15 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @ExtendWith(MockitoExtension.class)
 class GmcDoctorMessageListenerTest {
 
-  DoctorsForDB doctorsForDB;
-  MasterDoctorView masterDoctorView;
+  private DoctorsForDB doctorsForDB;
+
   @InjectMocks
   private GmcDoctorMessageListener gmcDoctorMessageListener;
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     doctorsForDB = DoctorsForDB.builder()
         .gmcReferenceNumber("101")
         .doctorFirstName("AAA")
@@ -63,39 +64,23 @@ class GmcDoctorMessageListenerTest {
         .designatedBodyCode("PQR")
         .admin("Reval Admin").build();
 
-    masterDoctorView = MasterDoctorView.builder()
-        .tcsPersonId(null)
-        .gmcReferenceNumber("101")
-        .doctorFirstName("AAA")
-        .doctorLastName("BBB")
-        .submissionDate(LocalDate.now())
-        .programmeName("No Programme Name")
-        .membershipType("No Membership Type")
-        .designatedBody("DBC")
-        .tcsDesignatedBody("No TCS DBC")
-        .programmeOwner("No Programme Owner")
-        .connectionStatus("Yes")
-        .membershipStartDate(null)
-        .membershipEndDate(null)
-        .build();
   }
 
   @Test
-  public void testMessagesAreReceivedFromSqsQueue() throws Exception {
-
-    setField(gmcDoctorMessageListener, "sqsEndPoint", "sqsEndPoint");
-
-    //method under test
+  void testMessagesAreReceivedFromSqsQueue() {
     gmcDoctorMessageListener.getMessage(doctorsForDB);
 
-    assertThat(doctorsForDB.getGmcReferenceNumber(), is("101"));
-    assertThat(doctorsForDB.getDoctorFirstName(), is("AAA"));
-    assertThat(doctorsForDB.getDoctorLastName(), is("BBB"));
-    assertThat(doctorsForDB.getSubmissionDate(), is(LocalDate.now()));
-    assertThat(doctorsForDB.getDateAdded(), is(LocalDate.now()));
-    assertThat(doctorsForDB.getUnderNotice(), is(UnderNotice.NO));
-    assertThat(doctorsForDB.getDesignatedBodyCode(), is("PQR"));
+    ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
+        .forClass(MasterDoctorView.class);
+    verify(doctorUpsertElasticSearchService).populateMasterIndex(masterDoctorViewCaptor.capture());
+    MasterDoctorView masterDoctorView = masterDoctorViewCaptor.getValue();
 
+    assertThat(masterDoctorView.getGmcReferenceNumber(), is("101"));
+    assertThat(masterDoctorView.getDoctorFirstName(), is("AAA"));
+    assertThat(masterDoctorView.getDoctorLastName(), is("BBB"));
+    assertThat(masterDoctorView.getSubmissionDate(), is(LocalDate.now()));
+    assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
+    assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
   }
 
 }

@@ -23,10 +23,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -34,8 +32,14 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class DoctorUpsertElasticSearchService {
 
-  @Autowired
-  private MasterDoctorElasticSearchRepository masterDoctorElasticSearchRepository;
+  private MasterDoctorElasticSearchRepository repository;
+  private MasterDoctorViewMapper mapper;
+
+  public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
+      MasterDoctorViewMapper mapper) {
+    this.repository = repository;
+    this.mapper = mapper;
+  }
 
   //get doctor's gmc id
   //search the doctor with that gmc id in the es master index
@@ -48,7 +52,7 @@ public class DoctorUpsertElasticSearchService {
     // find trainee record from Exception ES index
     Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcReferenceNumber(masterDoctorDocumentToSave);
 
-    // if trainee already exists in ES index, then update the existing record
+    // if doctor already exists in ES index, then update the existing record
     if (Iterables.size(existingRecords) > 0) {
       updateMasterDoctorViews(existingRecords, masterDoctorDocumentToSave);
     }
@@ -59,30 +63,18 @@ public class DoctorUpsertElasticSearchService {
   }
 
   private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcReferenceNumber(MasterDoctorView masterDoctorDocumentToSave) {
-    BoolQueryBuilder mustBoolQueryBuilder = new BoolQueryBuilder();
-    BoolQueryBuilder shouldBoolQueryBuilder = new BoolQueryBuilder();
-
-    if (masterDoctorDocumentToSave.getGmcReferenceNumber() != null) {
-      shouldBoolQueryBuilder
-          .should(new MatchQueryBuilder("gmcReferenceNumber", masterDoctorDocumentToSave.getGmcReferenceNumber()));
-    }
-    return masterDoctorElasticSearchRepository.search(mustBoolQueryBuilder.must(shouldBoolQueryBuilder));
-
+    return repository.findByGmcReferenceNumber(masterDoctorDocumentToSave.getGmcReferenceNumber());
   }
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
     existingRecords.forEach(currentDoctorView -> {
-      //updating trick is here, as id is unique we need to update the record with this
-      dataToSave.setId(currentDoctorView.getId());
-      dataToSave.setGmcReferenceNumber(currentDoctorView.getGmcReferenceNumber());
-      dataToSave.setProgrammeName("London LMF");
-      masterDoctorElasticSearchRepository.save(dataToSave);
+      repository.save(mapper.updateMasterDoctorView(currentDoctorView, dataToSave));
     });
   }
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
-    masterDoctorElasticSearchRepository.save(dataToSave);
+    repository.save(dataToSave);
   }
 
 }
