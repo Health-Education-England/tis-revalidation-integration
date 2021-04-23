@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.repository;
 
+import java.util.List;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -29,4 +30,5 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public interface MasterDoctorElasticSearchRepository extends
     ElasticsearchRepository<MasterDoctorView, String> {
 
+  List<MasterDoctorView> findByGmcReferenceNumber(String gmcReferenceNumber);
 }

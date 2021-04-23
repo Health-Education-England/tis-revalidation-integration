@@ -21,13 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
-import static org.mapstruct.factory.Mappers.getMapper;
-
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -37,8 +32,13 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class DoctorUpsertElasticSearchService {
 
-  @Autowired
-  private MasterDoctorElasticSearchRepository masterDoctorElasticSearchRepository;
+  private MasterDoctorElasticSearchRepository repository;
+  private MasterDoctorViewMapper mapper;
+
+  DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository, MasterDoctorViewMapper mapper) {
+    this.repository = repository;
+    this.mapper = mapper;
+  }
 
   //get doctor's gmc id
   //search the doctor with that gmc id in the es master index
@@ -62,28 +62,17 @@ public class DoctorUpsertElasticSearchService {
   }
 
   private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcReferenceNumber(MasterDoctorView masterDoctorDocumentToSave) {
-    BoolQueryBuilder mustBoolQueryBuilder = new BoolQueryBuilder();
-    BoolQueryBuilder shouldBoolQueryBuilder = new BoolQueryBuilder();
-
-    if (masterDoctorDocumentToSave.getGmcReferenceNumber() != null) {
-      shouldBoolQueryBuilder
-          .should(new MatchQueryBuilder("gmcReferenceNumber", masterDoctorDocumentToSave.getGmcReferenceNumber()));
-    }
-    return masterDoctorElasticSearchRepository.search(mustBoolQueryBuilder.must(shouldBoolQueryBuilder));
-
+    return repository.findByGmcReferenceNumber(masterDoctorDocumentToSave.getGmcReferenceNumber());
   }
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
     existingRecords.forEach(currentDoctorView -> {
-      final var masterDoctorViewMapper = getMapper(MasterDoctorViewMapper.class);
-      masterDoctorElasticSearchRepository
-          .save(masterDoctorViewMapper.updateMasterDoctorView(currentDoctorView, dataToSave));
+      repository.save(mapper.updateMasterDoctorView(currentDoctorView, dataToSave));
     });
   }
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
-    masterDoctorElasticSearchRepository.save(dataToSave);
+    repository.save(dataToSave);
   }
-
 }
