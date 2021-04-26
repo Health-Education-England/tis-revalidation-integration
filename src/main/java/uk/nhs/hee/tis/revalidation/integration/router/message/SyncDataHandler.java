@@ -24,6 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.router.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+@Slf4j
 @Component
 public class SyncDataHandler {
 
@@ -53,10 +56,14 @@ public class SyncDataHandler {
   public void updateMasterIndex(Exchange exchange) throws JsonProcessingException {
     final String body = exchange.getIn().getBody(String.class);
     final ConnectionInfoDto connectionInfo = objectMapper.readValue(body, ConnectionInfoDto.class);
-
-    var masterDoctorView = getMasterDoctorView(connectionInfo);
-
-    doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
+    if(connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
+      log.info("TIME TO GET GMC STUFF!");
+    }
+    else {
+      var masterDoctorView = getMasterDoctorView(connectionInfo);
+      doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
+      log.info("record inserted " + connectionInfo.getTcsPersonId());
+    }
   }
 
   private MasterDoctorView getMasterDoctorView(ConnectionInfoDto connectionInfo) {
