@@ -66,7 +66,6 @@ dependencies {
 
   //RabbitMQ
   implementation 'org.apache.camel:camel-rabbitmq:3.6.0'
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3"
 
   // AWS cloud
   ext.cloudVersion = "2.3.0"
@@ -79,6 +78,8 @@ dependencies {
   // Java Persistence
   implementation "javax.persistence:javax.persistence-api:2.2"
 
+  // Jackson Json
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3"
 }
 
 checkstyle {
