@@ -65,7 +65,7 @@ dependencies {
   implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2"
 
   //RabbitMQ
-  implementation 'org.apache.camel:camel-rabbitmq:3.6.0'
+  implementation "org.springframework.boot:spring-boot-starter-amqp"
 
   // AWS cloud
   ext.cloudVersion = "2.3.0"
