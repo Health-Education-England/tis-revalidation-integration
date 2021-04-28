@@ -33,13 +33,15 @@ public class ConnectionMessageRouter extends RouteBuilder {
   private final String revalSyncDataRoute;
   private final String revalConnectionUpdateRoute;
   private final String revalSyncStartRoute;
+  private final String revalGetMasterRoute;
 
   public ConnectionMessageRouter(RabbitConfiguration rabbitConfiguration) {
     super();
     this.rabbitConfiguration = rabbitConfiguration;
     this.revalSyncStartRoute = rabbitConfiguration.getSyncStartRoute();
     this.revalSyncDataRoute = rabbitConfiguration.getSyncDataRoute();
-    this.revalConnectionUpdateRoute =  rabbitConfiguration.getConnectionUpdateRoute();
+    this.revalConnectionUpdateRoute = rabbitConfiguration.getConnectionUpdateRoute();
+    this.revalGetMasterRoute = rabbitConfiguration.getGetMasterRoute();
   }
 
   @Override

@@ -55,6 +55,9 @@ public class RabbitConfiguration {
   @Value("${app.rabbit.reval.queue.connection.syncdata}")
   private String revalSyncDataQueueName;
 
+  @Value("${app.rabbit.reval.queue.connection.getmaster}")
+  private String esGetMasterQueueName;
+
   @Value("${app.rabbit.reval.exchange}")
   private String revalExchange;
 
@@ -66,6 +69,9 @@ public class RabbitConfiguration {
 
   @Value("${app.rabbit.reval.routingKey.connection.syncdata}")
   private String revalSyncDataRoutingKey;
+
+  @Value("${app.rabbit.reval.routingKey.connection.getmaster}")
+  private String esGetMasterRoutingKey;
 
   @Bean
   public ConnectionFactory rabbitConnectionFactory() {
@@ -91,13 +97,17 @@ public class RabbitConfiguration {
     return getRoute(revalExchange, revalSyncDataQueueName);
   }
 
+  public String getGetMasterRoute() {
+    return getRoute(revalExchange, esGetMasterQueueName);
+  }
+
   private String getRoute(String exchange, String queue) {
     String route = "rabbitmq:"
-      + exchange
-      +"?connectionFactory=#rabbitConnectionFactory"
-      +"&queue="
-      + queue
-      + OPTIONS;
+        + exchange
+        + "?connectionFactory=#rabbitConnectionFactory"
+        + "&queue="
+        + queue
+        + OPTIONS;
     return route;
   }
 }

@@ -23,6 +23,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -34,8 +36,18 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
+
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
+
+  @Value("${app.rabbit.reval.exchange}")
+  private String revalExchange;
+
+  @Value("${app.rabbit.reval.routingKey.connection.getmaster}")
+  private String esGetMasterRoutingKey;
+
+  @Autowired
+  private RabbitTemplate rabbitTemplate;
 
   public GmcDoctorMessageListener(
       DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
@@ -63,8 +75,12 @@ public class GmcDoctorMessageListener {
         .membershipEndDate(null)
         .build();
 
-    doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
-
+    if (doctor.getSyncEnd() != null && doctor.getSyncEnd()) {
+      rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey,
+          "getMaster");
+    } else {
+      doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
+    }
   }
 
   private String getConnectionStatus(DoctorsForDB doctorsForDB) {
