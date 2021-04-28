@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
@@ -34,6 +35,12 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Component
 @Slf4j
 public class TraineeDataMessageListener {
+
+  @Value("${app.rabbit.reval.exchange}")
+  private String exchange;
+
+  @Value("${app.rabbit.reval.routingKey.recommendation.syncstart}")
+  private String routingKey;
 
   @Autowired
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
@@ -44,13 +51,15 @@ public class TraineeDataMessageListener {
   /**
    * Updates Master ElasticSearch index with data from connection sync data router.
    *
-   * @param COnnectionInfoDto Trainee Connection Info
+   * @param connectionInfo Trainee Connection Info
    */
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncdata}")
   public void receiveMessage(final ConnectionInfoDto connectionInfo) {
     log.info("listener");
     if (connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
       log.info("TIME TO GET GMC STUFF!");
+      String gmcSyncStart = "gmcSyncStart";
+      rabbitTemplate.convertAndSend(exchange, routingKey, gmcSyncStart);
     }
     else {
       var masterDoctorView = getMasterDoctorView(connectionInfo);
