@@ -9,6 +9,6 @@ public class SyncServiceRouter extends RouteBuilder {
   @Override
   public void configure() {
     from("direct:start-tis-sync")
-      .to("bean:syncStartHandler");
+    .to("bean:syncStartHandler");
   }
 }

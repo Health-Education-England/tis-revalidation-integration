@@ -6,12 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SyncApiRouter extends RouteBuilder {
+  @Override
+  public void configure() {
+    restConfiguration().component("servlet");
 
-    @Override
-    public void configure() {
-      restConfiguration().component("servlet");
-
-      rest("/startconnectionsync")
-          .get().bindingMode(RestBindingMode.auto).to("direct:start-tis-sync");
-    }
+    rest("/startconnectionsync")
+        .get().bindingMode(RestBindingMode.auto).to("direct:start-tis-sync");
+  }
 }
