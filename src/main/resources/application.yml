@@ -75,10 +75,12 @@ app:
     reval.queue.connection.syncstart: ${REVAL_RABBIT_SYNC_START_QUEUE:reval.queue.connection.syncstart}
     reval.queue.recommendation.syncstart: ${REVAL_RABBIT_RECOMMENDATION_SYNC_START_QUEUE:reval.queue.recommendation.syncstart}
     reval.queue.connection.syncdata: ${REVAL_RABBIT_SYNC_DATA_QUEUE:reval.queue.connection.syncdata}
+    reval.queue.connection.getmaster: ${REVAL_RABBIT_GET_MASTER_QUEUE:reval.queue.connection.getmaster}
     reval.routingKey.connection.update: ${REVAL_RABBIT_ROUTING_KEY:reval.connection.update}
     reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY:reval.connection.syncstart}
     reval.routingKey.recommendation.syncstart: ${REVAL_RABBIT_RECOMMENDATION_SYNCSTART_ROUTING_KEY:reval.recommendation.syncstart}
     reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY:reval.connection.syncdata}
+    reval.routingKey.connection.getmaster: ${REVAL_RABBIT_GETMASTER_ROUTING_KEY:reval.connection.getmaster}
 
 logging:
   level:
