@@ -18,45 +18,38 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
-*/
+ */
 
-package uk.nhs.hee.tis.revalidation.integration.router.message;
+package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
-import org.apache.camel.Handler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Slf4j
 @Component
-public class SyncDataHandler {
+@Slf4j
+public class TraineeDataMessageListener {
 
-  private ObjectMapper objectMapper;
+  @Autowired
+  private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
-  DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
-
-  public SyncDataHandler(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
-    objectMapper = new ObjectMapper();
-    this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
-  }
-
+  @Autowired
+  private RabbitTemplate rabbitTemplate;
 
   /**
    * Updates Master ElasticSearch index with data from connection sync data router.
    *
-   * @param exchange routed exchanged containing ConnectionInfoDto
+   * @param COnnectionInfoDto Trainee Connection Info
    */
-  @Handler
-  public void updateMasterIndex(Exchange exchange) throws JsonProcessingException {
-    final String body = exchange.getIn().getBody(String.class);
-    final ConnectionInfoDto connectionInfo = objectMapper.readValue(body, ConnectionInfoDto.class);
-    if(connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
+  @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncdata}")
+  public void receiveMessage(final ConnectionInfoDto connectionInfo) {
+    log.info("listener");
+    if (connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
       log.info("TIME TO GET GMC STUFF!");
     }
     else {
@@ -83,4 +76,5 @@ public class SyncDataHandler {
         .membershipEndDate(connectionInfo.getProgrammeMembershipEndDate())
         .build();
   }
+
 }
