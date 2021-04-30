@@ -1,7 +1,6 @@
 /*
  * The MIT License (MIT)
- *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,17 +22,18 @@ package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
+import org.mapstruct.MappingTarget;
+import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Mapper(componentModel = "spring")
-public interface TraineeConnectionMapper {
+public interface MasterDoctorViewMapper {
 
-  @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
-  @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
-  @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
-  @Mapping(target = "tcsPersonId", ignore = true)
-  ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
-      ConnectionRecordDto connectionRecordDto);
+  @Mapping(target = "gmcReferenceNumber", ignore = true)
+  @Mapping(target = "doctorFirstName", ignore = true)
+  @Mapping(target = "doctorLastName", ignore = true)
+  @Mapping(target = "designatedBody", ignore = true)
+  @Mapping(target = "connectionStatus", ignore = true)
+  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
+      @MappingTarget MasterDoctorView target);
+
 }

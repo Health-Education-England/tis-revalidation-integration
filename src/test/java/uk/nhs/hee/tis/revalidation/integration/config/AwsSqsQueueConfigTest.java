@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,21 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.config;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-@Mapper(componentModel = "spring")
-public interface TraineeConnectionMapper {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-  @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
-  @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
-  @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
-  @Mapping(target = "tcsPersonId", ignore = true)
-  ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
-      ConnectionRecordDto connectionRecordDto);
+class AwsSqsQueueConfigTest {
+
+  private AwsSqsQueueConfig awsSqsQueueConfig;
+
+  @BeforeEach
+  void setUp() {
+    awsSqsQueueConfig = new AwsSqsQueueConfig();
+  }
+
+  @Test
+  public void testAmazonSqsAsync() {
+    assertThat(awsSqsQueueConfig.amazonSQSAsync(), notNullValue());
+  }
+
+  @Test
+  public void testQueueMessagingTemplate() {
+    assertThat(awsSqsQueueConfig.queueMessagingTemplate(), notNullValue());
+  }
 }
+
