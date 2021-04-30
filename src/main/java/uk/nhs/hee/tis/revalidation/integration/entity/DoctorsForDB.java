@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,48 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.entity;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import java.time.LocalDate;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 @Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectionInfoDto {
+@Builder
+public class DoctorsForDB {
 
-  Long tcsPersonId;
-  String gmcReferenceNumber;
-  String doctorFirstName;
-  String doctorLastName;
+  private String gmcReferenceNumber;
+  private String doctorFirstName;
+  private String doctorLastName;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
-  LocalDate submissionDate;
-  String programmeName;
-  String programmeMembershipType;
-  String designatedBody;
-  String tcsDesignatedBody;
-  String programmeOwner;
-  String connectionStatus;
+  private LocalDate submissionDate;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
-  LocalDate programmeMembershipStartDate;
+  private LocalDate dateAdded;
+  private UnderNotice underNotice;
+  private String sanction;
+  private RecommendationStatus doctorStatus;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
-  LocalDate programmeMembershipEndDate;
-  @Nullable
-  Boolean syncEnd;
+  private LocalDate lastUpdatedDate;
+  private String designatedBodyCode;
+  private String admin;
+
 }
