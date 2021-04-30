@@ -79,7 +79,7 @@ public class GmcDoctorMessageListener {
         .build();
 
     if (doctor.getSyncEnd() != null && doctor.getSyncEnd()) {
-      log.info("GMC sync end! Connection get master.");
+      log.info("GMC sync completed. Sending message to Connection.");
       String getMaster = "getMaster";
       rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
     }
