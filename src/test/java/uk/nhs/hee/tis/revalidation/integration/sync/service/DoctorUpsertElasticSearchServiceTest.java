@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -79,6 +80,7 @@ class DoctorUpsertElasticSearchServiceTest {
         .build();
   }
 
+
   @Test
   void shouldUpdateMasterDoctorViewsWhenRecordIsFoundInEs() {
     List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
@@ -87,7 +89,7 @@ class DoctorUpsertElasticSearchServiceTest {
     recordsAlreadyInEs.add(currentDoctorView);
 
     when(repository
-        .findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+        .findByGmcReferenceNumberOrTcsPersonId(dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId()))
         .thenReturn(recordsAlreadyInEs);
 
     //id which is unique needs to be set to avoid duplicate rows while updating the record in ES
@@ -118,7 +120,7 @@ class DoctorUpsertElasticSearchServiceTest {
 
     //this is a new record, so query will return nothing
     when(repository
-        .findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+        .findByGmcReferenceNumberOrTcsPersonId(dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId()))
         .thenReturn(recordsAlreadyInEs);
 
     //this will lead to addMasterDoctorViews() as no record found

@@ -23,6 +23,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -50,7 +52,7 @@ public class DoctorUpsertElasticSearchService {
 
   public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) {
     // find trainee record from Exception ES index
-    Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcReferenceNumber(masterDoctorDocumentToSave);
+    Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcNumberPersonId(masterDoctorDocumentToSave);
 
     // if doctor already exists in ES index, then update the existing record
     if (Iterables.size(existingRecords) > 0) {
@@ -62,8 +64,10 @@ public class DoctorUpsertElasticSearchService {
     }
   }
 
-  private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcReferenceNumber(MasterDoctorView masterDoctorDocumentToSave) {
-    return repository.findByGmcReferenceNumber(masterDoctorDocumentToSave.getGmcReferenceNumber());
+  private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcNumberPersonId(MasterDoctorView masterDoctorDocumentToSave) {
+    return repository.findByGmcReferenceNumberOrTcsPersonId(
+        masterDoctorDocumentToSave.getGmcReferenceNumber(),
+        masterDoctorDocumentToSave.getTcsPersonId());
   }
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,

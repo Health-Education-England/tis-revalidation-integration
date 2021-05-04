@@ -10,7 +10,7 @@ public class SyncApiRouter extends RouteBuilder {
   public void configure() {
     restConfiguration().component("servlet");
 
-    rest("/startconnectionsync")
+    rest("/sync")
         .get().bindingMode(RestBindingMode.auto).to("direct:start-tis-sync");
   }
 }

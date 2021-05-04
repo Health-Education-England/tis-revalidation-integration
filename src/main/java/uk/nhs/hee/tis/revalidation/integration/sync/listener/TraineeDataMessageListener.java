@@ -55,16 +55,14 @@ public class TraineeDataMessageListener {
    */
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncdata}")
   public void receiveMessage(final ConnectionInfoDto connectionInfo) {
-    log.info("listener");
     if (connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
-      log.info("TIME TO GET GMC STUFF!");
+      log.info("TCS sync completed. Starting GMC sync.");
       String gmcSyncStart = "gmcSyncStart";
       rabbitTemplate.convertAndSend(exchange, routingKey, gmcSyncStart);
     }
     else {
       var masterDoctorView = getMasterDoctorView(connectionInfo);
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
-      log.info("record inserted " + connectionInfo.getTcsPersonId());
     }
   }
 
