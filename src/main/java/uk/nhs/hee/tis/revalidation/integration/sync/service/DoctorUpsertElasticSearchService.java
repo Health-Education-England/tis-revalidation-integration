@@ -23,6 +23,9 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
+import org.elasticsearch.index.IndexNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -34,6 +37,10 @@ public class DoctorUpsertElasticSearchService {
 
   private MasterDoctorElasticSearchRepository repository;
   private MasterDoctorViewMapper mapper;
+  private static final String ES_INDEX = "masterdoctorindex";
+
+  @Autowired
+  private ElasticsearchOperations elasticSearchOperations;
 
   public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
       MasterDoctorViewMapper mapper) {
@@ -41,16 +48,10 @@ public class DoctorUpsertElasticSearchService {
     this.mapper = mapper;
   }
 
-  //get doctor's gmc id
-  //search the doctor with that gmc id in the es master index
-  // 1. Doctor is found in es master index
-  //      update doctor info ... ...
-  // 2. Doctor is not found in master index
-  //      new doctor info will be inserted
-
   public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) {
     // find trainee record from Exception ES index
-    Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcReferenceNumber(masterDoctorDocumentToSave);
+    Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcReferenceNumber(
+        masterDoctorDocumentToSave);
 
     // if doctor already exists in ES index, then update the existing record
     if (Iterables.size(existingRecords) > 0) {
@@ -75,6 +76,26 @@ public class DoctorUpsertElasticSearchService {
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
     repository.save(dataToSave);
+  }
+
+  public void clearMasterDoctorIndex() {
+    deleteMasterDoctorIndex();
+    createMasterDoctorIndex();
+  }
+
+  private void deleteMasterDoctorIndex() {
+    log.info("deleting masterdoctorindex elastic search index");
+    try {
+      elasticSearchOperations.deleteIndex(ES_INDEX);
+    } catch (IndexNotFoundException e) {
+      log.info("Could not delete an index that does not exist, continuing");
+    }
+  }
+
+  private void createMasterDoctorIndex() {
+    log.info("creating and updating mappings");
+    elasticSearchOperations.createIndex(ES_INDEX);
+    elasticSearchOperations.putMapping(MasterDoctorView.class);
   }
 
 }
