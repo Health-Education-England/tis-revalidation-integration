@@ -50,7 +50,7 @@ public class DoctorUpsertElasticSearchService {
 
   public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) {
     // find trainee record from Exception ES index
-    Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcReferenceNumber(
+    Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcNumberPersonId(
         masterDoctorDocumentToSave);
 
     // if doctor already exists in ES index, then update the existing record
@@ -63,8 +63,12 @@ public class DoctorUpsertElasticSearchService {
     }
   }
 
-  private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcReferenceNumber(MasterDoctorView masterDoctorDocumentToSave) {
-    return repository.findByGmcReferenceNumber(masterDoctorDocumentToSave.getGmcReferenceNumber());
+  private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcNumberPersonId(
+      MasterDoctorView masterDoctorDocumentToSave) {
+
+    return repository.findByGmcReferenceNumberOrTcsPersonId(
+        masterDoctorDocumentToSave.getGmcReferenceNumber(),
+        masterDoctorDocumentToSave.getTcsPersonId());
   }
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,

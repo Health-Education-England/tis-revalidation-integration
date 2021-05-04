@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 @Data
 @AllArgsConstructor
@@ -54,5 +55,7 @@ public class DoctorsForDB {
   private LocalDate lastUpdatedDate;
   private String designatedBodyCode;
   private String admin;
+  @Nullable
+  Boolean syncEnd;
 
 }
