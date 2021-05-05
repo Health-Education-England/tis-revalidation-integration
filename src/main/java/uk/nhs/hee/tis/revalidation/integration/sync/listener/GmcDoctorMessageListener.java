@@ -62,19 +62,12 @@ public class GmcDoctorMessageListener {
 
     //prepare the MasterDoctorView and call the service method
     MasterDoctorView masterDoctorView = MasterDoctorView.builder()
-        .tcsPersonId(null)
         .gmcReferenceNumber(doctor.getGmcReferenceNumber())
         .doctorFirstName(doctor.getDoctorFirstName())
         .doctorLastName(doctor.getDoctorLastName())
         .submissionDate(doctor.getSubmissionDate())
-        .programmeName("No Programme Name")
-        .membershipType("No Membership Type")
         .designatedBody(doctor.getDesignatedBodyCode())
-        .tcsDesignatedBody("No TCS DBC")
-        .programmeOwner("No Programme Owner")
         .connectionStatus(getConnectionStatus(doctor))
-        .membershipStartDate(null)
-        .membershipEndDate(null)
         .build();
 
     if (doctor.getSyncEnd() != null && doctor.getSyncEnd()) {
