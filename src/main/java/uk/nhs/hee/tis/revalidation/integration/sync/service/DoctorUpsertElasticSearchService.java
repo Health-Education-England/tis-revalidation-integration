@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
 import org.elasticsearch.index.IndexNotFoundException;
@@ -63,11 +64,25 @@ public class DoctorUpsertElasticSearchService {
   }
 
   private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcNumberPersonId(
-      MasterDoctorView masterDoctorDocumentToSave) {
+      MasterDoctorView dataToSave) {
 
-    return repository.findByGmcReferenceNumberOrTcsPersonId(
-        masterDoctorDocumentToSave.getGmcReferenceNumber(),
-        masterDoctorDocumentToSave.getTcsPersonId());
+    if (dataToSave.getGmcReferenceNumber() != null && dataToSave.getTcsPersonId() != null) {
+      return repository.findByGmcReferenceNumberAndTcsPersonId(
+          dataToSave.getGmcReferenceNumber(),
+          dataToSave.getTcsPersonId());
+    }
+    else if (dataToSave.getGmcReferenceNumber() != null && dataToSave.getTcsPersonId() == null) {
+      return repository.findByGmcReferenceNumber(
+          dataToSave.getGmcReferenceNumber());
+    }
+    else if (dataToSave.getGmcReferenceNumber() == null && dataToSave.getTcsPersonId() != null) {
+      return repository.findByTcsPersonId(
+          dataToSave.getTcsPersonId());
+    }
+    else {
+      return new ArrayList<>();
+    }
+
   }
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,

@@ -30,6 +30,10 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public interface MasterDoctorElasticSearchRepository extends
     ElasticsearchRepository<MasterDoctorView, String> {
 
-  List<MasterDoctorView> findByGmcReferenceNumberOrTcsPersonId(String gmcReferenceNumber,
+  List<MasterDoctorView> findByGmcReferenceNumberAndTcsPersonId(String gmcReferenceNumber,
       Long tcsPersonId);
+
+  List<MasterDoctorView> findByGmcReferenceNumber(String gmcReferenceNumber);
+
+  List<MasterDoctorView> findByTcsPersonId(Long tcsPersonId);
 }
