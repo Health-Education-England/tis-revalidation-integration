@@ -81,8 +81,7 @@ public class GmcDoctorMessageListener {
       log.info("GMC sync completed. Sending message to Connection.");
       String getMaster = "getMaster";
       rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
-    }
-    else {
+    } else {
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
     }
   }
