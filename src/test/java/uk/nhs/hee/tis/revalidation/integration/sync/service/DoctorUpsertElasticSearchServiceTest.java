@@ -65,7 +65,7 @@ class DoctorUpsertElasticSearchServiceTest {
         .build();
 
     dataToSave = MasterDoctorView.builder()
-        .tcsPersonId(null)
+        .tcsPersonId(1001L)
         .gmcReferenceNumber("56789")
         .doctorFirstName("AAAAA")
         .doctorLastName("BBBB")
@@ -87,7 +87,7 @@ class DoctorUpsertElasticSearchServiceTest {
     recordsAlreadyInEs.add(currentDoctorView);
 
     when(repository
-        .findByGmcReferenceNumberOrTcsPersonId(dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId()))
+        .findByGmcReferenceNumberAndTcsPersonId(dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId()))
         .thenReturn(recordsAlreadyInEs);
 
     //id which is unique needs to be set to avoid duplicate rows while updating the record in ES
@@ -112,13 +112,78 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
+  void shouldUpdateMasterDoctorViewsWhenRecordIsFoundInEsPersonIdNull() {
+    List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
+    //the id is needed as it will be the record already in the ES
+    currentDoctorView.setId("1a2b3c");
+    recordsAlreadyInEs.add(currentDoctorView);
+
+    dataToSave.setTcsPersonId(null);
+    when(repository
+        .findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+        .thenReturn(recordsAlreadyInEs);
+
+    //id which is unique needs to be set to avoid duplicate rows while updating the record in ES
+    dataToSave.setId(recordsAlreadyInEs.get(0).getId());
+
+    //this will lead to updateMasterDoctorViews() as record is there already in the ES
+    service.populateMasterIndex(dataToSave);
+
+    assertThat(dataToSave.getId(), is("1a2b3c"));
+    assertThat(dataToSave.getTcsPersonId(), is(1001L));
+
+    //mapper will make sure all the TIS data fields are populated
+    assertThat(dataToSave.getProgrammeName(), is("Medicine"));
+    assertThat(dataToSave.getMembershipType(), is("Visitor"));
+    assertThat(dataToSave.getTcsDesignatedBody(), is("KSS"));
+    assertThat(dataToSave.getProgrammeOwner(), is("East of England"));
+
+    //gmc fields will remain same
+    assertThat(dataToSave.getGmcReferenceNumber(), is("56789"));
+    assertThat(dataToSave.getDoctorFirstName(), is("AAAAA"));
+    assertThat(dataToSave.getDoctorLastName(), is("BBBB"));
+  }
+
+  @Test
+  void shouldUpdateMasterDoctorViewsWhenRecordIsFoundInEsGmcIdNull() {
+    List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
+    //the id is needed as it will be the record already in the ES
+    currentDoctorView.setId("1a2b3c");
+    recordsAlreadyInEs.add(currentDoctorView);
+
+    dataToSave.setGmcReferenceNumber(null);
+    when(repository
+        .findByTcsPersonId(dataToSave.getTcsPersonId()))
+        .thenReturn(recordsAlreadyInEs);
+
+    //id which is unique needs to be set to avoid duplicate rows while updating the record in ES
+    dataToSave.setId(recordsAlreadyInEs.get(0).getId());
+
+    //this will lead to updateMasterDoctorViews() as record is there already in the ES
+    service.populateMasterIndex(dataToSave);
+
+    assertThat(dataToSave.getId(), is("1a2b3c"));
+    assertThat(dataToSave.getTcsPersonId(), is(1001L));
+
+    //mapper will make sure all the TIS data fields are populated
+    assertThat(dataToSave.getProgrammeName(), is("Medicine"));
+    assertThat(dataToSave.getMembershipType(), is("Visitor"));
+    assertThat(dataToSave.getTcsDesignatedBody(), is("KSS"));
+    assertThat(dataToSave.getProgrammeOwner(), is("East of England"));
+
+    //gmc fields will remain same
+    assertThat(dataToSave.getDoctorFirstName(), is("AAAAA"));
+    assertThat(dataToSave.getDoctorLastName(), is("BBBB"));
+  }
+
+  @Test
   void shouldAddMasterDoctorViewsWhenRecordIsNotInEs() {
     //this is an empty record list
     List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
 
     //this is a new record, so query will return nothing
     when(repository
-        .findByGmcReferenceNumberOrTcsPersonId(dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId()))
+        .findByGmcReferenceNumberAndTcsPersonId(dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId()))
         .thenReturn(recordsAlreadyInEs);
 
     //this will lead to addMasterDoctorViews() as no record found
