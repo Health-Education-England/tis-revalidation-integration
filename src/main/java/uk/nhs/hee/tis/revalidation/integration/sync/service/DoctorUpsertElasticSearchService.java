@@ -35,10 +35,9 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class DoctorUpsertElasticSearchService {
 
-  private MasterDoctorElasticSearchRepository repository;
-  private MasterDoctorViewMapper mapper;
   private static final String ES_INDEX = "masterdoctorindex";
-
+  private final MasterDoctorElasticSearchRepository repository;
+  private final MasterDoctorViewMapper mapper;
   @Autowired
   private ElasticsearchOperations elasticSearchOperations;
 

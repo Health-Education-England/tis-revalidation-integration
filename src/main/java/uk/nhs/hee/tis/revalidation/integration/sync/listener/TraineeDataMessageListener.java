@@ -59,8 +59,7 @@ public class TraineeDataMessageListener {
       log.info("TCS sync completed. Starting GMC sync.");
       String gmcSyncStart = "gmcSyncStart";
       rabbitTemplate.convertAndSend(exchange, routingKey, gmcSyncStart);
-    }
-    else {
+    } else {
       var masterDoctorView = getMasterDoctorView(connectionInfo);
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
     }
