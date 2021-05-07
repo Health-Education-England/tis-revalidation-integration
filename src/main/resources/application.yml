@@ -23,10 +23,10 @@ kc:
   password: ${KC_PASSWORD:}
 
 rabbitmq:
-  host: ${REVAL_RABBITMQ_HOST:localhost}
-  port: ${REVAL_RABBITMQ_PORT:5672}
-  username: ${REVAL_RABBITMQ_USERNAME:guest}
-  password: ${REVAL_RABBITMQ_PASSWORD:guest}
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  username: ${RABBITMQ_USERNAME:guest}
+  password: ${RABBITMQ_PASSWORD:guest}
 
 service:
   concern:
