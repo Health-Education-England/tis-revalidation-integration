@@ -47,6 +47,7 @@ public class SyncStartHandler {
 
   @Handler
   public void startTraineeSync() {
+    log.info("Elastic Search update sync start.");
     doctorUpsertElasticSearchService.clearMasterDoctorIndex();
     rabbitTemplate.convertAndSend(revalExchange, revalSyncStartRoutingKey, "syncStart");
   }
