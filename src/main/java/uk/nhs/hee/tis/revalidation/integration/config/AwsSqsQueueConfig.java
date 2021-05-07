@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,21 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.config;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
+import com.amazonaws.services.sqs.AmazonSQSAsync;
+import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
+import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-@Mapper(componentModel = "spring")
-public interface TraineeConnectionMapper {
+@Configuration
+public class AwsSqsQueueConfig {
 
-  @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
-  @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
-  @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
-  @Mapping(target = "tcsPersonId", ignore = true)
-  ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
-      ConnectionRecordDto connectionRecordDto);
+  @Bean
+  public QueueMessagingTemplate queueMessagingTemplate() {
+    return new QueueMessagingTemplate(amazonSQSAsync());
+  }
+
+  @Primary
+  @Bean
+  public AmazonSQSAsync amazonSQSAsync() {
+    return AmazonSQSAsyncClientBuilder.defaultClient();
+  }
+
 }

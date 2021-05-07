@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,21 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.entity;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionRecordDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
+public enum UnderNotice {
 
-@Mapper(componentModel = "spring")
-public interface TraineeConnectionMapper {
+  YES("Yes"), NO("No"), ON_HOLD("On Hold");
 
-  @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
-  @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
-  @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
-  @Mapping(target = "tcsPersonId", ignore = true)
-  ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
-      ConnectionRecordDto connectionRecordDto);
+  private final String notice;
+
+  UnderNotice(final String notice) {
+    this.notice = notice;
+  }
+
+  public static UnderNotice fromString(final String value) {
+    for (final UnderNotice underNotice : values()) {
+      if (underNotice.notice.equalsIgnoreCase(value)) {
+        return underNotice;
+      }
+    }
+    return null;
+  }
+
+  public String value() {
+    return notice;
+  }
+
 }
