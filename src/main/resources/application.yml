@@ -2,6 +2,12 @@ spring:
   elasticsearch:
     rest:
       uris: ${ES_URLS:http://localhost:9200}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
 camel:
   component:
     servlet:
@@ -21,12 +27,6 @@ kc:
     url: ${KC_SERVER_URL:}
   username: ${KC_USERNAME:}
   password: ${KC_PASSWORD:}
-
-rabbitmq:
-  host: ${RABBITMQ_HOST:localhost}
-  port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USERNAME:guest}
-  password: ${RABBITMQ_PASSWORD:guest}
 
 service:
   concern:
