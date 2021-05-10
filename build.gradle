@@ -73,7 +73,7 @@ dependencies {
   implementation "io.awspring.cloud:spring-cloud-starter-aws-messaging:$cloudVersion"
 
   // Elastic Search
-  implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch:2.4.4"
+  implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch:2.4.5"
 
   // Java Persistence
   implementation "javax.persistence:javax.persistence-api:2.2"
