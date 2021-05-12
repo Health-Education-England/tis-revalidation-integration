@@ -95,5 +95,5 @@ sentry:
 cloud:
   aws:
     end-point:
-      uri: ${SQS_RECOMMENDATION_QUEUE:}
+      uri: ${SQS_SYNC_GMC_QUEUE:}
 
