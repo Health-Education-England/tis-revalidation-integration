@@ -52,6 +52,8 @@ public class GmcDoctorMessageListener {
   @Autowired
   private RabbitTemplate rabbitTemplate;
 
+  private long traineeCount;
+
   public GmcDoctorMessageListener(
       DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
@@ -71,11 +73,14 @@ public class GmcDoctorMessageListener {
         .build();
 
     if (doctor.getSyncEnd() != null && doctor.getSyncEnd()) {
-      log.info("GMC sync completed. Sending message to Connection.");
+      log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
+          traineeCount);
       String getMaster = "getMaster";
       rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
+      traineeCount = 0;
     } else {
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
+      traineeCount++;
     }
   }
 

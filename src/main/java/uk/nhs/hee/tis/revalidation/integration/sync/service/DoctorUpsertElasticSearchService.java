@@ -65,35 +65,69 @@ public class DoctorUpsertElasticSearchService {
 
   private Iterable<MasterDoctorView> findMasterDoctorRecordByGmcNumberPersonId(
       MasterDoctorView dataToSave) {
+    Iterable<MasterDoctorView> result = new ArrayList<>();
 
     if (dataToSave.getGmcReferenceNumber() != null && dataToSave.getTcsPersonId() != null) {
-      return repository.findByGmcReferenceNumberAndTcsPersonId(
-          dataToSave.getGmcReferenceNumber(),
-          dataToSave.getTcsPersonId());
-    }
-    else if (dataToSave.getGmcReferenceNumber() != null && dataToSave.getTcsPersonId() == null) {
-      return repository.findByGmcReferenceNumber(
-          dataToSave.getGmcReferenceNumber());
-    }
-    else if (dataToSave.getGmcReferenceNumber() == null && dataToSave.getTcsPersonId() != null) {
-      return repository.findByTcsPersonId(
-          dataToSave.getTcsPersonId());
-    }
-    else {
-      return new ArrayList<>();
+      try {
+        result = repository.findByGmcReferenceNumberAndTcsPersonId(
+            dataToSave.getGmcReferenceNumber(),
+            dataToSave.getTcsPersonId());
+      }
+      catch (Exception ex) {
+        log.info("Exception in `findByGmcReferenceNumberAndTcsPersonId`"
+                + "(GmcId: {}; PersonId: {}): {}",
+            dataToSave.getGmcReferenceNumber(),dataToSave.getTcsPersonId(),  ex);
+      }
     }
 
+    else if (dataToSave.getGmcReferenceNumber() != null
+        && dataToSave.getTcsPersonId() == null) {
+      try {
+        result = repository.findByGmcReferenceNumber(
+            dataToSave.getGmcReferenceNumber());
+      }
+      catch (Exception ex) {
+        log.info("Exception in `findByGmcReferenceNumber` (GmcId: {}): {}",
+            dataToSave.getGmcReferenceNumber(),  ex);
+      }
+    }
+
+    else if (dataToSave.getGmcReferenceNumber() == null
+        && dataToSave.getTcsPersonId() != null) {
+      try {
+        result = repository.findByTcsPersonId(
+            dataToSave.getTcsPersonId());
+      }
+      catch (Exception ex) {
+        log.info("Exception in `findByTcsPersonId` (PersonId: {}): {}",
+            dataToSave.getTcsPersonId(),  ex);
+      }
+    }
+
+    return result;
   }
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
-    existingRecords.forEach(currentDoctorView -> {
-      repository.save(mapper.updateMasterDoctorView(currentDoctorView, dataToSave));
-    });
+    try {
+      existingRecords.forEach(currentDoctorView -> {
+        repository.save(mapper.updateMasterDoctorView(currentDoctorView, dataToSave));
+      });
+    }
+    catch (Exception ex) {
+      log.info("Exception in `updateMasterDoctorViews` (GmcId: {}; PersonId: {}): {}",
+          dataToSave.getGmcReferenceNumber(),dataToSave.getTcsPersonId(),  ex);
+    }
   }
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
-    repository.save(dataToSave);
+    try {
+      repository.save(dataToSave);
+    }
+    catch (Exception ex) {
+      log.info("Exception in `addMasterDoctorViews` (GmcId: {}; PersonId: {}): {}",
+          dataToSave.getGmcReferenceNumber(),dataToSave.getTcsPersonId(),  ex);
+    }
   }
 
   public void clearMasterDoctorIndex() {
