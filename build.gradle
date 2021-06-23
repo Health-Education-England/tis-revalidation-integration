@@ -22,11 +22,16 @@ configurations {
 
 repositories {
   mavenCentral()
+
   maven {
-    url "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/"
+    name 'hee-ssh-repository'
+    url 'https://build.tis.nhs.uk/maven/repository'
+    authentication {
+      basic(BasicAuthentication)
+    }
     credentials {
-      username "aws"
-      password System.env.CODEARTIFACT_AUTH_TOKEN
+      username = "gradle"
+      password = "jWRg9EfqNMswy3A9vMDwkRQR2RMzgMc94T6sPCVL"
     }
   }
 }
