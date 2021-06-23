@@ -29,6 +29,7 @@ repositories {
       username "aws"
       password System.env.CODEARTIFACT_AUTH_TOKEN
     }
+  }
 }
 
 dependencies {
