@@ -27,6 +27,9 @@ import org.elasticsearch.common.util.iterable.Iterables;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.ReactiveIndexOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -138,7 +141,7 @@ public class DoctorUpsertElasticSearchService {
   private void deleteMasterDoctorIndex() {
     log.info("deleting masterdoctorindex elastic search index");
     try {
-      elasticSearchOperations.deleteIndex(ES_INDEX);
+      elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).delete();
     } catch (IndexNotFoundException e) {
       log.info("Could not delete an index that does not exist, continuing");
     }
@@ -146,8 +149,8 @@ public class DoctorUpsertElasticSearchService {
 
   private void createMasterDoctorIndex() {
     log.info("creating and updating mappings");
-    elasticSearchOperations.createIndex(ES_INDEX);
-    elasticSearchOperations.putMapping(MasterDoctorView.class);
+    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).create();
+    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).putMapping(MasterDoctorView.class);
   }
 
 }
