@@ -63,7 +63,7 @@ dependencies {
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.2"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4"
 
   //RabbitMQ
   implementation "org.springframework.boot:spring-boot-starter-amqp"
@@ -80,7 +80,7 @@ dependencies {
   implementation "javax.persistence:javax.persistence-api:2.2"
 
   // Jackson Json
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4"
 }
 
 checkstyle {
