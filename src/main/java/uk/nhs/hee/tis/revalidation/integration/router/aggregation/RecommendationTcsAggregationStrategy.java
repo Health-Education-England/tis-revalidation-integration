@@ -48,25 +48,30 @@ public class RecommendationTcsAggregationStrategy implements AggregationStrategy
   public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
     final var result = new DefaultExchange(new DefaultCamelContext());
 
-    final var messageBody = oldExchange.getIn().getBody(String.class);
-    final Map<String, TraineeCoreDto> recommendationRecordMap = mapper
-        .readValue(messageBody, Map.class);
-    final Map<String, RecommendationTcsDto> recommendationTcsMap = newExchange.getIn()
-        .getBody(Map.class);
+    try {
+      final var messageBody = oldExchange.getIn().getBody(String.class);
+      final Map<String, TraineeCoreDto> recommendationRecordMap = mapper
+          .readValue(messageBody, Map.class);
+      final Map<String, RecommendationTcsDto> recommendationTcsMap = newExchange.getIn()
+          .getBody(Map.class);
 
-    final var recommendationOutcomeMapper = getMapper(RecommendationOutcomeMapper.class);
-    final var keys = recommendationRecordMap.keySet();
-    keys.stream().forEach(key -> {
-      final var recommendationInfo = mapper
-          .convertValue(recommendationRecordMap.get(key), TraineeCoreDto.class);
-      final var recommendationTcs = mapper
-          .convertValue(recommendationTcsMap.get(key), RecommendationTcsDto.class);
-      recommendationRecordMap
-          .put(key, recommendationOutcomeMapper
-              .mergeRecommendationOutcomeResponses(recommendationInfo, recommendationTcs));
-    });
+      final var recommendationOutcomeMapper = getMapper(RecommendationOutcomeMapper.class);
+      final var keys = recommendationRecordMap.keySet();
+      keys.stream().forEach(key -> {
+        final var recommendationInfo = mapper
+            .convertValue(recommendationRecordMap.get(key), TraineeCoreDto.class);
+        final var recommendationTcs = mapper
+            .convertValue(recommendationTcsMap.get(key), RecommendationTcsDto.class);
+        recommendationRecordMap
+            .put(key, recommendationOutcomeMapper
+                .mergeRecommendationOutcomeResponses(recommendationInfo, recommendationTcs));
+      });
 
-    result.getMessage().setBody(recommendationRecordMap);
-    return result;
+      result.getMessage().setBody(recommendationRecordMap);
+      return result;
+    } catch (Exception e) {
+      log.info("Exception in RecommendationTcsAggregationStrategy", e);
+      return null;
+    }
   }
 }
