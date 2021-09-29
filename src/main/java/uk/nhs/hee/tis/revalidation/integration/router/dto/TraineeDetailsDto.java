@@ -19,25 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Component
-public class TraineeApiRouter extends RouteBuilder {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TraineeDetailsDto {
 
-  @Override
-  public void configure() {
-    restConfiguration().component("servlet");
-
-    rest("/trainee/{gmcId}")
-        .get().bindingMode(RestBindingMode.auto)
-        .to("direct:trainee");
-
-    rest("/trainees/{gmcIds}")
-        .get().bindingMode(RestBindingMode.off)
-        .to("direct:trainees");
-  }
+  private String gmcNumber;
+  private String forenames;
+  private String surname;
+  private LocalDate cctDate;
+  private String programmeMembershipType;
+  private String programmeName;
+  private String currentGrade;
+  private Integer tisPersonId;
+  private List<TraineeNotesInfoDto> notes;
 }

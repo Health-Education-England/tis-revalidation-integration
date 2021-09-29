@@ -1,7 +1,6 @@
 /*
  * The MIT License (MIT)
- *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,25 +18,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Component
-public class TraineeApiRouter extends RouteBuilder {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TraineeNotesDto {
 
-  @Override
-  public void configure() {
-    restConfiguration().component("servlet");
-
-    rest("/trainee/{gmcId}")
-        .get().bindingMode(RestBindingMode.auto)
-        .to("direct:trainee");
-
-    rest("/trainees/{gmcIds}")
-        .get().bindingMode(RestBindingMode.off)
-        .to("direct:trainees");
-  }
+  private String gmcId;
+  private List<TraineeNotesInfoDto> notes;
 }
