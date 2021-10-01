@@ -25,9 +25,12 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GE
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.TraineeNotesAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
@@ -37,19 +40,38 @@ public class TraineeServiceRouter extends RouteBuilder {
       "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_TRAINEES =
       "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_TRAINEENOTE =
+      "/api/trainee/${header.gmcId}/notes?bridgeEndpoint=true";
 
   @Autowired
   private KeycloakBean keycloakBean;
 
+  @Autowired
+  private GmcIdProcessorBean gmcIdProcessorBean;
+
+  @Autowired
+  private TraineeNotesAggregationStrategy traineeNotesAggregationStrategy;
+
   @Value("${service.tcs.url}")
   private String serviceUrl;
+
+  @Value("${service.core.url}")
+  private String coreServiceUrl;
 
   @Override
   public void configure() {
 
     from("direct:trainee")
+        .to("direct:trainee-details")
+        .setHeader("gmcId").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
+        .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy);
+    from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrl + API_TRAINEE);
+        .toD(serviceUrl + API_TRAINEE)
+        .unmarshal().json(JsonLibrary.Jackson);
+    from("direct:traineenotes-get")
+        .toD(coreServiceUrl + API_TRAINEENOTE)
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:trainees")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
