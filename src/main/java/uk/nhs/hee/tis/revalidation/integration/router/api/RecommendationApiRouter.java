@@ -37,7 +37,7 @@ public class RecommendationApiRouter extends RouteBuilder {
         .put().bindingMode(RestBindingMode.off).to("direct:recommendation-put");
 
     rest("/recommendation/{gmcId}")
-        .get().bindingMode(RestBindingMode.auto).to("direct:recommendation-gmc-id")
+        .get().bindingMode(RestBindingMode.off).to("direct:recommendation-gmc-id")
         .post("/submit/{recommendationId}").bindingMode(RestBindingMode.off)
         .to("direct:recommendation-submit");
   }
