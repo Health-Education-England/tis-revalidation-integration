@@ -39,5 +39,9 @@ public class TraineeApiRouter extends RouteBuilder {
     rest("/trainees/{gmcIds}")
         .get().bindingMode(RestBindingMode.off)
         .to("direct:trainees");
+
+    rest("/trainee/{gmcId}/notes/add")
+        .post().bindingMode(RestBindingMode.auto)
+        .to("direct:traineenotes-add");
   }
 }
