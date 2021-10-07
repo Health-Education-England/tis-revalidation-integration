@@ -43,7 +43,7 @@ public class TraineeServiceRouter extends RouteBuilder {
   private static final String API_TRAINEENOTES =
       "/api/trainee/${header.gmcId}/notes?bridgeEndpoint=true";
   private static final String API_TRAINEEENOTES_ADD =
-      "/api/trainee/${header.gmcId}/notes/add?bridgeEndpoint=true";
+      "/api/trainee/notes/add?bridgeEndpoint=true";
 
   @Autowired
   private KeycloakBean keycloakBean;
