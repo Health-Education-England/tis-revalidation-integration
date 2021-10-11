@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2021 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -40,8 +40,10 @@ public class TraineeServiceRouter extends RouteBuilder {
       "/api/revalidation/trainee/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_TRAINEES =
       "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_TRAINEENOTE =
+  private static final String API_TRAINEENOTES =
       "/api/trainee/${header.gmcId}/notes?bridgeEndpoint=true";
+  private static final String API_TRAINEEENOTES_ADD =
+      "/api/trainee/notes/add?bridgeEndpoint=true";
 
   @Autowired
   private KeycloakBean keycloakBean;
@@ -70,9 +72,10 @@ public class TraineeServiceRouter extends RouteBuilder {
         .toD(serviceUrl + API_TRAINEE)
         .unmarshal().json(JsonLibrary.Jackson);
     from("direct:traineenotes-get")
-        .toD(coreServiceUrl + API_TRAINEENOTE)
+        .toD(coreServiceUrl + API_TRAINEENOTES)
         .unmarshal().json(JsonLibrary.Jackson);
-
+    from("direct:traineenotes-add")
+        .to(coreServiceUrl + API_TRAINEEENOTES_ADD);
     from("direct:trainees")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_TRAINEES);
