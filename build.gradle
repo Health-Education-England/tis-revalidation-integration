@@ -1,6 +1,6 @@
 plugins {
   id "java"
-  id "org.springframework.boot" version "2.5.2"
+  id "org.springframework.boot" version "2.5.5"
   id "io.spring.dependency-management" version "1.0.11.RELEASE"
 
   // Code quality plugins
@@ -63,7 +63,7 @@ dependencies {
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
 
   //RabbitMQ
   implementation "org.springframework.boot:spring-boot-starter-amqp"
@@ -80,7 +80,7 @@ dependencies {
   implementation "javax.persistence:javax.persistence-api:2.2"
 
   // Jackson Json
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
 }
 
 checkstyle {
