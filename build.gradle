@@ -69,7 +69,7 @@ dependencies {
   implementation "org.springframework.boot:spring-boot-starter-amqp"
 
   // AWS cloud
-  ext.cloudVersion = "2.3.0"
+  ext.cloudVersion = "2.3.2"
   implementation "io.awspring.cloud:spring-cloud-starter-aws:$cloudVersion"
   implementation "io.awspring.cloud:spring-cloud-starter-aws-messaging:$cloudVersion"
 
