@@ -63,7 +63,7 @@ dependencies {
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
 
   //RabbitMQ
   implementation "org.springframework.boot:spring-boot-starter-amqp"
@@ -74,13 +74,13 @@ dependencies {
   implementation "io.awspring.cloud:spring-cloud-starter-aws-messaging:$cloudVersion"
 
   // Elastic Search
-  implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch:2.5.4"
+  implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch:2.5.5"
 
   // Java Persistence
   implementation "javax.persistence:javax.persistence-api:2.2"
 
   // Jackson Json
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
 }
 
 checkstyle {
