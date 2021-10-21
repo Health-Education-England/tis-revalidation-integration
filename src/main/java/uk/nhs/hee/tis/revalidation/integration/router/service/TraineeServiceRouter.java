@@ -44,6 +44,8 @@ public class TraineeServiceRouter extends RouteBuilder {
       "/api/trainee/${header.gmcId}/notes?bridgeEndpoint=true";
   private static final String API_TRAINEEENOTES_ADD =
       "/api/trainee/notes/add?bridgeEndpoint=true";
+  private static final String API_TRAINEEENOTES_EDIT =
+      "/api/trainee/notes/edit?bridgeEndpoint=true";
 
   @Autowired
   private KeycloakBean keycloakBean;
@@ -76,6 +78,8 @@ public class TraineeServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
     from("direct:traineenotes-add")
         .to(coreServiceUrl + API_TRAINEEENOTES_ADD);
+    from("direct:traineenotes-edit")
+        .to(coreServiceUrl + API_TRAINEEENOTES_EDIT);
     from("direct:trainees")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_TRAINEES);
