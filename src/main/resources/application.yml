@@ -69,7 +69,7 @@ service:
 
 app:
   admins:
-    roles: ${ROLE_NAMES:HEE Admin Revalidation, RVAdmin}
+    roles: ${RVADMIN_ROLE_NAMES:RevalApprover, RevalAdmin, RVOfficer}
   rabbit:
     reval.exchange: ${REVAL_RABBIT_EXCHANGE:reval.exchange}
     reval.queue.connection.update: ${REVAL_RABBIT_QUEUE:reval.queue.connection.update}
