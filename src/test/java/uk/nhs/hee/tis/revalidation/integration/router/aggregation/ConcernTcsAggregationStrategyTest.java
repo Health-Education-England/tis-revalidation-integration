@@ -34,8 +34,10 @@ import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.support.DefaultMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConcernRecordDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.ProgrammeConcernMapper;
 
 class ConcernTcsAggregationStrategyTest {
 
@@ -52,7 +54,8 @@ class ConcernTcsAggregationStrategyTest {
 
   @BeforeEach
   void setUp() {
-    aggregationStrategy = new ConcernTcsAggregationStrategy(new ObjectMapper());
+    aggregationStrategy = new ConcernTcsAggregationStrategy(new ObjectMapper(),
+        Mappers.getMapper(ProgrammeConcernMapper.class));
   }
 
   @Test
@@ -62,7 +65,7 @@ class ConcernTcsAggregationStrategyTest {
     var concernRecord1 = new ConcernRecordDto();
     concernRecord1.setProgramme(OLD_PROGRAMME_1);
     var concernRecord2 = new ConcernRecordDto();
-    concernRecord1.setProgramme(OLD_PROGRAMME_2);
+    concernRecord2.setProgramme(OLD_PROGRAMME_2);
     Map<String, ConcernRecordDto> oldBody = Map.of(KEY_1, concernRecord1, KEY_2, concernRecord2);
 
     var oldMessage = new DefaultMessage(camelContext);
