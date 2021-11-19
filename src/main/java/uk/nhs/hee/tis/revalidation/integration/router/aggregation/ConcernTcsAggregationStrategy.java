@@ -40,8 +40,11 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.ProgrammeConcernMap
 @Component
 public class ConcernTcsAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+
+  ConcernTcsAggregationStrategy(ObjectMapper mapper) {
+    this.mapper = mapper;
+  }
 
   @SneakyThrows
   @Override
