@@ -20,8 +20,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
-import static org.mapstruct.factory.Mappers.getMapper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import lombok.SneakyThrows;
@@ -30,7 +28,6 @@ import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationTcsDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
@@ -40,8 +37,14 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.RecommendationOutco
 @Component
 public class RecommendationTcsAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+  private final RecommendationOutcomeMapper recommendationOutcomeMapper;
+
+  RecommendationTcsAggregationStrategy(ObjectMapper mapper,
+      RecommendationOutcomeMapper recommendationOutcomeMapper) {
+    this.mapper = mapper;
+    this.recommendationOutcomeMapper = recommendationOutcomeMapper;
+  }
 
   @SneakyThrows
   @Override
@@ -55,7 +58,6 @@ public class RecommendationTcsAggregationStrategy implements AggregationStrategy
       final Map<String, RecommendationTcsDto> recommendationTcsMap = newExchange.getIn()
           .getBody(Map.class);
 
-      final var recommendationOutcomeMapper = getMapper(RecommendationOutcomeMapper.class);
       final var keys = recommendationRecordMap.keySet();
       keys.stream().forEach(key -> {
         final var recommendationInfo = mapper
