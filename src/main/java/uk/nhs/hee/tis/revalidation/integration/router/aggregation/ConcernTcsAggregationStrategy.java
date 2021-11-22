@@ -20,17 +20,15 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
-import static org.mapstruct.factory.Mappers.getMapper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import java.util.Map.Entry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConcernRecordDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
@@ -40,8 +38,14 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.ProgrammeConcernMap
 @Component
 public class ConcernTcsAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+  private final ProgrammeConcernMapper programmeConcernMapper;
+
+  ConcernTcsAggregationStrategy(ObjectMapper mapper,
+      ProgrammeConcernMapper programmeConcernMapper) {
+    this.mapper = mapper;
+    this.programmeConcernMapper = programmeConcernMapper;
+  }
 
   @SneakyThrows
   @Override
@@ -52,14 +56,12 @@ public class ConcernTcsAggregationStrategy implements AggregationStrategy {
     final Map<String, ConcernRecordDto> concernRecordMap = mapper.readValue(messageBody, Map.class);
     final Map<String, TraineeCoreDto> traineeRecordMap = newExchange.getIn().getBody(Map.class);
 
-    final var programmeConcernMapper = getMapper(ProgrammeConcernMapper.class);
-    final var keys = concernRecordMap.keySet();
-    keys.stream().forEach(key -> {
-      final var concern = mapper.convertValue(concernRecordMap.get(key), ConcernRecordDto.class);
-      final var trainee = mapper.convertValue(traineeRecordMap.get(key), TraineeCoreDto.class);
-      concernRecordMap
-          .put(key, programmeConcernMapper.mergeTraineeConcernResponses(trainee, concern));
-    });
+    for (Entry<String, ConcernRecordDto> entry : concernRecordMap.entrySet()) {
+      ConcernRecordDto concern = mapper.convertValue(entry.getValue(), ConcernRecordDto.class);
+      TraineeCoreDto trainee = mapper
+          .convertValue(traineeRecordMap.get(entry.getKey()), TraineeCoreDto.class);
+      entry.setValue(programmeConcernMapper.mergeTraineeConcernResponses(trainee, concern));
+    }
 
     result.getMessage().setBody(mapper.writeValueAsBytes(concernRecordMap));
     return result;
