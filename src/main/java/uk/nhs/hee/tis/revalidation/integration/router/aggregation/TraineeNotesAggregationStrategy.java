@@ -28,7 +28,6 @@ import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeDetailsDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
@@ -37,8 +36,11 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
 @Component
 public class TraineeNotesAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+
+  TraineeNotesAggregationStrategy(ObjectMapper mapper) {
+    this.mapper = mapper;
+  }
 
   @SneakyThrows
   @Override

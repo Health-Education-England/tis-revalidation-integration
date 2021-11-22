@@ -20,17 +20,14 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
-import static org.mapstruct.factory.Mappers.getMapper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
-import lombok.SneakyThrows;
+import java.util.Map.Entry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationTcsDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
@@ -40,14 +37,17 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.RecommendationOutco
 @Component
 public class RecommendationTcsAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+  private final RecommendationOutcomeMapper recommendationOutcomeMapper;
 
-  @SneakyThrows
+  RecommendationTcsAggregationStrategy(ObjectMapper mapper,
+      RecommendationOutcomeMapper recommendationOutcomeMapper) {
+    this.mapper = mapper;
+    this.recommendationOutcomeMapper = recommendationOutcomeMapper;
+  }
+
   @Override
   public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
-    final var result = new DefaultExchange(new DefaultCamelContext());
-
     try {
       final var messageBody = oldExchange.getIn().getBody(String.class);
       final Map<String, TraineeCoreDto> recommendationRecordMap = mapper
@@ -55,18 +55,15 @@ public class RecommendationTcsAggregationStrategy implements AggregationStrategy
       final Map<String, RecommendationTcsDto> recommendationTcsMap = newExchange.getIn()
           .getBody(Map.class);
 
-      final var recommendationOutcomeMapper = getMapper(RecommendationOutcomeMapper.class);
-      final var keys = recommendationRecordMap.keySet();
-      keys.stream().forEach(key -> {
-        final var recommendationInfo = mapper
-            .convertValue(recommendationRecordMap.get(key), TraineeCoreDto.class);
-        final var recommendationTcs = mapper
-            .convertValue(recommendationTcsMap.get(key), RecommendationTcsDto.class);
-        recommendationRecordMap
-            .put(key, recommendationOutcomeMapper
-                .mergeRecommendationOutcomeResponses(recommendationInfo, recommendationTcs));
-      });
+      for (Entry<String, TraineeCoreDto> entry : recommendationRecordMap.entrySet()) {
+        TraineeCoreDto traineeCore = mapper.convertValue(entry.getValue(), TraineeCoreDto.class);
+        RecommendationTcsDto recommendation = mapper
+            .convertValue(recommendationTcsMap.get(entry.getKey()), RecommendationTcsDto.class);
+        entry.setValue(recommendationOutcomeMapper
+            .mergeRecommendationOutcomeResponses(traineeCore, recommendation));
+      }
 
+      final var result = new DefaultExchange(new DefaultCamelContext());
       result.getMessage().setBody(recommendationRecordMap);
       return result;
     } catch (Exception e) {
