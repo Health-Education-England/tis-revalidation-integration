@@ -29,7 +29,6 @@ import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationDto;
@@ -38,8 +37,11 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationD
 @Component
 public class DoctorRecommendationAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+
+  DoctorRecommendationAggregationStrategy(ObjectMapper mapper) {
+    this.mapper = mapper;
+  }
 
   @SneakyThrows
   @Override
@@ -63,9 +65,9 @@ public class DoctorRecommendationAggregationStrategy implements AggregationStrat
   }
 
   private TraineeCoreDto getTcsCoreRecord(final Exchange exchange, final String gmcId) {
-    final var body = exchange.getIn().getBody();
+    final Map<?, ?> body = (Map<?, ?>) exchange.getIn().getBody();
 
-    final var tcsCoreValue = (Map<String, String>) ((Map) body).get(gmcId);
+    final var tcsCoreValue = body.get(gmcId);
     return tcsCoreValue != null ? mapper
         .convertValue(tcsCoreValue, TraineeCoreDto.class) : null;
   }
