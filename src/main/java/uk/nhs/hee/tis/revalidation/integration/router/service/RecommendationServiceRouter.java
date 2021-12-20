@@ -105,6 +105,11 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .to(serviceUrl + "/api/v1/doctors/assign-admin?bridgeEndpoint=true");
 
+    from("direct:temp-doctors-start-nightly-sync")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
+        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
+        .to(serviceUrl + "/api/v1/doctors/start-nightly-sync?bridgeEndpoint=true");
+
     from("direct:recommendation-post")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))

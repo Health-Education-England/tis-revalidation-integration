@@ -45,6 +45,10 @@ public class V1ApiRouter extends RouteBuilder {
     rest("/v1/doctors/assign-admin")
         .post().bindingMode(RestBindingMode.off)
         .to("direct:temp-doctors-assign-admin");
+
+    rest("/v1/doctors/start-nightly-sync")
+        .post().bindingMode(RestBindingMode.off)
+        .to("direct:temp-doctors-start-nightly-sync");
   }
 }
 
