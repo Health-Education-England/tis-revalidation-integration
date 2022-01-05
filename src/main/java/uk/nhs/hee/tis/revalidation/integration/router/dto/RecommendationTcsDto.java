@@ -37,7 +37,7 @@ public class RecommendationTcsDto {
   private String doctorStatus;
   private String admin;
   private LocalDate lastUpdatedDate;
-  private LocalDate cctDate;
+  private LocalDate curriculumEndDate;
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;

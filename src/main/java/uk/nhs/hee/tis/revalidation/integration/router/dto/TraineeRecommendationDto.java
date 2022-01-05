@@ -14,7 +14,7 @@ public class TraineeRecommendationDto {
   private String designatedBody;
   private String programmeMembershipType;
   private String currentGrade;
-  private LocalDate cctDate;
+  private LocalDate curriculumEndDate;
   private String underNotice;
   private LocalDate gmcSubmissionDate;
   private List<TraineeRecommendationRecordDto> revalidations;
