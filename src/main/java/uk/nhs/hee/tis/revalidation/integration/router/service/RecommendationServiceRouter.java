@@ -52,7 +52,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private static final String API_RECOMMENDATION_SUBMIT =
       "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
   private static final String API_CONNECTION = "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_SYNC = "/api/admin/trigger-doctor-symc?bridgeEndpoint=true";
+  private static final String API_DOCTOR_SYNC = "/api/admin/trigger-doctor-sync?bridgeEndpoint=true";
 
 
   @Autowired
@@ -133,6 +133,6 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     from("direct:admin")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .toD(serviceUrl + API_SYNC);
+        .toD(serviceUrl + API_DOCTOR_SYNC);
   }
 }
