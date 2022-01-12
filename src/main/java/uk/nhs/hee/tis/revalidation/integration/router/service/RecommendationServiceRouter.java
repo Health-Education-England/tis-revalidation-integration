@@ -51,9 +51,10 @@ public class RecommendationServiceRouter extends RouteBuilder {
       "/api/recommendation/latest/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_RECOMMENDATION_SUBMIT =
       "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
-  private static final String API_CONNECTION = "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_DOCTOR_SYNC = "/api/admin/trigger-doctor-sync?bridgeEndpoint=true";
-
+  private static final String API_CONNECTION =
+      "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
+  private static final String API_DOCTOR_SYNC =
+      "/api/admin/trigger-doctor-sync?bridgeEndpoint=true";
 
   @Autowired
   private GmcIdProcessorBean gmcIdProcessorBean;
