@@ -88,7 +88,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
   @Test
   void shouldAggregateWhenMatchingGmcId() {
-    var traineeInfo1 = new TraineeInfoDto();
+    final var traineeInfo1 = new TraineeInfoDto();
     traineeInfo1.setAdmin(ADMIN_1);
     traineeInfo1.setConnectionStatus(CONNECTION_STATUS_1);
     traineeInfo1.setDateAdded(DATA_ADDED_1);
@@ -100,47 +100,47 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     traineeInfo1.setLastUpdatedDate(LAST_UPDATED_DATE_1);
     traineeInfo1.setSubmissionDate(SUBMISSION_DATE_1);
 
-    var traineeSummary = new TraineeSummaryDto();
+    final var traineeSummary = new TraineeSummaryDto();
     traineeSummary.setCountTotal(1);
     traineeSummary.setCountUnderNotice(2);
     traineeSummary.setTotalPages(3);
     traineeSummary.setTotalResults(4);
     traineeSummary.setTraineeInfo(List.of(traineeInfo1));
 
-    var camelContext = new DefaultCamelContext();
-    var oldMessage = new DefaultMessage(camelContext);
+    final var camelContext = new DefaultCamelContext();
+    final var oldMessage = new DefaultMessage(camelContext);
     oldMessage.setBody(traineeSummary);
-    var oldExchange = new DefaultExchange(camelContext);
+    final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
-    var traineeCore = new TraineeCoreDto();
+    final var traineeCore = new TraineeCoreDto();
     traineeCore.setCctDate(CCT_DATE);
     traineeCore.setCurrentGrade(GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     traineeCore.setProgrammeName(PROGRAMME_NAME);
 
-    var newMessage = new DefaultMessage(camelContext);
+    final var newMessage = new DefaultMessage(camelContext);
     newMessage.setBody(Map.of(GMC_REF_NUMBER_1, objectMapper.convertValue(traineeCore, Map.class)));
-    var newExchange = new DefaultExchange(camelContext);
+    final var newExchange = new DefaultExchange(camelContext);
     newExchange.setIn(newMessage);
 
-    Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
-    Message aggregatedMessage = aggregatedExchange.getMessage();
+    final Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
+    final Message aggregatedMessage = aggregatedExchange.getMessage();
     assertThat("Unexpected message body type.", aggregatedMessage.getBody(),
         instanceOf(RecommendationSummaryDto.class));
 
-    RecommendationSummaryDto aggregatedBody = aggregatedMessage
+    final RecommendationSummaryDto aggregatedBody = aggregatedMessage
         .getBody(RecommendationSummaryDto.class);
     assertThat("Unexpected count total.", aggregatedBody.getCountTotal(), is(1L));
     assertThat("Unexpected under notice count.", aggregatedBody.getCountUnderNotice(), is(2L));
     assertThat("Unexpected total pages.", aggregatedBody.getTotalPages(), is(3L));
     assertThat("Unexpected total results.", aggregatedBody.getTotalResults(), is(4L));
 
-    List<RecommendationInfoDto> recommendationInfos = aggregatedBody.getRecommendationInfo();
+    final List<RecommendationInfoDto> recommendationInfos = aggregatedBody.getRecommendationInfo();
     assertThat("Unexpected number of recommendation infos.", recommendationInfos.size(), is(1));
 
-    RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
+    final RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected admin.", recommendationInfo.getAdmin(), is(ADMIN_1));
     assertThat("Unexpected CCT date.", recommendationInfo.getCctDate(), is(CCT_DATE));
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), is(GRADE));
@@ -165,7 +165,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
   @Test
   void shouldNotAggregateWhenNonMatchingGmcId() {
-    var traineeInfo1 = new TraineeInfoDto();
+    final var traineeInfo1 = new TraineeInfoDto();
     traineeInfo1.setAdmin(ADMIN_1);
     traineeInfo1.setConnectionStatus(CONNECTION_STATUS_1);
     traineeInfo1.setDateAdded(DATA_ADDED_1);
@@ -177,47 +177,47 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     traineeInfo1.setLastUpdatedDate(LAST_UPDATED_DATE_1);
     traineeInfo1.setSubmissionDate(SUBMISSION_DATE_1);
 
-    var traineeSummary = new TraineeSummaryDto();
+    final var traineeSummary = new TraineeSummaryDto();
     traineeSummary.setCountTotal(1);
     traineeSummary.setCountUnderNotice(2);
     traineeSummary.setTotalPages(3);
     traineeSummary.setTotalResults(4);
     traineeSummary.setTraineeInfo(List.of(traineeInfo1));
 
-    var camelContext = new DefaultCamelContext();
-    var oldMessage = new DefaultMessage(camelContext);
+    final var camelContext = new DefaultCamelContext();
+    final var oldMessage = new DefaultMessage(camelContext);
     oldMessage.setBody(traineeSummary);
-    var oldExchange = new DefaultExchange(camelContext);
+    final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
-    var traineeCore = new TraineeCoreDto();
+    final var traineeCore = new TraineeCoreDto();
     traineeCore.setCctDate(CCT_DATE);
     traineeCore.setCurrentGrade(GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     traineeCore.setProgrammeName(PROGRAMME_NAME);
 
-    var newMessage = new DefaultMessage(camelContext);
+    final var newMessage = new DefaultMessage(camelContext);
     newMessage.setBody(Map.of(GMC_REF_NUMBER_2, objectMapper.convertValue(traineeCore, Map.class)));
-    var newExchange = new DefaultExchange(camelContext);
+    final var newExchange = new DefaultExchange(camelContext);
     newExchange.setIn(newMessage);
 
-    Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
-    Message aggregatedMessage = aggregatedExchange.getMessage();
+    final Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
+    final Message aggregatedMessage = aggregatedExchange.getMessage();
     assertThat("Unexpected message body type.", aggregatedMessage.getBody(),
         instanceOf(RecommendationSummaryDto.class));
 
-    RecommendationSummaryDto aggregatedBody = aggregatedMessage
+    final RecommendationSummaryDto aggregatedBody = aggregatedMessage
         .getBody(RecommendationSummaryDto.class);
     assertThat("Unexpected count total.", aggregatedBody.getCountTotal(), is(1L));
     assertThat("Unexpected under notice count.", aggregatedBody.getCountUnderNotice(), is(2L));
     assertThat("Unexpected total pages.", aggregatedBody.getTotalPages(), is(3L));
     assertThat("Unexpected total results.", aggregatedBody.getTotalResults(), is(4L));
 
-    List<RecommendationInfoDto> recommendationInfos = aggregatedBody.getRecommendationInfo();
+    final List<RecommendationInfoDto> recommendationInfos = aggregatedBody.getRecommendationInfo();
     assertThat("Unexpected number of recommendation infos.", recommendationInfos.size(), is(1));
 
-    RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
+    final RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected admin.", recommendationInfo.getAdmin(), is(ADMIN_1));
     assertThat("Unexpected CCT date.", recommendationInfo.getCctDate(), nullValue());
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), nullValue());
@@ -241,7 +241,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
   @Test
   void shouldAggregateWhenMixedMatchingAndNonMatchingGmcId() {
-    var traineeInfo1 = new TraineeInfoDto();
+    final var traineeInfo1 = new TraineeInfoDto();
     traineeInfo1.setAdmin(ADMIN_1);
     traineeInfo1.setConnectionStatus(CONNECTION_STATUS_1);
     traineeInfo1.setDateAdded(DATA_ADDED_1);
@@ -253,7 +253,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     traineeInfo1.setLastUpdatedDate(LAST_UPDATED_DATE_1);
     traineeInfo1.setSubmissionDate(SUBMISSION_DATE_1);
 
-    var traineeInfo2 = new TraineeInfoDto();
+    final var traineeInfo2 = new TraineeInfoDto();
     traineeInfo2.setAdmin(ADMIN_2);
     traineeInfo2.setConnectionStatus(CONNECTION_STATUS_2);
     traineeInfo2.setDateAdded(DATA_ADDED_2);
@@ -265,40 +265,40 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     traineeInfo2.setLastUpdatedDate(LAST_UPDATED_DATE_2);
     traineeInfo2.setSubmissionDate(SUBMISSION_DATE_2);
 
-    var traineeSummary = new TraineeSummaryDto();
+    final var traineeSummary = new TraineeSummaryDto();
     traineeSummary.setCountTotal(1);
     traineeSummary.setCountUnderNotice(2);
     traineeSummary.setTotalPages(3);
     traineeSummary.setTotalResults(4);
     traineeSummary.setTraineeInfo(List.of(traineeInfo1, traineeInfo2));
 
-    var camelContext = new DefaultCamelContext();
-    var oldMessage = new DefaultMessage(camelContext);
+    final var camelContext = new DefaultCamelContext();
+    final var oldMessage = new DefaultMessage(camelContext);
     oldMessage.setBody(traineeSummary);
-    var oldExchange = new DefaultExchange(camelContext);
+    final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
-    var traineeCore = new TraineeCoreDto();
+    final var traineeCore = new TraineeCoreDto();
     traineeCore.setCctDate(CCT_DATE);
     traineeCore.setCurrentGrade(GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
     traineeCore.setProgrammeName(PROGRAMME_NAME);
 
-    var newMessage = new DefaultMessage(camelContext);
+    final var newMessage = new DefaultMessage(camelContext);
     newMessage.setBody(Map.of(GMC_REF_NUMBER_1, objectMapper.convertValue(traineeCore, Map.class)));
-    var newExchange = new DefaultExchange(camelContext);
+    final var newExchange = new DefaultExchange(camelContext);
     newExchange.setIn(newMessage);
 
-    Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
-    Message aggregatedMessage = aggregatedExchange.getMessage();
+    final Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
+    final Message aggregatedMessage = aggregatedExchange.getMessage();
     assertThat("Unexpected message body type.", aggregatedMessage.getBody(),
         instanceOf(RecommendationSummaryDto.class));
 
-    RecommendationSummaryDto aggregatedBody = aggregatedMessage
+    final RecommendationSummaryDto aggregatedBody = aggregatedMessage
         .getBody(RecommendationSummaryDto.class);
 
-    List<RecommendationInfoDto> recommendationInfos = aggregatedBody.getRecommendationInfo();
+    final List<RecommendationInfoDto> recommendationInfos = aggregatedBody.getRecommendationInfo();
     assertThat("Unexpected number of recommendation infos.", recommendationInfos.size(), is(2));
 
     RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);

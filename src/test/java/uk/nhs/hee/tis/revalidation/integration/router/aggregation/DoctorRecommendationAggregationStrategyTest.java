@@ -71,9 +71,9 @@ class DoctorRecommendationAggregationStrategyTest {
 
   @Test
   void shouldAggregateRecommendationWhenCoreFound() {
-    var camelContext = new DefaultCamelContext();
+    final var camelContext = new DefaultCamelContext();
 
-    var traineeRecommendation = new TraineeRecommendationDto();
+    final var traineeRecommendation = new TraineeRecommendationDto();
     traineeRecommendation.setCctDate(OLD_CCT_DATE);
     traineeRecommendation.setCurrentGrade(OLD_GRADE);
     traineeRecommendation.setDesignatedBody(DESIGNATED_BODY);
@@ -83,29 +83,29 @@ class DoctorRecommendationAggregationStrategyTest {
     traineeRecommendation.setProgrammeMembershipType(OLD_PROGRAMME_MEMBERSHIP_TYPE);
     traineeRecommendation.setUnderNotice(UNDER_NOTICE);
 
-    var oldMessage = new DefaultMessage(camelContext);
+    final var oldMessage = new DefaultMessage(camelContext);
     oldMessage.setBody(traineeRecommendation);
-    var oldExchange = new DefaultExchange(camelContext);
+    final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
-    var traineeCore = new TraineeCoreDto();
+    final var traineeCore = new TraineeCoreDto();
     traineeCore.setCctDate(NEW_CCT_DATE);
     traineeCore.setCurrentGrade(NEW_GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(NEW_PROGRAMME_MEMBERSHIP_TYPE);
     traineeCore.setProgrammeName(PROGRAMME_NAME);
 
-    var newMessage = new DefaultMessage(camelContext);
+    final var newMessage = new DefaultMessage(camelContext);
     newMessage.setBody(Map.of(GMC_NUMBER, objectMapper.convertValue(traineeCore, Map.class)));
-    var newExchange = new DefaultExchange(camelContext);
+    final var newExchange = new DefaultExchange(camelContext);
     newExchange.setIn(newMessage);
 
-    Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
-    Message aggregatedMessage = aggregatedExchange.getMessage();
+    final Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
+    final Message aggregatedMessage = aggregatedExchange.getMessage();
     assertThat("Unexpected message body type.", aggregatedMessage.getBody(),
         instanceOf(TraineeRecommendationDto.class));
 
-    TraineeRecommendationDto aggregatedBody = aggregatedMessage
+    final TraineeRecommendationDto aggregatedBody = aggregatedMessage
         .getBody(TraineeRecommendationDto.class);
     assertThat("Unexpected CCT date.", aggregatedBody.getCctDate(), is(NEW_CCT_DATE));
     assertThat("Unexpected current grade.", aggregatedBody.getCurrentGrade(), is(NEW_GRADE));
@@ -122,9 +122,9 @@ class DoctorRecommendationAggregationStrategyTest {
 
   @Test
   void shouldReturnUnchangedRecommendationWhenNoCoreFound() {
-    var camelContext = new DefaultCamelContext();
+    final var camelContext = new DefaultCamelContext();
 
-    var traineeRecommendation = new TraineeRecommendationDto();
+    final var traineeRecommendation = new TraineeRecommendationDto();
     traineeRecommendation.setCctDate(OLD_CCT_DATE);
     traineeRecommendation.setCurrentGrade(OLD_GRADE);
     traineeRecommendation.setDesignatedBody(DESIGNATED_BODY);
@@ -134,22 +134,22 @@ class DoctorRecommendationAggregationStrategyTest {
     traineeRecommendation.setProgrammeMembershipType(OLD_PROGRAMME_MEMBERSHIP_TYPE);
     traineeRecommendation.setUnderNotice(UNDER_NOTICE);
 
-    var oldMessage = new DefaultMessage(camelContext);
+    final var oldMessage = new DefaultMessage(camelContext);
     oldMessage.setBody(traineeRecommendation);
-    var oldExchange = new DefaultExchange(camelContext);
+    final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
-    var newMessage = new DefaultMessage(camelContext);
+    final var newMessage = new DefaultMessage(camelContext);
     newMessage.setBody(Collections.emptyMap());
-    var newExchange = new DefaultExchange(camelContext);
+    final var newExchange = new DefaultExchange(camelContext);
     newExchange.setIn(newMessage);
 
-    Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
-    Message aggregatedMessage = aggregatedExchange.getMessage();
+    final Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
+    final Message aggregatedMessage = aggregatedExchange.getMessage();
     assertThat("Unexpected message body type.", aggregatedMessage.getBody(),
         instanceOf(TraineeRecommendationDto.class));
 
-    TraineeRecommendationDto aggregatedBody = aggregatedMessage
+    final TraineeRecommendationDto aggregatedBody = aggregatedMessage
         .getBody(TraineeRecommendationDto.class);
     assertThat("Unexpected CCT date.", aggregatedBody.getCctDate(), is(OLD_CCT_DATE));
     assertThat("Unexpected current grade.", aggregatedBody.getCurrentGrade(), is(OLD_GRADE));
