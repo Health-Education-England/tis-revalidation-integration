@@ -41,7 +41,7 @@ class UsernameBeanTest {
 
   @Test
   void shouldReturnPreferredUsername() throws IOException {
-    String claims = "{\"custom:preferred_username\":\"test-user\"}";
+    String claims = "{\"preferred_username\":\"test-user\"}";
     String encodedClaims = Base64.getEncoder()
         .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
 
