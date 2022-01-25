@@ -22,9 +22,9 @@
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
 import static java.util.stream.Collectors.toList;
-import static org.mapstruct.factory.Mappers.getMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +32,9 @@ import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
@@ -45,8 +45,17 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.TraineeRecommendati
 @Component
 public class DoctorRecommendationSummaryAggregationStrategy implements AggregationStrategy {
 
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper;
+  private final RecommendationSummaryMapper recommendationSummaryMapper;
+  private final TraineeRecommendationMapper traineeRecommendationMapper;
+
+  DoctorRecommendationSummaryAggregationStrategy(ObjectMapper mapper,
+      RecommendationSummaryMapper recommendationSummaryMapper,
+      TraineeRecommendationMapper traineeRecommendationMapper) {
+    this.mapper = mapper;
+    this.recommendationSummaryMapper = recommendationSummaryMapper;
+    this.traineeRecommendationMapper = traineeRecommendationMapper;
+  }
 
   @SneakyThrows
   @Override
@@ -54,15 +63,15 @@ public class DoctorRecommendationSummaryAggregationStrategy implements Aggregati
     final var result = new DefaultExchange(new DefaultCamelContext());
 
     final var messageBody = oldExchange.getIn().getBody();
-    final var traineeSummaryDto = mapper.convertValue(messageBody, TraineeSummaryDto.class);
-    final var traineeInfos = traineeSummaryDto.getTraineeInfo();
+    final TraineeSummaryDto traineeSummaryDto = mapper
+        .convertValue(messageBody, TraineeSummaryDto.class);
+    final List<TraineeInfoDto> traineeInfos = traineeSummaryDto.getTraineeInfo();
 
-    final var recommendationInfoDtos = traineeInfos.stream().map(traineeInfo -> {
-      return aggregateTraineeWithRecommendation(newExchange, traineeInfo);
-    }).collect(toList());
+    final List<RecommendationInfoDto> recommendationInfoDtos = traineeInfos.stream()
+        .map(traineeInfo -> aggregateTraineeWithRecommendation(newExchange, traineeInfo))
+        .collect(toList());
 
-    final var recommendationSummaryMapper = getMapper(RecommendationSummaryMapper.class);
-    final var recommendationSummaryDto = recommendationSummaryMapper
+    final RecommendationSummaryDto recommendationSummaryDto = recommendationSummaryMapper
         .mergeConnectionInfo(traineeSummaryDto, recommendationInfoDtos);
 
     result.getMessage().setBody(recommendationSummaryDto);
@@ -71,17 +80,16 @@ public class DoctorRecommendationSummaryAggregationStrategy implements Aggregati
 
   private RecommendationInfoDto aggregateTraineeWithRecommendation(final Exchange newExchange,
       final TraineeInfoDto traineeInfo) {
-
-    final var traineeCoreDto = getTcsCoreRecord(newExchange,
+    final TraineeCoreDto traineeCoreDto = getTcsCoreRecord(newExchange,
         traineeInfo.getGmcReferenceNumber());
-    final var mapper = getMapper(TraineeRecommendationMapper.class);
-    return mapper.mergeTraineeRecommendationResponses(traineeInfo, traineeCoreDto);
+    return traineeRecommendationMapper
+        .mergeTraineeRecommendationResponses(traineeInfo, traineeCoreDto);
   }
 
   private TraineeCoreDto getTcsCoreRecord(final Exchange exchange, final String gmcId) {
-    final var body = exchange.getIn().getBody();
+    final Map<?, ?> body = (Map<?, ?>) exchange.getIn().getBody();
 
-    final var tcsCoreValue = ((Map) body).get(gmcId);
+    final var tcsCoreValue = body.get(gmcId);
     return tcsCoreValue != null ? mapper
         .convertValue(tcsCoreValue, TraineeCoreDto.class) : null;
   }
