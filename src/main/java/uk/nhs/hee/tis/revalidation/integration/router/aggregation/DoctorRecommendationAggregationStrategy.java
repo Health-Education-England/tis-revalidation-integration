@@ -58,7 +58,7 @@ public class DoctorRecommendationAggregationStrategy implements AggregationStrat
       traineeRecommendationDto.setCurrentGrade(traineeCoreDto.getCurrentGrade());
       traineeRecommendationDto
           .setProgrammeMembershipType(traineeCoreDto.getProgrammeMembershipType());
-      traineeRecommendationDto.setCctDate(traineeCoreDto.getCctDate());
+      traineeRecommendationDto.setCurriculumEndDate(traineeCoreDto.getCurriculumEndDate());
     }
     result.getMessage().setBody(traineeRecommendationDto);
     return result;

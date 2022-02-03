@@ -50,7 +50,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
   private static final String ADMIN_1 = "admin1";
   private static final String ADMIN_2 = "admin2";
-  private static final LocalDate CCT_DATE = LocalDate.EPOCH;
+  private static final LocalDate CURRICULUM_END_DATE = LocalDate.EPOCH;
   private static final String CONNECTION_STATUS_1 = "connectectionStatus1";
   private static final String CONNECTION_STATUS_2 = "connectectionStatus2";
   private static final LocalDate DATA_ADDED_1 = LocalDate.MIN;
@@ -114,7 +114,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     oldExchange.setIn(oldMessage);
 
     final var traineeCore = new TraineeCoreDto();
-    traineeCore.setCctDate(CCT_DATE);
+    traineeCore.setCurriculumEndDate(CURRICULUM_END_DATE);
     traineeCore.setCurrentGrade(GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
@@ -142,7 +142,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
     final RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected admin.", recommendationInfo.getAdmin(), is(ADMIN_1));
-    assertThat("Unexpected CCT date.", recommendationInfo.getCctDate(), is(CCT_DATE));
+    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), is(GRADE));
     assertThat("Unexpected designated body.", recommendationInfo.getDesignatedBody(),
         is(DESIGNATED_BODY_1));
@@ -191,7 +191,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     oldExchange.setIn(oldMessage);
 
     final var traineeCore = new TraineeCoreDto();
-    traineeCore.setCctDate(CCT_DATE);
+    traineeCore.setCurriculumEndDate(CURRICULUM_END_DATE);
     traineeCore.setCurrentGrade(GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
@@ -219,7 +219,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
     final RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected admin.", recommendationInfo.getAdmin(), is(ADMIN_1));
-    assertThat("Unexpected CCT date.", recommendationInfo.getCctDate(), nullValue());
+    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), nullValue());
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), nullValue());
     assertThat("Unexpected designated body.", recommendationInfo.getDesignatedBody(),
         is(DESIGNATED_BODY_1));
@@ -279,7 +279,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     oldExchange.setIn(oldMessage);
 
     final var traineeCore = new TraineeCoreDto();
-    traineeCore.setCctDate(CCT_DATE);
+    traineeCore.setCurriculumEndDate(CURRICULUM_END_DATE);
     traineeCore.setCurrentGrade(GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(PROGRAMME_MEMBERSHIP_TYPE);
@@ -304,7 +304,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected GMC reference number.", recommendationInfo.getGmcReferenceNumber(),
         is(GMC_REF_NUMBER_1));
-    assertThat("Unexpected CCT date.", recommendationInfo.getCctDate(), is(CCT_DATE));
+    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), is(GRADE));
     assertThat("Unexpected GMC outcome.", recommendationInfo.getGmcOutcome(), is(GMC_OUTCOME));
     assertThat("Unexpected programme membership type.",
@@ -315,7 +315,7 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     recommendationInfo = recommendationInfos.get(1);
     assertThat("Unexpected GMC reference number.", recommendationInfo.getGmcReferenceNumber(),
         is(GMC_REF_NUMBER_2));
-    assertThat("Unexpected CCT date.", recommendationInfo.getCctDate(), nullValue());
+    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), nullValue());
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), nullValue());
     assertThat("Unexpected GMC outcome.", recommendationInfo.getGmcOutcome(), nullValue());
     assertThat("Unexpected programme membership type.",

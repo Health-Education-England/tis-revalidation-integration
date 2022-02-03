@@ -49,24 +49,24 @@ class RecommendationTcsAggregationStrategyTest {
   private static final String KEY_1 = "identifier1";
   private static final String KEY_2 = "identifier2";
 
-  private static final LocalDate OLD_CCT_DATE_1 = LocalDate.now();
+  private static final LocalDate OLD_CURRICULUM_END_DATE_1 = LocalDate.now();
   private static final String OLD_CURRENT_GRADE_1 = "grade1";
   private static final String OLD_GMC_OUTCOME_1 = "outcome1";
   private static final String OLD_PROGRAMME_MEMBERSHIP_TYPE_1 = "type1";
   private static final String OLD_PROGRAMME_NAME_1 = "programme1";
 
-  private static final LocalDate OLD_CCT_DATE_2 = LocalDate.now().plusYears(1);
+  private static final LocalDate OLD_CURRICULUM_END_DATE_2 = LocalDate.now().plusYears(1);
   private static final String OLD_CURRENT_GRADE_2 = "grade2";
   private static final String OLD_GMC_OUTCOME_2 = "outcome2";
   private static final String OLD_PROGRAMME_MEMBERSHIP_TYPE_2 = "type2";
   private static final String OLD_PROGRAMME_NAME_2 = "programme2";
 
-  private static final LocalDate NEW_CCT_DATE_1 = LocalDate.now().plusYears(2);
+  private static final LocalDate NEW_CURRICULUM_END_DATE_1 = LocalDate.now().plusYears(2);
   private static final String NEW_CURRENT_GRADE_1 = "grade10";
   private static final String NEW_PROGRAMME_MEMBERSHIP_TYPE_1 = "type10";
   private static final String NEW_PROGRAMME_NAME_1 = "programme10";
 
-  private static final LocalDate NEW_CCT_DATE_2 = LocalDate.now().plusYears(3);
+  private static final LocalDate NEW_CURRICULUM_END_DATE_2 = LocalDate.now().plusYears(3);
   private static final String NEW_CURRENT_GRADE_2 = "grade20";
   private static final String NEW_PROGRAMME_MEMBERSHIP_TYPE_2 = "type20";
   private static final String NEW_PROGRAMME_NAME_2 = "programme20";
@@ -86,13 +86,13 @@ class RecommendationTcsAggregationStrategyTest {
   @Test
   void shouldAggregateTraineeCoresWhenValid() throws JsonProcessingException {
     var traineeCore1 = new TraineeCoreDto();
-    traineeCore1.setCctDate(OLD_CCT_DATE_1);
+    traineeCore1.setCurriculumEndDate(OLD_CURRICULUM_END_DATE_1);
     traineeCore1.setCurrentGrade(OLD_CURRENT_GRADE_1);
     traineeCore1.setGmcOutcome(OLD_GMC_OUTCOME_1);
     traineeCore1.setProgrammeMembershipType(OLD_PROGRAMME_MEMBERSHIP_TYPE_1);
     traineeCore1.setProgrammeName(OLD_PROGRAMME_NAME_1);
     var traineeCore2 = new TraineeCoreDto();
-    traineeCore2.setCctDate(OLD_CCT_DATE_2);
+    traineeCore2.setCurriculumEndDate(OLD_CURRICULUM_END_DATE_2);
     traineeCore2.setCurrentGrade(OLD_CURRENT_GRADE_2);
     traineeCore2.setGmcOutcome(OLD_GMC_OUTCOME_2);
     traineeCore2.setProgrammeMembershipType(OLD_PROGRAMME_MEMBERSHIP_TYPE_2);
@@ -106,12 +106,12 @@ class RecommendationTcsAggregationStrategyTest {
     oldExchange.setIn(oldMessage);
 
     var recommendation1 = new RecommendationTcsDto();
-    recommendation1.setCctDate(NEW_CCT_DATE_1);
+    recommendation1.setCurriculumEndDate(NEW_CURRICULUM_END_DATE_1);
     recommendation1.setCurrentGrade(NEW_CURRENT_GRADE_1);
     recommendation1.setProgrammeMembershipType(NEW_PROGRAMME_MEMBERSHIP_TYPE_1);
     recommendation1.setProgrammeName(NEW_PROGRAMME_NAME_1);
     var recommendation2 = new RecommendationTcsDto();
-    recommendation2.setCctDate(NEW_CCT_DATE_2);
+    recommendation2.setCurriculumEndDate(NEW_CURRICULUM_END_DATE_2);
     recommendation2.setCurrentGrade(NEW_CURRENT_GRADE_2);
     recommendation2.setProgrammeMembershipType(NEW_PROGRAMME_MEMBERSHIP_TYPE_2);
     recommendation2.setProgrammeName(NEW_PROGRAMME_NAME_2);
@@ -131,7 +131,7 @@ class RecommendationTcsAggregationStrategyTest {
         hasItems(KEY_1, KEY_2));
 
     TraineeCoreDto aggregatedTrainee = aggregatedTrainees.get(KEY_1);
-    assertThat("Unexpected CCT date.", aggregatedTrainee.getCctDate(), is(NEW_CCT_DATE_1));
+    assertThat("Unexpected curriculumEndDate date.", aggregatedTrainee.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE_1));
     assertThat("Unexpected current grade.", aggregatedTrainee.getCurrentGrade(),
         is(NEW_CURRENT_GRADE_1));
     assertThat("Unexpected GMC outcome.", aggregatedTrainee.getGmcOutcome(), is(OLD_GMC_OUTCOME_1));
@@ -141,7 +141,7 @@ class RecommendationTcsAggregationStrategyTest {
         is(NEW_PROGRAMME_NAME_1));
 
     aggregatedTrainee = aggregatedTrainees.get(KEY_2);
-    assertThat("Unexpected CCT date.", aggregatedTrainee.getCctDate(), is(NEW_CCT_DATE_2));
+    assertThat("Unexpected curriculumEndDate date.", aggregatedTrainee.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE_2));
     assertThat("Unexpected current grade.", aggregatedTrainee.getCurrentGrade(),
         is(NEW_CURRENT_GRADE_2));
     assertThat("Unexpected GMC outcome.", aggregatedTrainee.getGmcOutcome(), is(OLD_GMC_OUTCOME_2));
