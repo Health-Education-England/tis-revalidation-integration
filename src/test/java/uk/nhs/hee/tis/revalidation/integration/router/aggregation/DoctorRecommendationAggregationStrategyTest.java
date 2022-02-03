@@ -50,11 +50,11 @@ class DoctorRecommendationAggregationStrategyTest {
   private static final String PROGRAMME_NAME = "programme2";
   private static final String UNDER_NOTICE = "underNotice1";
 
-  private static final LocalDate OLD_CCT_DATE = LocalDate.MIN;
+  private static final LocalDate OLD_CURRICULUM_END_DATE = LocalDate.MIN;
   private static final String OLD_PROGRAMME_MEMBERSHIP_TYPE = "type1";
   private static final String OLD_GRADE = "grade1";
 
-  private static final LocalDate NEW_CCT_DATE = LocalDate.MAX;
+  private static final LocalDate NEW_CURRICULUM_END_DATE = LocalDate.MAX;
   private static final String NEW_PROGRAMME_MEMBERSHIP_TYPE = "type2";
   private static final String NEW_GRADE = "grade2";
 
@@ -74,7 +74,7 @@ class DoctorRecommendationAggregationStrategyTest {
     final var camelContext = new DefaultCamelContext();
 
     final var traineeRecommendation = new TraineeRecommendationDto();
-    traineeRecommendation.setCctDate(OLD_CCT_DATE);
+    traineeRecommendation.setCurriculumEndDate(OLD_CURRICULUM_END_DATE);
     traineeRecommendation.setCurrentGrade(OLD_GRADE);
     traineeRecommendation.setDesignatedBody(DESIGNATED_BODY);
     traineeRecommendation.setFullName(FULL_NAME);
@@ -89,7 +89,7 @@ class DoctorRecommendationAggregationStrategyTest {
     oldExchange.setIn(oldMessage);
 
     final var traineeCore = new TraineeCoreDto();
-    traineeCore.setCctDate(NEW_CCT_DATE);
+    traineeCore.setCurriculumEndDate(NEW_CURRICULUM_END_DATE);
     traineeCore.setCurrentGrade(NEW_GRADE);
     traineeCore.setGmcOutcome(GMC_OUTCOME);
     traineeCore.setProgrammeMembershipType(NEW_PROGRAMME_MEMBERSHIP_TYPE);
@@ -107,7 +107,8 @@ class DoctorRecommendationAggregationStrategyTest {
 
     final TraineeRecommendationDto aggregatedBody = aggregatedMessage
         .getBody(TraineeRecommendationDto.class);
-    assertThat("Unexpected CCT date.", aggregatedBody.getCctDate(), is(NEW_CCT_DATE));
+    assertThat("Unexpected curriculumEndDate date.", aggregatedBody.getCurriculumEndDate(),
+        is(NEW_CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", aggregatedBody.getCurrentGrade(), is(NEW_GRADE));
     assertThat("Unexpected designated body.", aggregatedBody.getDesignatedBody(),
         is(DESIGNATED_BODY));
@@ -125,7 +126,7 @@ class DoctorRecommendationAggregationStrategyTest {
     final var camelContext = new DefaultCamelContext();
 
     final var traineeRecommendation = new TraineeRecommendationDto();
-    traineeRecommendation.setCctDate(OLD_CCT_DATE);
+    traineeRecommendation.setCurriculumEndDate(OLD_CURRICULUM_END_DATE);
     traineeRecommendation.setCurrentGrade(OLD_GRADE);
     traineeRecommendation.setDesignatedBody(DESIGNATED_BODY);
     traineeRecommendation.setFullName(FULL_NAME);
@@ -151,7 +152,8 @@ class DoctorRecommendationAggregationStrategyTest {
 
     final TraineeRecommendationDto aggregatedBody = aggregatedMessage
         .getBody(TraineeRecommendationDto.class);
-    assertThat("Unexpected CCT date.", aggregatedBody.getCctDate(), is(OLD_CCT_DATE));
+    assertThat("Unexpected curriculumEndDate date.", aggregatedBody.getCurriculumEndDate(),
+        is(OLD_CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", aggregatedBody.getCurrentGrade(), is(OLD_GRADE));
     assertThat("Unexpected designated body.", aggregatedBody.getDesignatedBody(),
         is(DESIGNATED_BODY));

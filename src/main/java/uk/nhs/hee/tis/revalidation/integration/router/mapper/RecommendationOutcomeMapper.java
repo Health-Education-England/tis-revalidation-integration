@@ -28,7 +28,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 @Mapper(componentModel = "spring")
 public interface RecommendationOutcomeMapper {
 
-  @Mapping(target = "cctDate", source = "recommendationTcsDto.cctDate")
+  @Mapping(target = "curriculumEndDate", source = "recommendationTcsDto.curriculumEndDate")
   @Mapping(target = "programmeMembershipType", source = "recommendationTcsDto.programmeMembershipType")
   @Mapping(target = "programmeName", source = "recommendationTcsDto.programmeName")
   @Mapping(target = "currentGrade", source = "recommendationTcsDto.currentGrade")
