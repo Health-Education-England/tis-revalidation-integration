@@ -131,7 +131,8 @@ class RecommendationTcsAggregationStrategyTest {
         hasItems(KEY_1, KEY_2));
 
     TraineeCoreDto aggregatedTrainee = aggregatedTrainees.get(KEY_1);
-    assertThat("Unexpected curriculumEndDate date.", aggregatedTrainee.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE_1));
+    assertThat("Unexpected curriculumEndDate date.",
+        aggregatedTrainee.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE_1));
     assertThat("Unexpected current grade.", aggregatedTrainee.getCurrentGrade(),
         is(NEW_CURRENT_GRADE_1));
     assertThat("Unexpected GMC outcome.", aggregatedTrainee.getGmcOutcome(), is(OLD_GMC_OUTCOME_1));
@@ -141,7 +142,8 @@ class RecommendationTcsAggregationStrategyTest {
         is(NEW_PROGRAMME_NAME_1));
 
     aggregatedTrainee = aggregatedTrainees.get(KEY_2);
-    assertThat("Unexpected curriculumEndDate date.", aggregatedTrainee.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE_2));
+    assertThat("Unexpected curriculumEndDate date.",
+        aggregatedTrainee.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE_2));
     assertThat("Unexpected current grade.", aggregatedTrainee.getCurrentGrade(),
         is(NEW_CURRENT_GRADE_2));
     assertThat("Unexpected GMC outcome.", aggregatedTrainee.getGmcOutcome(), is(OLD_GMC_OUTCOME_2));

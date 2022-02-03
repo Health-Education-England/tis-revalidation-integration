@@ -107,7 +107,8 @@ class DoctorRecommendationAggregationStrategyTest {
 
     final TraineeRecommendationDto aggregatedBody = aggregatedMessage
         .getBody(TraineeRecommendationDto.class);
-    assertThat("Unexpected curriculumEndDate date.", aggregatedBody.getCurriculumEndDate(), is(NEW_CURRICULUM_END_DATE));
+    assertThat("Unexpected curriculumEndDate date.", aggregatedBody.getCurriculumEndDate(),
+        is(NEW_CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", aggregatedBody.getCurrentGrade(), is(NEW_GRADE));
     assertThat("Unexpected designated body.", aggregatedBody.getDesignatedBody(),
         is(DESIGNATED_BODY));
@@ -151,7 +152,8 @@ class DoctorRecommendationAggregationStrategyTest {
 
     final TraineeRecommendationDto aggregatedBody = aggregatedMessage
         .getBody(TraineeRecommendationDto.class);
-    assertThat("Unexpected curriculumEndDate date.", aggregatedBody.getCurriculumEndDate(), is(OLD_CURRICULUM_END_DATE));
+    assertThat("Unexpected curriculumEndDate date.", aggregatedBody.getCurriculumEndDate(),
+        is(OLD_CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", aggregatedBody.getCurrentGrade(), is(OLD_GRADE));
     assertThat("Unexpected designated body.", aggregatedBody.getDesignatedBody(),
         is(DESIGNATED_BODY));

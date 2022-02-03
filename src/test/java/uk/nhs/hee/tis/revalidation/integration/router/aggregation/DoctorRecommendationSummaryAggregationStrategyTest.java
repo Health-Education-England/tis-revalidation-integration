@@ -142,7 +142,8 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
     final RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected admin.", recommendationInfo.getAdmin(), is(ADMIN_1));
-    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
+    assertThat("Unexpected curriculumEndDate date.",
+        recommendationInfo.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), is(GRADE));
     assertThat("Unexpected designated body.", recommendationInfo.getDesignatedBody(),
         is(DESIGNATED_BODY_1));
@@ -219,7 +220,8 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
 
     final RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected admin.", recommendationInfo.getAdmin(), is(ADMIN_1));
-    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), nullValue());
+    assertThat("Unexpected curriculumEndDate date.",
+        recommendationInfo.getCurriculumEndDate(), nullValue());
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), nullValue());
     assertThat("Unexpected designated body.", recommendationInfo.getDesignatedBody(),
         is(DESIGNATED_BODY_1));
@@ -304,7 +306,8 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     RecommendationInfoDto recommendationInfo = recommendationInfos.get(0);
     assertThat("Unexpected GMC reference number.", recommendationInfo.getGmcReferenceNumber(),
         is(GMC_REF_NUMBER_1));
-    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
+    assertThat("Unexpected curriculumEndDate date.",
+        recommendationInfo.getCurriculumEndDate(), is(CURRICULUM_END_DATE));
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), is(GRADE));
     assertThat("Unexpected GMC outcome.", recommendationInfo.getGmcOutcome(), is(GMC_OUTCOME));
     assertThat("Unexpected programme membership type.",
@@ -315,7 +318,8 @@ class DoctorRecommendationSummaryAggregationStrategyTest {
     recommendationInfo = recommendationInfos.get(1);
     assertThat("Unexpected GMC reference number.", recommendationInfo.getGmcReferenceNumber(),
         is(GMC_REF_NUMBER_2));
-    assertThat("Unexpected curriculumEndDate date.", recommendationInfo.getCurriculumEndDate(), nullValue());
+    assertThat("Unexpected curriculumEndDate date.",
+        recommendationInfo.getCurriculumEndDate(), nullValue());
     assertThat("Unexpected current grade.", recommendationInfo.getCurrentGrade(), nullValue());
     assertThat("Unexpected GMC outcome.", recommendationInfo.getGmcOutcome(), nullValue());
     assertThat("Unexpected programme membership type.",
