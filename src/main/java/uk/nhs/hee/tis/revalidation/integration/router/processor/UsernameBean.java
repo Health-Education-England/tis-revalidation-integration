@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 public class UsernameBean {
 
   // TODO: replace with non-custom field when userpool recreated.
-  private static final String USERNAME_KEY = "custom:preferred_username";
+  private static final String USERNAME_KEY = "preferred_username";
 
   /**
    * Get the username from the claims in the authorization token.
