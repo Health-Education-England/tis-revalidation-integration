@@ -36,6 +36,8 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
+import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -59,8 +61,14 @@ public class MasterDoctorView {
   private String programmeName;
   private String membershipType;
   private String designatedBody;
+  private String gmcStatus;
+  private RecommendationStatus tisStatus;
+  private String admin;
+  private LocalDate lastUpdatedDate;
+  private UnderNotice underNotice;
   private String tcsDesignatedBody;
   private String programmeOwner;
+  private LocalDate curriculumEndDate;
   private String connectionStatus;
   @Nullable
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
@@ -70,5 +78,4 @@ public class MasterDoctorView {
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate membershipEndDate;
-
 }

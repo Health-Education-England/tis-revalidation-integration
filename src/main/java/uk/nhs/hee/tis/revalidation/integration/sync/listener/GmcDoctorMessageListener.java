@@ -27,7 +27,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -60,19 +60,24 @@ public class GmcDoctorMessageListener {
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(DoctorsForDB doctor) {
+  public void getMessage(RevalidationSummaryDto revalidationSummaryDto) {
 
     //prepare the MasterDoctorView and call the service method
     MasterDoctorView masterDoctorView = MasterDoctorView.builder()
-        .gmcReferenceNumber(doctor.getGmcReferenceNumber())
-        .doctorFirstName(doctor.getDoctorFirstName())
-        .doctorLastName(doctor.getDoctorLastName())
-        .submissionDate(doctor.getSubmissionDate())
-        .designatedBody(doctor.getDesignatedBodyCode())
-        .connectionStatus(getConnectionStatus(doctor))
+        .gmcReferenceNumber(revalidationSummaryDto.getDoctor().getGmcReferenceNumber())
+        .doctorFirstName(revalidationSummaryDto.getDoctor().getDoctorFirstName())
+        .doctorLastName(revalidationSummaryDto.getDoctor().getDoctorLastName())
+        .submissionDate(revalidationSummaryDto.getDoctor().getSubmissionDate())
+        .designatedBody(revalidationSummaryDto.getDoctor().getDesignatedBodyCode())
+        .gmcStatus(revalidationSummaryDto.getGmcOutcome())
+        .tisStatus(revalidationSummaryDto.getDoctor().getDoctorStatus())
+        .connectionStatus(getConnectionStatus(revalidationSummaryDto))
+        .admin(revalidationSummaryDto.getDoctor().getAdmin())
+        .lastUpdatedDate(revalidationSummaryDto.getDoctor().getLastUpdatedDate())
+        .underNotice(revalidationSummaryDto.getDoctor().getUnderNotice())
         .build();
 
-    if (doctor.getSyncEnd() != null && doctor.getSyncEnd()) {
+    if (revalidationSummaryDto.getSyncEnd() != null && revalidationSummaryDto.getSyncEnd()) {
       log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
           traineeCount);
       String getMaster = "getMaster";
@@ -84,7 +89,7 @@ public class GmcDoctorMessageListener {
     }
   }
 
-  private String getConnectionStatus(DoctorsForDB doctorsForDB) {
-    return (doctorsForDB.getDesignatedBodyCode() != null) ? "Yes" : "No";
+  private String getConnectionStatus(RevalidationSummaryDto revalidationSummaryDto) {
+    return (revalidationSummaryDto.getDoctor().getDesignatedBodyCode() != null) ? "Yes" : "No";
   }
 }
