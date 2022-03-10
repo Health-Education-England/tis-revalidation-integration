@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.entity;
+package uk.nhs.hee.tis.revalidation.integration.router.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
+import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 
 @Data
 @AllArgsConstructor
@@ -35,6 +35,4 @@ public class RevalidationSummaryDto {
 
   private DoctorsForDB doctor;
   private String gmcOutcome;
-  @Nullable
-  Boolean syncEnd;
 }
