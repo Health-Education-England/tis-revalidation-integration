@@ -27,5 +27,7 @@ public enum RecommendationStatus {
   STARTED,
   READY_TO_REVIEW,
   READY_TO_SUBMIT,
-  SUBMITTED_TO_GMC
+  SUBMITTED_TO_GMC,
+  COMPLETED,
+  DRAFT
 }
