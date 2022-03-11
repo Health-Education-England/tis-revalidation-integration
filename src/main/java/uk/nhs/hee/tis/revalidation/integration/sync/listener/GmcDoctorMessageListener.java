@@ -45,9 +45,6 @@ public class GmcDoctorMessageListener {
   @Value("${app.rabbit.reval.exchange}")
   private String revalExchange;
 
-  @Value("${app.rabbit.reval.queue.connection.getmaster}")
-  private String esGetMasterQueueName;
-
   @Value("${app.rabbit.reval.routingKey.indexrebuildgetmastercommand.requested}")
   private String esGetMasterRoutingKey;
 
