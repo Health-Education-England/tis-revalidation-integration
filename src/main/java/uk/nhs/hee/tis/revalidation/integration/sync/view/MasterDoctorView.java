@@ -64,10 +64,16 @@ public class MasterDoctorView {
   private String gmcStatus;
   private RecommendationStatus tisStatus;
   private String admin;
+  @Nullable
+  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate lastUpdatedDate;
   private UnderNotice underNotice;
   private String tcsDesignatedBody;
   private String programmeOwner;
+  @Nullable
+  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate curriculumEndDate;
   private String connectionStatus;
   @Nullable

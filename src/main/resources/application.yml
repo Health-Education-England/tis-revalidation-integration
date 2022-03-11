@@ -77,7 +77,7 @@ app:
     reval.routingKey.connection.syncstart: ${REVAL_RABBIT_SYNCSTART_ROUTING_KEY:reval.connection.syncstart}
     reval.routingKey.recommendation.syncstart: ${REVAL_RABBIT_RECOMMENDATION_SYNCSTART_ROUTING_KEY:reval.recommendation.syncstart}
     reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY:reval.connection.syncdata}
-    reval.routingKey.connection.getmaster: ${REVAL_RABBIT_GETMASTER_ROUTING_KEY:reval.connection.getmaster}
+    reval.indexrebuildgetmastercommand.requested: ${REVAL_RABBIT_GETMASTER_ROUTING_KEY:reval.connection.getmaster}
 
 logging:
   level:

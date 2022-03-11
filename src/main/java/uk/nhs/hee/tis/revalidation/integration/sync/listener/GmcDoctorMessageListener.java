@@ -63,30 +63,28 @@ public class GmcDoctorMessageListener {
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
   public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
-
-    //prepare the MasterDoctorView and call the service method
-    final var doctorsForDB = message.getPayload().getDoctor();
-    MasterDoctorView masterDoctorView = MasterDoctorView.builder()
-        .gmcReferenceNumber(doctorsForDB.getGmcReferenceNumber())
-        .doctorFirstName(doctorsForDB.getDoctorFirstName())
-        .doctorLastName(doctorsForDB.getDoctorLastName())
-        .submissionDate(doctorsForDB.getSubmissionDate())
-        .designatedBody(doctorsForDB.getDesignatedBodyCode())
-        .gmcStatus(message.getPayload().getGmcOutcome())
-        .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
-        .connectionStatus(getConnectionStatus(doctorsForDB))
-        .admin(doctorsForDB.getAdmin())
-        .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
-        .underNotice(doctorsForDB.getUnderNotice())
-        .build();
-
-    if (message.getSyncEnd() != null && message.getSyncEnd()) {
+    if (message.getSyncEnd() != null && message.getSyncEnd().equals(true)) {
       log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
           traineeCount);
       String getMaster = "getMaster";
       rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
       traineeCount = 0;
     } else {
+      //prepare the MasterDoctorView and call the service method
+      final var doctorsForDB = message.getPayload().getDoctor();
+      MasterDoctorView masterDoctorView = MasterDoctorView.builder()
+          .gmcReferenceNumber(doctorsForDB.getGmcReferenceNumber())
+          .doctorFirstName(doctorsForDB.getDoctorFirstName())
+          .doctorLastName(doctorsForDB.getDoctorLastName())
+          .submissionDate(doctorsForDB.getSubmissionDate())
+          .designatedBody(doctorsForDB.getDesignatedBodyCode())
+          .gmcStatus(message.getPayload().getGmcOutcome())
+          .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
+          .connectionStatus(getConnectionStatus(doctorsForDB))
+          .admin(doctorsForDB.getAdmin())
+          .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
+          .underNotice(doctorsForDB.getUnderNotice())
+          .build();
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;
     }
