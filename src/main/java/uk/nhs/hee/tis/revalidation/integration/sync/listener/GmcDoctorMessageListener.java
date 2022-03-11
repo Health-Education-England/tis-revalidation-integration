@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -46,7 +48,7 @@ public class GmcDoctorMessageListener {
   @Value("${app.rabbit.reval.queue.connection.getmaster}")
   private String esGetMasterQueueName;
 
-  @Value("${app.rabbit.reval.routingKey.connection.getmaster}")
+  @Value("${app.rabbit.reval.routingKey.indexrebuildgetmastercommand.requested}")
   private String esGetMasterRoutingKey;
 
   @Autowired
@@ -60,25 +62,29 @@ public class GmcDoctorMessageListener {
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(DoctorsForDB doctor) {
-
-    //prepare the MasterDoctorView and call the service method
-    MasterDoctorView masterDoctorView = MasterDoctorView.builder()
-        .gmcReferenceNumber(doctor.getGmcReferenceNumber())
-        .doctorFirstName(doctor.getDoctorFirstName())
-        .doctorLastName(doctor.getDoctorLastName())
-        .submissionDate(doctor.getSubmissionDate())
-        .designatedBody(doctor.getDesignatedBodyCode())
-        .connectionStatus(getConnectionStatus(doctor))
-        .build();
-
-    if (doctor.getSyncEnd() != null && doctor.getSyncEnd()) {
+  public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
+    if (message.getSyncEnd() != null && message.getSyncEnd().equals(true)) {
       log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
           traineeCount);
       String getMaster = "getMaster";
       rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
       traineeCount = 0;
     } else {
+      //prepare the MasterDoctorView and call the service method
+      final var doctorsForDB = message.getPayload().getDoctor();
+      MasterDoctorView masterDoctorView = MasterDoctorView.builder()
+          .gmcReferenceNumber(doctorsForDB.getGmcReferenceNumber())
+          .doctorFirstName(doctorsForDB.getDoctorFirstName())
+          .doctorLastName(doctorsForDB.getDoctorLastName())
+          .submissionDate(doctorsForDB.getSubmissionDate())
+          .designatedBody(doctorsForDB.getDesignatedBodyCode())
+          .gmcStatus(message.getPayload().getGmcOutcome())
+          .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
+          .connectionStatus(getConnectionStatus(doctorsForDB))
+          .admin(doctorsForDB.getAdmin())
+          .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
+          .underNotice(doctorsForDB.getUnderNotice())
+          .build();
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;
     }
