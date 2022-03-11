@@ -35,13 +35,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
+import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class GmcDoctorMessageListenerTest {
 
+  private IndexSyncMessage<RevalidationSummaryDto> message;
+  private RevalidationSummaryDto revalidationSummaryDto;
   private DoctorsForDB doctorsForDB;
 
   @InjectMocks
@@ -64,11 +68,17 @@ class GmcDoctorMessageListenerTest {
         .designatedBodyCode("PQR")
         .admin("Reval Admin").build();
 
+    revalidationSummaryDto = RevalidationSummaryDto.builder()
+        .doctor(doctorsForDB)
+        .gmcOutcome("Approved").build();
+
+    message = new IndexSyncMessage<RevalidationSummaryDto>();
+    message.setPayload(revalidationSummaryDto);
   }
 
   @Test
   void testMessagesAreReceivedFromSqsQueue() {
-    gmcDoctorMessageListener.getMessage(doctorsForDB);
+    gmcDoctorMessageListener.getMessage(message);
 
     ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
         .forClass(MasterDoctorView.class);
@@ -82,5 +92,4 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
     assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
   }
-
 }
