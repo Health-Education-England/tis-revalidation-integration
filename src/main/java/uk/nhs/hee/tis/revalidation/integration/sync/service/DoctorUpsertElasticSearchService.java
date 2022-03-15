@@ -114,7 +114,7 @@ public class DoctorUpsertElasticSearchService {
       MasterDoctorView dataToSave) {
     try {
       existingRecords.forEach(currentDoctorView -> {
-        repository.save(mapper.updateMasterDoctorView(currentDoctorView, dataToSave));
+        repository.save(mapper.updateMasterDoctorView(dataToSave, currentDoctorView));
       });
     }
     catch (Exception ex) {
