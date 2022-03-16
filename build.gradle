@@ -81,6 +81,9 @@ dependencies {
 
   // Jackson Json
   implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
+
+  // Faker
+  implementation "com.github.javafaker:javafaker:1.0.2"
 }
 
 checkstyle {
