@@ -34,6 +34,8 @@ public interface TraineeConnectionMapper {
   @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
   @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
   @Mapping(target = "tcsPersonId", ignore = true)
+  @Mapping(target = "curriculumEndDate", ignore = true)
+  @Mapping(target = "syncEnd", ignore = true)
   ConnectionInfoDto mergeTraineeConnectionResponses(TraineeInfoDto traineeInfoDto,
       ConnectionRecordDto connectionRecordDto);
 }

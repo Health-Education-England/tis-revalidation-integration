@@ -60,6 +60,9 @@ public class ConnectionInfoDto {
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate programmeMembershipEndDate;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
+  LocalDate curriculumEndDate;
   @Nullable
   Boolean syncEnd;
 }
