@@ -23,9 +23,11 @@ package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MasterDoctorViewMapper {
 
   @Mapping(target = "gmcReferenceNumber", ignore = true)
