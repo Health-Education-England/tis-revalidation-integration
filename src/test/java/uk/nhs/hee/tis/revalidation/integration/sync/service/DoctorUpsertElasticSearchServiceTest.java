@@ -24,17 +24,16 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 
 @ExtendWith(MockitoExtension.class)
 class DoctorUpsertElasticSearchServiceTest {
@@ -46,7 +45,9 @@ class DoctorUpsertElasticSearchServiceTest {
   private MasterDoctorViewMapper mapper;
 
   private DoctorUpsertElasticSearchService service;
-  private MasterDoctorView currentDoctorView, dataToSave, mappedView;
+  private MasterDoctorView currentDoctorView;
+  private MasterDoctorView dataToSave;
+  private MasterDoctorView mappedView;
   private List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
 
 

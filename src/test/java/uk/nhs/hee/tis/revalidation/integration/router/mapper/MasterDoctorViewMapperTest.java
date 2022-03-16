@@ -29,12 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
-import uk.nhs.hee.tis.revalidation.integration.entity.*;
 
 @ExtendWith(MockitoExtension.class)
-public class MasterDoctorViewMapperTest {
+class MasterDoctorViewMapperTest {
 
   @InjectMocks
   MasterDoctorViewMapperImpl masterDoctorViewMapper;
@@ -67,7 +67,8 @@ public class MasterDoctorViewMapperTest {
     dataToSave.setTcsDesignatedBody("tcsDesignatedBody_new");
     dataToSave.setProgrammeOwner("programmeOwner_new");
 
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
+        dataToSave, currentDoctorView);
 
     assertThat(result.getId(), is("1a2b3c"));
     assertThat(result.getTcsPersonId(), is(1001L));
@@ -91,7 +92,8 @@ public class MasterDoctorViewMapperTest {
     dataToSave.setGmcStatus("gmcStatus");
     dataToSave.setTisStatus(RecommendationStatus.COMPLETED);
 
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
+        dataToSave, currentDoctorView);
 
     assertThat(result.getId(), is("1a2b3c"));
     assertThat(result.getTcsPersonId(), is(1001L));
@@ -116,7 +118,8 @@ public class MasterDoctorViewMapperTest {
     dataToSave.setTcsDesignatedBody(null);
     dataToSave.setProgrammeOwner(null);
 
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
+        dataToSave, currentDoctorView);
 
     assertThat(result.getId(), is("1a2b3c"));
     assertThat(result.getTcsPersonId(), is(1001L));
@@ -131,12 +134,13 @@ public class MasterDoctorViewMapperTest {
     assertThat(result.getGmcReferenceNumber(), is("gmcReferenceNumber"));
     assertThat(result.getDoctorFirstName(), is("doctorFirstName"));
     assertThat(result.getDoctorLastName(), is("doctorLastName"));
-}
+  }
 
   @Test
   void shouldNotUpdateMasterDoctorViewsWhenNull() {
     MasterDoctorView dataToSave = null;
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
+        dataToSave, currentDoctorView);
 
     assertThat(result, nullValue());
   }
