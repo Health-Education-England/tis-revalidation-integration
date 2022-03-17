@@ -21,7 +21,6 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -30,11 +29,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MasterDoctorViewMapper {
 
-  @Mapping(target = "gmcReferenceNumber", ignore = true)
-  @Mapping(target = "doctorFirstName", ignore = true)
-  @Mapping(target = "doctorLastName", ignore = true)
-  @Mapping(target = "designatedBody", ignore = true)
-  @Mapping(target = "connectionStatus", ignore = true)
   MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
       @MappingTarget MasterDoctorView target);
 
