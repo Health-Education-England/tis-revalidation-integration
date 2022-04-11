@@ -1,6 +1,7 @@
 /*
  * The MIT License (MIT)
- * Copyright 2021 Crown Copyright (Health Education England)
+ *
+ * Copyright 2022 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,23 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
 
-@Mapper(componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MasterDoctorViewMapper {
+public interface CdcService<T> {
+  void addNewEntity(T entity);
 
-  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-      @MappingTarget MasterDoctorView target);
+  void updateSubsetOfFields(ChangeStreamDocument<T> changes);
 
-  @Mapping(source="doctorStatus", target = "tisStatus")
-  @Mapping(source="designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
 }

@@ -1,6 +1,7 @@
 /*
  * The MIT License (MIT)
- * Copyright 2021 Crown Copyright (Health Education England)
+ *
+ * Copyright 2022 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,23 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.cdc.service.helper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import java.time.LocalDate;
+import org.bson.BsonDocument;
+import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Mapper(componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MasterDoctorViewMapper {
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
 
-  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-      @MappingTarget MasterDoctorView target);
-
-  @Mapping(source="doctorStatus", target = "tisStatus")
-  @Mapping(source="designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
+@Component
+public class CdcRecommendationFieldUpdateHelper extends CdcFieldUpdateHelper{
+  @Override
+  public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
+    switch(key) {
+      case OUTCOME:
+        masterDoctorView.setGmcStatus(String.valueOf(updates.getString(OUTCOME)));
+        break;
+      case LAST_UPDATED_DATE: {
+        masterDoctorView.setLastUpdatedDate(LocalDate.now());
+      }
+      break;
+      default:
+        break;
+    }
+  }
 }
