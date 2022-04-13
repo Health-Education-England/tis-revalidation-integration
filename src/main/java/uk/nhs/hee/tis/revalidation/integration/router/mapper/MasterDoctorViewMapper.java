@@ -32,9 +32,9 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public interface MasterDoctorViewMapper {
 
   MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-      @MappingTarget MasterDoctorView target);
+                                          @MappingTarget MasterDoctorView target);
 
-  @Mapping(source="doctorStatus", target = "tisStatus")
-  @Mapping(source="designatedBodyCode", target = "designatedBody")
+  @Mapping(source = "doctorStatus", target = "tisStatus")
+  @Mapping(source = "designatedBodyCode", target = "designatedBody")
   MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
 }

@@ -21,6 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+
+import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,13 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 
-import javax.naming.OperationNotSupportedException;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
-public class CdcRecommendationMessageHandlerTest {
+class CdcRecommendationMessageHandlerTest {
 
   @InjectMocks
   CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
@@ -44,8 +43,10 @@ public class CdcRecommendationMessageHandlerTest {
   CdcRecommendationService cdcRecommendationService;
 
   @Test
-  void shouldRejectOtherRecommendationOperationMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getRecommendationUnsupportedChangeStreamDocument();
+  void shouldRejectOtherRecommendationOperationMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationUnsupportedChangeStreamDocument();
     assertThrows(OperationNotSupportedException.class, () -> {
       cdcRecommendationMessageHandler.handleMessage(testMessage);
     });
@@ -53,7 +54,8 @@ public class CdcRecommendationMessageHandlerTest {
 
   @Test
   void shouldHandleInserts() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
     cdcRecommendationMessageHandler.handleMessage(testMessage);
 
     verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
@@ -61,7 +63,8 @@ public class CdcRecommendationMessageHandlerTest {
 
   @Test
   void shouldHandleUpdates() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
     cdcRecommendationMessageHandler.handleMessage(testMessage);
 
     verify(cdcRecommendationService).updateSubsetOfFields(testMessage);

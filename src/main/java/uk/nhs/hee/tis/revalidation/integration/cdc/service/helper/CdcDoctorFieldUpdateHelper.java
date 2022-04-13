@@ -21,20 +21,27 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service.helper;
 
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DESIGNATED_BODY_CODE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_FIRST_NAME;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_LAST_NAME;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_STATUS;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.EXISTS_IN_GMC;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.SUBMISSION_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.UNDER_NOTICE;
+
 import org.bson.BsonDocument;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.*;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.EXISTS_IN_GMC;
-
 @Component
-public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper{
+public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper {
   @Override
   public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
-    switch(key) {
+    switch (key) {
       case DOCTOR_FIRST_NAME:
         masterDoctorView.setDoctorFirstName(String.valueOf(updates.getString(DOCTOR_FIRST_NAME)));
         break;
@@ -42,16 +49,24 @@ public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper{
         masterDoctorView.setDoctorLastName(String.valueOf(updates.getString(DOCTOR_LAST_NAME)));
         break;
       case SUBMISSION_DATE:
-        masterDoctorView.setSubmissionDate(getLocalDateFromBsonDateTime(updates.getDateTime(SUBMISSION_DATE)));
+        masterDoctorView.setSubmissionDate(
+            getLocalDateFromBsonDateTime(updates.getDateTime(SUBMISSION_DATE))
+        );
         break;
       case UNDER_NOTICE:
-        masterDoctorView.setUnderNotice(UnderNotice.valueOf(String.valueOf(updates.getString(UNDER_NOTICE))));
+        masterDoctorView.setUnderNotice(
+            UnderNotice.valueOf(String.valueOf(updates.getString(UNDER_NOTICE)))
+        );
         break;
       case DOCTOR_STATUS:
-        masterDoctorView.setTisStatus(RecommendationStatus.valueOf(String.valueOf(updates.getString(DOCTOR_STATUS))));
+        masterDoctorView.setTisStatus(
+            RecommendationStatus.valueOf(String.valueOf(updates.getString(DOCTOR_STATUS)))
+        );
         break;
       case LAST_UPDATED_DATE:
-        masterDoctorView.setLastUpdatedDate(getLocalDateFromBsonDateTime(updates.getDateTime(LAST_UPDATED_DATE)));
+        masterDoctorView.setLastUpdatedDate(
+            getLocalDateFromBsonDateTime(updates.getDateTime(LAST_UPDATED_DATE))
+        );
         break;
       case DESIGNATED_BODY_CODE:
         masterDoctorView.setDesignatedBody(String.valueOf(updates.getString(DESIGNATED_BODY_CODE)));
@@ -60,7 +75,9 @@ public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper{
         masterDoctorView.setAdmin(String.valueOf(updates.getString(ADMIN)));
         break;
       case EXISTS_IN_GMC:
-        masterDoctorView.setExistsInGmc(Boolean.valueOf(String.valueOf((updates.getBoolean(EXISTS_IN_GMC)))));
+        masterDoctorView.setExistsInGmc(
+            Boolean.valueOf(String.valueOf((updates.getBoolean(EXISTS_IN_GMC))))
+        );
         break;
       default:
         break;

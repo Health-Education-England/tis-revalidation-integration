@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class RecommendationConstants {
   public static final String RECOMMENDATION_ID = "id";
   public static final String GMC_NUMBER = "gmcNumber";

@@ -21,6 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+
+import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,13 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 
-import javax.naming.OperationNotSupportedException;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
-public class CdcDoctorMessageHandlerTest {
+class CdcDoctorMessageHandlerTest {
 
   @InjectMocks
   CdcDoctorMessageHandler cdcDoctorMessageHandler;
@@ -44,8 +43,10 @@ public class CdcDoctorMessageHandlerTest {
   CdcDoctorService cdcDoctorService;
 
   @Test
-  void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getDoctorUnsupportedChangeStreamDocument();
+  void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getDoctorUnsupportedChangeStreamDocument();
     assertThrows(OperationNotSupportedException.class, () -> {
       cdcDoctorMessageHandler.handleMessage(testMessage);
     });
@@ -53,7 +54,8 @@ public class CdcDoctorMessageHandlerTest {
 
   @Test
   void shouldHandleInserts() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
+    var testMessage =
+        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
@@ -61,7 +63,8 @@ public class CdcDoctorMessageHandlerTest {
 
   @Test
   void shouldHandleUpdates() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+    var testMessage =
+        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).updateSubsetOfFields(testMessage);

@@ -23,27 +23,26 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
+import javax.naming.OperationNotSupportedException;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
 import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
 
-import javax.naming.OperationNotSupportedException;
-
 @Component
-public class CdcMessageHandler<T extends ChangeStreamDocument> implements MessageHandler<T> {
+public class CdcMessageHandler<T extends ChangeStreamDocument, U> implements MessageHandler<T> {
 
-  CdcService cdcService;
+  CdcService<U> cdcService;
 
-  public CdcMessageHandler(CdcService cdcService) {
+  public CdcMessageHandler(CdcService<U> cdcService) {
     this.cdcService = cdcService;
   }
 
   @Override
   public void handleMessage(T message) throws OperationNotSupportedException {
     final OperationType operation = message.getOperationType();
-    switch(operation) {
+    switch (operation) {
       case INSERT:
-        cdcService.addNewEntity(message.getFullDocument());
+        cdcService.addNewEntity((U) message.getFullDocument());
         break;
       case UPDATE:
         cdcService.updateSubsetOfFields(message);

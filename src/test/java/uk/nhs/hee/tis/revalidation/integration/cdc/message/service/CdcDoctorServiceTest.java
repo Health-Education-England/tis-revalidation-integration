@@ -21,6 +21,19 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DESIGNATED_BODY_CODE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_FIRST_NAME;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_LAST_NAME;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_STATUS;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.EXISTS_IN_GMC;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.SUBMISSION_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.UNDER_NOTICE;
+
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,13 +47,8 @@ import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.*;
-
 @ExtendWith(MockitoExtension.class)
-public class CdcDoctorServiceTest {
+class CdcDoctorServiceTest {
 
   @InjectMocks
   CdcDoctorService cdcDoctorService;
@@ -58,7 +66,8 @@ public class CdcDoctorServiceTest {
   void shouldAddNewFields() {
     var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
-    DoctorsForDB newDoctor = CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
+    DoctorsForDB newDoctor =
+        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
     verify(repository).save(mapper.doctorToMasterView(newDoctor));
@@ -69,27 +78,46 @@ public class CdcDoctorServiceTest {
     var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var changes = CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+    var changes =
+        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
     cdcDoctorService.updateSubsetOfFields(changes);
 
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, DOCTOR_FIRST_NAME, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, DOCTOR_FIRST_NAME, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, DOCTOR_LAST_NAME, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, DOCTOR_LAST_NAME, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, SUBMISSION_DATE, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, SUBMISSION_DATE, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, UNDER_NOTICE, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, UNDER_NOTICE, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, DOCTOR_STATUS, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, DOCTOR_STATUS, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, DESIGNATED_BODY_CODE, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, DESIGNATED_BODY_CODE, changes
+                .getUpdateDescription()
+                .getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, ADMIN, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, ADMIN, changes.getUpdateDescription().getUpdatedFields());
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, EXISTS_IN_GMC, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, EXISTS_IN_GMC, changes.getUpdateDescription().getUpdatedFields());
   }
 
 }

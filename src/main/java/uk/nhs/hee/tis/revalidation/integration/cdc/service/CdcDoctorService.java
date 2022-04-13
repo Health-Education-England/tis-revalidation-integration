@@ -22,20 +22,15 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
-import com.mongodb.client.model.changestream.UpdateDescription;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
-import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
-
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.*;
 
 @Service
 @Slf4j
@@ -46,19 +41,24 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
   private CdcDoctorFieldUpdateHelper fieldUpdateHelper;
 
   public CdcDoctorService(
-    MasterDoctorElasticSearchRepository repository,
-    MasterDoctorViewMapper mapper,
-    CdcDoctorFieldUpdateHelper fieldUpdateHelper
+      MasterDoctorElasticSearchRepository repository,
+      MasterDoctorViewMapper mapper,
+      CdcDoctorFieldUpdateHelper fieldUpdateHelper
   ) {
     this.repository = repository;
     this.mapper = mapper;
     this.fieldUpdateHelper = fieldUpdateHelper;
   }
 
+  /**
+   * Add new doctor to index.
+   *
+   * @param entity doctorsForDb to add to index
+   */
   @Override
   public void addNewEntity(DoctorsForDB entity) {
     MasterDoctorView newView = mapper.doctorToMasterView(entity);
-    try{
+    try {
       repository.save(newView);
     } catch (Exception e) {
       log.error(
@@ -69,16 +69,21 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
     }
   }
 
+  /**
+   * Update doctor fields in index.
+   *
+   * @param changes ChangeStreamDocument containing changed fields
+   */
   @Override
   public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
     String gmcId = changes.getFullDocument().getGmcReferenceNumber();
     List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if(!masterDoctorViewList.isEmpty()) {
+    if (!masterDoctorViewList.isEmpty()) {
       MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
       BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-      updatedFields.keySet().forEach(key -> {
-        fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields);
-      });
+      updatedFields.keySet().forEach(key ->
+          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+      );
       repository.save(masterDoctorView);
     }
 

@@ -31,6 +31,12 @@ public enum RecommendationGmcOutcome {
     this.outcome = outcome;
   }
 
+  /**
+   * Return corresponding enum from string input, defaults to UNDER_REVIEW.
+   *
+   * @param value String form of enum
+   * @return RecommendationGmcOutcome corresponding enum
+   */
   public static RecommendationGmcOutcome fromString(final String value) {
     for (final RecommendationGmcOutcome gmcOutcome : RecommendationGmcOutcome.values()) {
       if (gmcOutcome.outcome.equals(value)) {

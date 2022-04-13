@@ -21,10 +21,30 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DESIGNATED_BODY_CODE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_FIRST_NAME;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_LAST_NAME;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_STATUS;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.EXISTS_IN_GMC;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.SUBMISSION_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.UNDER_NOTICE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
+import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus.DRAFT;
+import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus.SUBMITTED_TO_GMC;
+import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
+import static uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome.APPROVED;
+
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import com.mongodb.client.model.changestream.UpdateDescription;
-import org.bson.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import org.bson.BsonBoolean;
+import org.bson.BsonDateTime;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
@@ -33,28 +53,21 @@ import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationType;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-import java.time.Instant;
-import java.time.LocalDate;
-
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.*;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
-import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus.DRAFT;
-import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus.SUBMITTED_TO_GMC;
-import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
-import static uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome.APPROVED;
-
 @Component
 public class CdcTestDataGenerator {
 
   public static final String GMC_REFERENCE_NUMBER_VAL = "111";
   public static final String DOCTOR_FIRST_NAME_VAL = "firstName";
   public static final String DOCTOR_LAST_NAME_VAL = "lastName";
-  public static final BsonDateTime SUBMISSION_DATE_VAL = new BsonDateTime(Instant.now().getEpochSecond());
-  public static final BsonDateTime DATE_ADDED_VAL = new BsonDateTime(Instant.now().getEpochSecond());
+  public static final BsonDateTime SUBMISSION_DATE_VAL =
+      new BsonDateTime(Instant.now().getEpochSecond());
+  public static final BsonDateTime DATE_ADDED_VAL =
+      new BsonDateTime(Instant.now().getEpochSecond());
   public static final UnderNotice UNDER_NOTICE_VAL = YES;
   public static final String SANCTION_VAL = "sanction";
   public static final RecommendationStatus DOCTOR_STATUS_VAL = SUBMITTED_TO_GMC;
-  public static final BsonDateTime LAST_UPDATED_DATE_VAL = new BsonDateTime(Instant.now().getEpochSecond());
+  public static final BsonDateTime LAST_UPDATED_DATE_VAL =
+      new BsonDateTime(Instant.now().getEpochSecond());
   public static final String DESIGNATED_BODY_CODE_VAL = "designatedBodyCode";
   public static final String ADMIN_VAL = "admin";
   public static final Boolean EXISTS_IN_GMC_VAL = true;
@@ -83,22 +96,32 @@ public class CdcTestDataGenerator {
       .admin(ADMIN_VAL)
       .build();
 
+  /**
+   * Get a test instance of MasterDoctorView.
+   *
+   * @return MasterDoctorView test instance
+   */
   public static MasterDoctorView getTestMasterDoctorView() {
     return MasterDoctorView.builder()
         .id("1")
         .tcsPersonId(1L)
         .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
-        .doctorFirstName("old"+DOCTOR_FIRST_NAME_VAL)
-        .doctorLastName("old"+DOCTOR_LAST_NAME_VAL)
+        .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
+        .doctorLastName("old" + DOCTOR_LAST_NAME_VAL)
         .submissionDate(LocalDate.now())
-        .designatedBody("old"+DESIGNATED_BODY_CODE_VAL)
+        .designatedBody("old" + DESIGNATED_BODY_CODE_VAL)
         .tisStatus(DRAFT)
         .lastUpdatedDate(LocalDate.now())
-        .admin("old"+ADMIN)
+        .admin("old" + ADMIN)
         .existsInGmc(false)
         .build();
   }
 
+  /**
+   * Get a test instance of an insert DoctorsForDb ChangeStreamDocument.
+   *
+   * @return ChangeStreamDocument DoctorsForDB test instance
+   */
   public static ChangeStreamDocument<DoctorsForDB> getDoctorInsertChangeStreamDocument() {
     return new ChangeStreamDocument<>(
         OperationType.INSERT,
@@ -114,7 +137,13 @@ public class CdcTestDataGenerator {
     );
   }
 
-  public static ChangeStreamDocument<Recommendation> getRecommendationInsertChangeStreamDocument() {
+  /**
+   * Get a test instance of an insert Recommendation ChangeStreamDocument.
+   *
+   * @return ChangeStreamDocument Recommendation insert test instance
+   */
+  public static ChangeStreamDocument<Recommendation>
+      getRecommendationInsertChangeStreamDocument() {
     Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -138,8 +167,12 @@ public class CdcTestDataGenerator {
     );
   }
 
+  /**
+   * Get a test instance of an update DoctorsForDB ChangeStreamDocument.
+   *
+   * @return ChangeStreamDocument DoctorsForDB update test instance
+   */
   public static ChangeStreamDocument<DoctorsForDB> getDoctorUpdateChangeStreamDocument() {
-
     var updatesBson = new BsonDocument();
     updatesBson.put(DOCTOR_FIRST_NAME, new BsonString(DOCTOR_FIRST_NAME_VAL));
     updatesBson.put(DOCTOR_LAST_NAME, new BsonString(DOCTOR_LAST_NAME_VAL));
@@ -165,7 +198,13 @@ public class CdcTestDataGenerator {
     );
   }
 
-  public static ChangeStreamDocument<Recommendation> getRecommendationUpdateChangeStreamDocument() {
+  /**
+   * Get a test instance of an update Recommendation ChangeStreamDocument.
+   *
+   * @return ChangeStreamDocument Recommendation update test instance
+   */
+  public static ChangeStreamDocument<Recommendation>
+      getRecommendationUpdateChangeStreamDocument() {
 
     var updatesBson = new BsonDocument();
     updatesBson.put(OUTCOME, new BsonString(APPROVED.getOutcome()));
@@ -185,6 +224,11 @@ public class CdcTestDataGenerator {
     );
   }
 
+  /**
+   * Get a test instance of an unsupported doctor change operation.
+   *
+   * @return ChangeStreamDocument DoctorsForDB unsupported test instance
+   */
   public static ChangeStreamDocument<DoctorsForDB> getDoctorUnsupportedChangeStreamDocument() {
     DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
 
@@ -202,7 +246,13 @@ public class CdcTestDataGenerator {
     );
   }
 
-  public static ChangeStreamDocument<Recommendation> getRecommendationUnsupportedChangeStreamDocument() {
+  /**
+   * Get a test instance of an unsupported recommendation change operation.
+   *
+   * @return ChangeStreamDocument Recommendation unsupported test instance
+   */
+  public static ChangeStreamDocument<Recommendation>
+      getRecommendationUnsupportedChangeStreamDocument() {
     Recommendation doctorsForDB = Recommendation.builder().build();
 
     return new ChangeStreamDocument<>(

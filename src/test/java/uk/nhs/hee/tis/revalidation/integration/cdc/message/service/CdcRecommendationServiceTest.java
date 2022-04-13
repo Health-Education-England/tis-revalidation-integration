@@ -21,6 +21,12 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
+
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,25 +34,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcRecommendationFieldUpdateHelper;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.*;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
-
 @ExtendWith(MockitoExtension.class)
-public class CdcRecommendationServiceTest {
+class CdcRecommendationServiceTest {
   @InjectMocks
   CdcRecommendationService cdcRecommendationService;
 
@@ -62,7 +56,8 @@ public class CdcRecommendationServiceTest {
   void shouldAddNewFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var newRecommendation = CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+    var newRecommendation =
+        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
     cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
   }
 
@@ -70,12 +65,17 @@ public class CdcRecommendationServiceTest {
   void shouldUpdateSubsetOfFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var changes = CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+    var changes =
+        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
     cdcRecommendationService.updateSubsetOfFields(changes);
 
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, OUTCOME, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, OUTCOME, changes.getUpdateDescription().getUpdatedFields()
+        );
     verify(fieldUpdateHelper)
-        .updateField(masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields());
+        .updateField(
+            masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
+        );
   }
 }

@@ -21,7 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import static org.mockito.Mockito.verify;
+
 import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,9 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CdcSqsMessageListenerTest {
@@ -49,15 +47,17 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassDoctorInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-      var testMessage = CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
-      cdcSqsMessageListener.getDoctorMessage(testMessage);
+    var testMessage =
+        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
+    cdcSqsMessageListener.getDoctorMessage(testMessage);
 
-      verify(cdcDoctorMessageHandler).handleMessage(testMessage);
+    verify(cdcDoctorMessageHandler).handleMessage(testMessage);
   }
 
   @Test
   void shouldPassDoctorUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+    var testMessage =
+        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
     cdcSqsMessageListener.getDoctorMessage(testMessage);
 
     verify(cdcDoctorMessageHandler).handleMessage(testMessage);

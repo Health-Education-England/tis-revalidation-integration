@@ -44,26 +44,36 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
     this.fieldUpdateHelper = fieldUpdateHelper;
   }
 
+  /**
+   * Add new recommendation to index (this is an aggregation, updating an existing record).
+   *
+   * @param entity recommendation to add to index
+   */
   @Override
   public void addNewEntity(Recommendation entity) {
     String gmcId = entity.getGmcNumber();
     List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if(!masterDoctorViewList.isEmpty()) {
+    if (!masterDoctorViewList.isEmpty()) {
       MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
       masterDoctorView.setAdmin(entity.getAdmin());
     }
   }
 
+  /**
+   * Update recommendation fields in index.
+   *
+   * @param changes ChangeStreamDocument containing changed fields
+   */
   @Override
   public void updateSubsetOfFields(ChangeStreamDocument<Recommendation> changes) {
     String gmcId = changes.getFullDocument().getGmcNumber();
     List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if(!masterDoctorViewList.isEmpty()) {
+    if (!masterDoctorViewList.isEmpty()) {
       MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
       BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-      updatedFields.keySet().forEach(key -> {
-        fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields);
-      });
+      updatedFields.keySet().forEach(key ->
+          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+      );
       repository.save(masterDoctorView);
     }
   }

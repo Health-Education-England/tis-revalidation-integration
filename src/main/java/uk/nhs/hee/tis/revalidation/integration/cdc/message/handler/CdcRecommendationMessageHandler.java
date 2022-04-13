@@ -27,7 +27,8 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationServ
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @Component
-public class CdcRecommendationMessageHandler extends CdcMessageHandler<ChangeStreamDocument<Recommendation>> {
+public class CdcRecommendationMessageHandler
+    extends CdcMessageHandler<ChangeStreamDocument<Recommendation>, Recommendation> {
   public CdcRecommendationMessageHandler(CdcRecommendationService cdcRecommendationService) {
     super(cdcRecommendationService);
   }
