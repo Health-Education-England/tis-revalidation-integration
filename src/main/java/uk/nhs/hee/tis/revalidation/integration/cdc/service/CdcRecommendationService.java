@@ -50,7 +50,6 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
     List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
     if(!masterDoctorViewList.isEmpty()) {
       MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-      masterDoctorView.setGmcStatus(entity.getOutcome().getOutcome());
       masterDoctorView.setAdmin(entity.getAdmin());
     }
   }

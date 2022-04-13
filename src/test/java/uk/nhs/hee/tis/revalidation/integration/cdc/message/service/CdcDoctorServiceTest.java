@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
+import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,9 @@ import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +56,8 @@ public class CdcDoctorServiceTest {
 
   @Test
   void shouldAddNewFields() {
+    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+
     DoctorsForDB newDoctor = CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
@@ -61,10 +66,12 @@ public class CdcDoctorServiceTest {
 
   @Test
   void shouldUpdateSubsetOfFields() {
+    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+
     var changes = CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
     cdcDoctorService.updateSubsetOfFields(changes);
 
-    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
     verify(fieldUpdateHelper)
         .updateField(masterDoctorView, DOCTOR_FIRST_NAME, changes.getUpdateDescription().getUpdatedFields());
     verify(fieldUpdateHelper)

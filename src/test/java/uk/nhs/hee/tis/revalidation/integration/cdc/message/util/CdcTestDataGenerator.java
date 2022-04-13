@@ -59,8 +59,29 @@ public class CdcTestDataGenerator {
   public static final String ADMIN_VAL = "admin";
   public static final Boolean EXISTS_IN_GMC_VAL = true;
 
-  private static final String doctorUpdateJson = "";
-  private static final String recommendationUpdateJson = "";
+  private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
+      .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+      .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
+      .doctorFirstName(DOCTOR_LAST_NAME_VAL)
+      .submissionDate(LocalDate.now())
+      .dateAdded(LocalDate.now())
+      .underNotice(UNDER_NOTICE_VAL)
+      .sanction(SANCTION_VAL)
+      .doctorStatus(DOCTOR_STATUS_VAL)
+      .lastUpdatedDate(LocalDate.now())
+      .designatedBodyCode(DESIGNATED_BODY_CODE_VAL)
+      .admin(ADMIN_VAL)
+      .existsInGmc(EXISTS_IN_GMC_VAL)
+      .build();
+
+  private static Recommendation recommendation = Recommendation.builder()
+      .id("1")
+      .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+      .recommendationType(RecommendationType.REVALIDATE)
+      .recommendationStatus(DRAFT)
+      .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+      .admin(ADMIN_VAL)
+      .build();
 
   public static MasterDoctorView getTestMasterDoctorView() {
     return MasterDoctorView.builder()
@@ -79,21 +100,6 @@ public class CdcTestDataGenerator {
   }
 
   public static ChangeStreamDocument<DoctorsForDB> getDoctorInsertChangeStreamDocument() {
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder()
-        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
-        .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
-        .doctorFirstName(DOCTOR_LAST_NAME_VAL)
-        .submissionDate(LocalDate.now())
-        .dateAdded(LocalDate.now())
-        .underNotice(UNDER_NOTICE_VAL)
-        .sanction(SANCTION_VAL)
-        .doctorStatus(DOCTOR_STATUS_VAL)
-        .lastUpdatedDate(LocalDate.now())
-        .designatedBodyCode(DESIGNATED_BODY_CODE_VAL)
-        .admin(ADMIN_VAL)
-        .existsInGmc(EXISTS_IN_GMC_VAL)
-        .build();
-
     return new ChangeStreamDocument<>(
         OperationType.INSERT,
         BsonDocument.parse("{}"),
@@ -150,7 +156,7 @@ public class CdcTestDataGenerator {
         BsonDocument.parse("{}"),
         null,
         null,
-        null,
+        doctorsForDB,
         null,
         null,
         new UpdateDescription(null, updatesBson),
@@ -170,7 +176,7 @@ public class CdcTestDataGenerator {
         BsonDocument.parse("{}"),
         null,
         null,
-        null,
+        recommendation,
         null,
         null,
         new UpdateDescription(null, updatesBson),
