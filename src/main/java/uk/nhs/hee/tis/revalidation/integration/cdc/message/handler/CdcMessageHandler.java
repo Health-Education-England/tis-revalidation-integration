@@ -33,7 +33,7 @@ public abstract class CdcMessageHandler<T> implements MessageHandler<ChangeStrea
 
   CdcService<T> cdcService;
 
-  public CdcMessageHandler(CdcService<T> cdcService) {
+  protected CdcMessageHandler(CdcService<T> cdcService) {
     this.cdcService = cdcService;
   }
 
