@@ -31,12 +31,8 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public class CdcRecommendationFieldUpdateHelper implements CdcFieldUpdateHelper {
   @Override
   public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
-    switch (key) {
-      case OUTCOME:
-        masterDoctorView.setGmcStatus(updates.getString(OUTCOME).getValue());
-        break;
-      default:
-        break;
+    if (key.equals(OUTCOME)) {
+      masterDoctorView.setGmcStatus(updates.getString(OUTCOME).getValue());
     }
   }
 }

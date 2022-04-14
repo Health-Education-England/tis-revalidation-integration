@@ -49,7 +49,7 @@ public class CdcSqsMessageListener {
    *
    * @param message containing change data for recommendation
    */
-  @SqsListener(value = "${}")
+  @SqsListener("${cloud.aws.end-point.cdc.recommendation}")
   public void getRecommendationMessage(ChangeStreamDocument<Recommendation> message) {
     try {
       cdcRecommendationMessageHandler.handleMessage(message);
@@ -63,7 +63,7 @@ public class CdcSqsMessageListener {
    *
    * @param message containing change data for doctorsForDb
    */
-  @SqsListener(value = "${}")
+  @SqsListener("${cloud.aws.end-point.cdc.doctor}")
   public void getDoctorMessage(ChangeStreamDocument<DoctorsForDB> message) {
     try {
       cdcDoctorMessageHandler.handleMessage(message);

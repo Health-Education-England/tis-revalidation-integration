@@ -92,4 +92,6 @@ cloud:
   aws:
     end-point:
       uri: ${SQS_SYNC_GMC_QUEUE:}
+      cdc.doctor: ${SQS_CDC_DOCTOR_QUEUE:}
+      cdc.recommendation: ${SQS_CDC_RECOMMENDATION_QUEUE:}
 
