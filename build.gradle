@@ -86,7 +86,8 @@ dependencies {
   implementation "com.github.javafaker:javafaker:1.0.2"
 
   // MongoDB
-  implementation 'org.mongodb:mongodb-driver-sync:4.5.1'
+  implementation 'org.mongodb:mongodb-driver-core:4.5.1'
+  implementation 'org.mongodb:bson:4.5.1'
 }
 
 checkstyle {
