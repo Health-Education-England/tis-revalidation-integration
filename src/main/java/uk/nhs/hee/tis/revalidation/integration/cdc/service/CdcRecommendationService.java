@@ -33,49 +33,49 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcRecommendationService implements CdcService<Recommendation> {
 
-    private MasterDoctorElasticSearchRepository repository;
-    private CdcRecommendationFieldUpdateHelper fieldUpdateHelper;
+  private MasterDoctorElasticSearchRepository repository;
+  private CdcRecommendationFieldUpdateHelper fieldUpdateHelper;
 
-    public CdcRecommendationService(
-            MasterDoctorElasticSearchRepository repository,
-            CdcRecommendationFieldUpdateHelper fieldUpdateHelper
-    ) {
-        this.repository = repository;
-        this.fieldUpdateHelper = fieldUpdateHelper;
-    }
+  public CdcRecommendationService(
+      MasterDoctorElasticSearchRepository repository,
+      CdcRecommendationFieldUpdateHelper fieldUpdateHelper
+  ) {
+    this.repository = repository;
+    this.fieldUpdateHelper = fieldUpdateHelper;
+  }
 
-    /**
-     * Add new recommendation to index (this is an aggregation, updating an existing record).
-     *
-     * @param entity recommendation to add to index
-     */
-    @Override
-    public void addNewEntity(Recommendation entity) {
-        String gmcId = entity.getGmcNumber();
-        List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-        if (!masterDoctorViewList.isEmpty()) {
-            MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-            masterDoctorView.setAdmin(entity.getAdmin());
-            repository.save(masterDoctorView);
-        }
+  /**
+   * Add new recommendation to index (this is an aggregation, updating an existing record).
+   *
+   * @param entity recommendation to add to index
+   */
+  @Override
+  public void addNewEntity(Recommendation entity) {
+    String gmcId = entity.getGmcNumber();
+    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+    if (!masterDoctorViewList.isEmpty()) {
+      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+      masterDoctorView.setAdmin(entity.getAdmin());
+      repository.save(masterDoctorView);
     }
+  }
 
-    /**
-     * Update recommendation fields in index.
-     *
-     * @param changes ChangeStreamDocument containing changed fields
-     */
-    @Override
-    public void updateSubsetOfFields(ChangeStreamDocument<Recommendation> changes) {
-        String gmcId = changes.getFullDocument().getGmcNumber();
-        List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-        if (!masterDoctorViewList.isEmpty()) {
-            MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-            BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-            updatedFields.keySet().forEach(key ->
-                    fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-            );
-            repository.save(masterDoctorView);
-        }
+  /**
+   * Update recommendation fields in index.
+   *
+   * @param changes ChangeStreamDocument containing changed fields
+   */
+  @Override
+  public void updateSubsetOfFields(ChangeStreamDocument<Recommendation> changes) {
+    String gmcId = changes.getFullDocument().getGmcNumber();
+    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+    if (!masterDoctorViewList.isEmpty()) {
+      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+      BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
+      updatedFields.keySet().forEach(key ->
+          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+      );
+      repository.save(masterDoctorView);
     }
+  }
 }

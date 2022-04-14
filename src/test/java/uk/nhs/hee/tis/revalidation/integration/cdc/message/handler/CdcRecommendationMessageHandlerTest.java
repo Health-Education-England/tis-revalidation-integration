@@ -36,38 +36,38 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationServ
 @ExtendWith(MockitoExtension.class)
 class CdcRecommendationMessageHandlerTest {
 
-    @InjectMocks
-    CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
+  @InjectMocks
+  CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
 
-    @Mock
-    CdcRecommendationService cdcRecommendationService;
+  @Mock
+  CdcRecommendationService cdcRecommendationService;
 
-    @Test
-    void shouldRejectOtherRecommendationOperationMessageFromSqsQueueToHandler()
-            throws OperationNotSupportedException {
-        var testMessage =
-                CdcTestDataGenerator.getRecommendationUnsupportedChangeStreamDocument();
-        assertThrows(OperationNotSupportedException.class, () -> {
-            cdcRecommendationMessageHandler.handleMessage(testMessage);
-        });
-    }
+  @Test
+  void shouldRejectOtherRecommendationOperationMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationUnsupportedChangeStreamDocument();
+    assertThrows(OperationNotSupportedException.class, () -> {
+      cdcRecommendationMessageHandler.handleMessage(testMessage);
+    });
+  }
 
-    @Test
-    void shouldHandleInserts() throws OperationNotSupportedException {
-        var testMessage =
-                CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
-        cdcRecommendationMessageHandler.handleMessage(testMessage);
+  @Test
+  void shouldHandleInserts() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+    cdcRecommendationMessageHandler.handleMessage(testMessage);
 
-        verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
-    }
+    verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
+  }
 
-    @Test
-    void shouldHandleUpdates() throws OperationNotSupportedException {
-        var testMessage =
-                CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
-        cdcRecommendationMessageHandler.handleMessage(testMessage);
+  @Test
+  void shouldHandleUpdates() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+    cdcRecommendationMessageHandler.handleMessage(testMessage);
 
-        verify(cdcRecommendationService).updateSubsetOfFields(testMessage);
-    }
+    verify(cdcRecommendationService).updateSubsetOfFields(testMessage);
+  }
 
 }

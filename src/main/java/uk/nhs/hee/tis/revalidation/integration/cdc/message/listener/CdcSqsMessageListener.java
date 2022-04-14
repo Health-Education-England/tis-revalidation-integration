@@ -33,42 +33,42 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 @Slf4j
 @Component
 public class CdcSqsMessageListener {
-    private CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
-    private CdcDoctorMessageHandler cdcDoctorMessageHandler;
+  private CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
+  private CdcDoctorMessageHandler cdcDoctorMessageHandler;
 
-    public CdcSqsMessageListener(
-            CdcRecommendationMessageHandler cdcRecommendationMessageHandler,
-            CdcDoctorMessageHandler cdcDoctorMessageHandler
-    ) {
-        this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
-        this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
-    }
+  public CdcSqsMessageListener(
+      CdcRecommendationMessageHandler cdcRecommendationMessageHandler,
+      CdcDoctorMessageHandler cdcDoctorMessageHandler
+  ) {
+    this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
+    this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
+  }
 
-    /**
-     * Get recommendation cdc message.
-     *
-     * @param message containing change data for recommendation
-     */
-    @SqsListener("${cloud.aws.end-point.cdc.recommendation}")
-    public void getRecommendationMessage(ChangeStreamDocument<Recommendation> message) {
-        try {
-            cdcRecommendationMessageHandler.handleMessage(message);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+  /**
+   * Get recommendation cdc message.
+   *
+   * @param message containing change data for recommendation
+   */
+  @SqsListener("${cloud.aws.end-point.cdc.recommendation}")
+  public void getRecommendationMessage(ChangeStreamDocument<Recommendation> message) {
+    try {
+      cdcRecommendationMessageHandler.handleMessage(message);
+    } catch (Exception e) {
+      log.error(e.getMessage());
     }
+  }
 
-    /**
-     * Get doctor cdc message.
-     *
-     * @param message containing change data for doctorsForDb
-     */
-    @SqsListener("${cloud.aws.end-point.cdc.doctor}")
-    public void getDoctorMessage(ChangeStreamDocument<DoctorsForDB> message) {
-        try {
-            cdcDoctorMessageHandler.handleMessage(message);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+  /**
+   * Get doctor cdc message.
+   *
+   * @param message containing change data for doctorsForDb
+   */
+  @SqsListener("${cloud.aws.end-point.cdc.doctor}")
+  public void getDoctorMessage(ChangeStreamDocument<DoctorsForDB> message) {
+    try {
+      cdcDoctorMessageHandler.handleMessage(message);
+    } catch (Exception e) {
+      log.error(e.getMessage());
     }
+  }
 }

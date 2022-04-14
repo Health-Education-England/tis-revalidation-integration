@@ -39,48 +39,48 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Component
 public class CdcDoctorFieldUpdateHelper implements CdcFieldUpdateHelper {
-    @Override
-    public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
-        switch (key) {
-            case DOCTOR_FIRST_NAME:
-                masterDoctorView.setDoctorFirstName(updates.getString(DOCTOR_FIRST_NAME).getValue());
-                break;
-            case DOCTOR_LAST_NAME:
-                masterDoctorView.setDoctorLastName(updates.getString(DOCTOR_LAST_NAME).getValue());
-                break;
-            case SUBMISSION_DATE:
-                masterDoctorView.setSubmissionDate(
-                        getLocalDateFromBsonDateTime(updates.getDateTime(SUBMISSION_DATE))
-                );
-                break;
-            case UNDER_NOTICE:
-                masterDoctorView.setUnderNotice(
-                        UnderNotice.fromString(updates.getString(UNDER_NOTICE).getValue())
-                );
-                break;
-            case DOCTOR_STATUS:
-                masterDoctorView.setTisStatus(
-                        RecommendationStatus.valueOf(updates.getString(DOCTOR_STATUS).getValue())
-                );
-                break;
-            case LAST_UPDATED_DATE:
-                masterDoctorView.setLastUpdatedDate(
-                        getLocalDateFromBsonDateTime(updates.getDateTime(LAST_UPDATED_DATE))
-                );
-                break;
-            case DESIGNATED_BODY_CODE:
-                masterDoctorView.setDesignatedBody(updates.getString(DESIGNATED_BODY_CODE).getValue());
-                break;
-            case ADMIN:
-                masterDoctorView.setAdmin(updates.getString(ADMIN).getValue());
-                break;
-            case EXISTS_IN_GMC:
-                masterDoctorView.setExistsInGmc(
-                        updates.getBoolean(EXISTS_IN_GMC).getValue()
-                );
-                break;
-            default:
-                break;
-        }
+  @Override
+  public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
+    switch (key) {
+      case DOCTOR_FIRST_NAME:
+        masterDoctorView.setDoctorFirstName(updates.getString(DOCTOR_FIRST_NAME).getValue());
+        break;
+      case DOCTOR_LAST_NAME:
+        masterDoctorView.setDoctorLastName(updates.getString(DOCTOR_LAST_NAME).getValue());
+        break;
+      case SUBMISSION_DATE:
+        masterDoctorView.setSubmissionDate(
+            getLocalDateFromBsonDateTime(updates.getDateTime(SUBMISSION_DATE))
+        );
+        break;
+      case UNDER_NOTICE:
+        masterDoctorView.setUnderNotice(
+            UnderNotice.fromString(updates.getString(UNDER_NOTICE).getValue())
+        );
+        break;
+      case DOCTOR_STATUS:
+        masterDoctorView.setTisStatus(
+            RecommendationStatus.valueOf(updates.getString(DOCTOR_STATUS).getValue())
+        );
+        break;
+      case LAST_UPDATED_DATE:
+        masterDoctorView.setLastUpdatedDate(
+            getLocalDateFromBsonDateTime(updates.getDateTime(LAST_UPDATED_DATE))
+        );
+        break;
+      case DESIGNATED_BODY_CODE:
+        masterDoctorView.setDesignatedBody(updates.getString(DESIGNATED_BODY_CODE).getValue());
+        break;
+      case ADMIN:
+        masterDoctorView.setAdmin(updates.getString(ADMIN).getValue());
+        break;
+      case EXISTS_IN_GMC:
+        masterDoctorView.setExistsInGmc(
+            updates.getBoolean(EXISTS_IN_GMC).getValue()
+        );
+        break;
+      default:
+        break;
     }
+  }
 }

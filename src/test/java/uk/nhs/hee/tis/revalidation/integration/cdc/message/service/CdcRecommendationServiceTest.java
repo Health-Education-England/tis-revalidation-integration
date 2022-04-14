@@ -44,72 +44,72 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class CdcRecommendationServiceTest {
-    @InjectMocks
-    CdcRecommendationService cdcRecommendationService;
+  @InjectMocks
+  CdcRecommendationService cdcRecommendationService;
 
-    @Mock
-    MasterDoctorElasticSearchRepository repository;
+  @Mock
+  MasterDoctorElasticSearchRepository repository;
 
-    @Mock
-    CdcRecommendationFieldUpdateHelper fieldUpdateHelper;
+  @Mock
+  CdcRecommendationFieldUpdateHelper fieldUpdateHelper;
 
-    private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+  private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
-    @Test
-    void shouldAddNewFields() {
-        when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+  @Test
+  void shouldAddNewFields() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-        var newRecommendation =
-                CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
-        cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var newRecommendation =
+        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
 
-        verify(repository).save(any());
-    }
+    verify(repository).save(any());
+  }
 
-    @Test
-    void shouldUpdateSubsetOfFields() {
-        when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+  @Test
+  void shouldUpdateSubsetOfFields() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-        var changes =
-                CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
-        cdcRecommendationService.updateSubsetOfFields(changes);
+    var changes =
+        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+    cdcRecommendationService.updateSubsetOfFields(changes);
 
-        verify(fieldUpdateHelper)
-                .updateField(
-                        masterDoctorView, OUTCOME, changes.getUpdateDescription().getUpdatedFields()
-                );
-        verify(fieldUpdateHelper)
-                .updateField(
-                        masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
-                );
-    }
+    verify(fieldUpdateHelper)
+        .updateField(
+            masterDoctorView, OUTCOME, changes.getUpdateDescription().getUpdatedFields()
+        );
+    verify(fieldUpdateHelper)
+        .updateField(
+            masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
+        );
+  }
 
-    @Test
-    void shouldNotInsertRecordIfDoctorDoesNotExist() {
-        when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
+  @Test
+  void shouldNotInsertRecordIfDoctorDoesNotExist() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-        var newRecommendation =
-                CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
-        cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var newRecommendation =
+        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
 
-        verify(repository, never()).save(any());
-    }
+    verify(repository, never()).save(any());
+  }
 
-    @Test
-    void shouldNotUpdateFieldsIfDoctorDoesNotExist() {
-        when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
+  @Test
+  void shouldNotUpdateFieldsIfDoctorDoesNotExist() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-        var changes =
-                CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
-        cdcRecommendationService.updateSubsetOfFields(changes);
+    var changes =
+        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+    cdcRecommendationService.updateSubsetOfFields(changes);
 
-        verify(fieldUpdateHelper, never())
-                .updateField(
-                        masterDoctorView, OUTCOME, changes.getUpdateDescription().getUpdatedFields()
-                );
-        verify(fieldUpdateHelper, never())
-                .updateField(
-                        masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
-                );
-    }
+    verify(fieldUpdateHelper, never())
+        .updateField(
+            masterDoctorView, OUTCOME, changes.getUpdateDescription().getUpdatedFields()
+        );
+    verify(fieldUpdateHelper, never())
+        .updateField(
+            masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
+        );
+  }
 }

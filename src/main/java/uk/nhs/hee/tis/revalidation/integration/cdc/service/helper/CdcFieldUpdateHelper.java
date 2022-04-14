@@ -30,13 +30,13 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 public interface CdcFieldUpdateHelper {
 
-    void updateField(
-            MasterDoctorView masterDoctorView, String key, BsonDocument updates
-    );
+  void updateField(
+      MasterDoctorView masterDoctorView, String key, BsonDocument updates
+  );
 
-    default LocalDate getLocalDateFromBsonDateTime(final BsonDateTime bsonDateTime) {
-        final long bsonInstant = bsonDateTime.getValue();
-        return LocalDate.ofInstant(Instant.ofEpochMilli(bsonInstant), ZoneId.systemDefault());
-    }
+  default LocalDate getLocalDateFromBsonDateTime(final BsonDateTime bsonDateTime) {
+    final long bsonInstant = bsonDateTime.getValue();
+    return LocalDate.ofInstant(Instant.ofEpochMilli(bsonInstant), ZoneId.systemDefault());
+  }
 
 }

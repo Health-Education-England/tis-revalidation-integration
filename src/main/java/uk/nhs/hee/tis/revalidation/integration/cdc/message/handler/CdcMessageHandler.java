@@ -31,24 +31,24 @@ import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
 @Component
 public abstract class CdcMessageHandler<T> implements MessageHandler<ChangeStreamDocument<T>> {
 
-    CdcService<T> cdcService;
+  CdcService<T> cdcService;
 
-    public CdcMessageHandler(CdcService<T> cdcService) {
-        this.cdcService = cdcService;
-    }
+  public CdcMessageHandler(CdcService<T> cdcService) {
+    this.cdcService = cdcService;
+  }
 
-    @Override
-    public void handleMessage(ChangeStreamDocument<T> message) throws OperationNotSupportedException {
-        final OperationType operation = message.getOperationType();
-        switch (operation) {
-            case INSERT:
-                cdcService.addNewEntity(message.getFullDocument());
-                break;
-            case UPDATE:
-                cdcService.updateSubsetOfFields(message);
-                break;
-            default:
-                throw new OperationNotSupportedException("CDC operation not supported: " + operation);
-        }
+  @Override
+  public void handleMessage(ChangeStreamDocument<T> message) throws OperationNotSupportedException {
+    final OperationType operation = message.getOperationType();
+    switch (operation) {
+      case INSERT:
+        cdcService.addNewEntity(message.getFullDocument());
+        break;
+      case UPDATE:
+        cdcService.updateSubsetOfFields(message);
+        break;
+      default:
+        throw new OperationNotSupportedException("CDC operation not supported: " + operation);
     }
+  }
 }

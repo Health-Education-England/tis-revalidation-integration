@@ -36,37 +36,37 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 @ExtendWith(MockitoExtension.class)
 class CdcDoctorMessageHandlerTest {
 
-    @InjectMocks
-    CdcDoctorMessageHandler cdcDoctorMessageHandler;
+  @InjectMocks
+  CdcDoctorMessageHandler cdcDoctorMessageHandler;
 
-    @Mock
-    CdcDoctorService cdcDoctorService;
+  @Mock
+  CdcDoctorService cdcDoctorService;
 
-    @Test
-    void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler()
-            throws OperationNotSupportedException {
-        var testMessage =
-                CdcTestDataGenerator.getDoctorUnsupportedChangeStreamDocument();
-        assertThrows(OperationNotSupportedException.class, () -> {
-            cdcDoctorMessageHandler.handleMessage(testMessage);
-        });
-    }
+  @Test
+  void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getDoctorUnsupportedChangeStreamDocument();
+    assertThrows(OperationNotSupportedException.class, () -> {
+      cdcDoctorMessageHandler.handleMessage(testMessage);
+    });
+  }
 
-    @Test
-    void shouldHandleInserts() throws OperationNotSupportedException {
-        var testMessage =
-                CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
-        cdcDoctorMessageHandler.handleMessage(testMessage);
+  @Test
+  void shouldHandleInserts() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
+    cdcDoctorMessageHandler.handleMessage(testMessage);
 
-        verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
-    }
+    verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
+  }
 
-    @Test
-    void shouldHandleUpdates() throws OperationNotSupportedException {
-        var testMessage =
-                CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
-        cdcDoctorMessageHandler.handleMessage(testMessage);
+  @Test
+  void shouldHandleUpdates() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+    cdcDoctorMessageHandler.handleMessage(testMessage);
 
-        verify(cdcDoctorService).updateSubsetOfFields(testMessage);
-    }
+    verify(cdcDoctorService).updateSubsetOfFields(testMessage);
+  }
 }
