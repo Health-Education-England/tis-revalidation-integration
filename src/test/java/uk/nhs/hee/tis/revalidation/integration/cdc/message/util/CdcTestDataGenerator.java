@@ -56,217 +56,217 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Component
 public class CdcTestDataGenerator {
 
-  public static final String GMC_REFERENCE_NUMBER_VAL = "111";
-  public static final String DOCTOR_FIRST_NAME_VAL = "firstName";
-  public static final String DOCTOR_LAST_NAME_VAL = "lastName";
-  public static final BsonDateTime SUBMISSION_DATE_VAL =
-      new BsonDateTime(Instant.now().getEpochSecond());
-  public static final BsonDateTime DATE_ADDED_VAL =
-      new BsonDateTime(Instant.now().getEpochSecond());
-  public static final UnderNotice UNDER_NOTICE_VAL = YES;
-  public static final String SANCTION_VAL = "sanction";
-  public static final RecommendationStatus DOCTOR_STATUS_VAL = SUBMITTED_TO_GMC;
-  public static final BsonDateTime LAST_UPDATED_DATE_VAL =
-      new BsonDateTime(Instant.now().getEpochSecond());
-  public static final String DESIGNATED_BODY_CODE_VAL = "designatedBodyCode";
-  public static final String ADMIN_VAL = "admin";
-  public static final Boolean EXISTS_IN_GMC_VAL = true;
+    public static final String GMC_REFERENCE_NUMBER_VAL = "111";
+    public static final String DOCTOR_FIRST_NAME_VAL = "firstName";
+    public static final String DOCTOR_LAST_NAME_VAL = "lastName";
+    public static final BsonDateTime SUBMISSION_DATE_VAL =
+            new BsonDateTime(Instant.now().getEpochSecond());
+    public static final BsonDateTime DATE_ADDED_VAL =
+            new BsonDateTime(Instant.now().getEpochSecond());
+    public static final UnderNotice UNDER_NOTICE_VAL = YES;
+    public static final String SANCTION_VAL = "sanction";
+    public static final RecommendationStatus DOCTOR_STATUS_VAL = SUBMITTED_TO_GMC;
+    public static final BsonDateTime LAST_UPDATED_DATE_VAL =
+            new BsonDateTime(Instant.now().getEpochSecond());
+    public static final String DESIGNATED_BODY_CODE_VAL = "designatedBodyCode";
+    public static final String ADMIN_VAL = "admin";
+    public static final Boolean EXISTS_IN_GMC_VAL = true;
 
-  private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
-      .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
-      .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
-      .doctorFirstName(DOCTOR_LAST_NAME_VAL)
-      .submissionDate(LocalDate.now())
-      .dateAdded(LocalDate.now())
-      .underNotice(UNDER_NOTICE_VAL)
-      .sanction(SANCTION_VAL)
-      .doctorStatus(DOCTOR_STATUS_VAL)
-      .lastUpdatedDate(LocalDate.now())
-      .designatedBodyCode(DESIGNATED_BODY_CODE_VAL)
-      .admin(ADMIN_VAL)
-      .existsInGmc(EXISTS_IN_GMC_VAL)
-      .build();
+    private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
+            .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+            .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
+            .doctorFirstName(DOCTOR_LAST_NAME_VAL)
+            .submissionDate(LocalDate.now())
+            .dateAdded(LocalDate.now())
+            .underNotice(UNDER_NOTICE_VAL)
+            .sanction(SANCTION_VAL)
+            .doctorStatus(DOCTOR_STATUS_VAL)
+            .lastUpdatedDate(LocalDate.now())
+            .designatedBodyCode(DESIGNATED_BODY_CODE_VAL)
+            .admin(ADMIN_VAL)
+            .existsInGmc(EXISTS_IN_GMC_VAL)
+            .build();
 
-  private static Recommendation recommendation = Recommendation.builder()
-      .id("1")
-      .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-      .recommendationType(RecommendationType.REVALIDATE)
-      .recommendationStatus(DRAFT)
-      .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-      .admin(ADMIN_VAL)
-      .build();
+    private static Recommendation recommendation = Recommendation.builder()
+            .id("1")
+            .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+            .recommendationType(RecommendationType.REVALIDATE)
+            .recommendationStatus(DRAFT)
+            .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+            .admin(ADMIN_VAL)
+            .build();
 
-  /**
-   * Get a test instance of MasterDoctorView.
-   *
-   * @return MasterDoctorView test instance
-   */
-  public static MasterDoctorView getTestMasterDoctorView() {
-    return MasterDoctorView.builder()
-        .id("1")
-        .tcsPersonId(1L)
-        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
-        .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
-        .doctorLastName("old" + DOCTOR_LAST_NAME_VAL)
-        .submissionDate(LocalDate.now())
-        .designatedBody("old" + DESIGNATED_BODY_CODE_VAL)
-        .tisStatus(DRAFT)
-        .lastUpdatedDate(LocalDate.now())
-        .admin("old" + ADMIN)
-        .existsInGmc(false)
-        .build();
-  }
+    /**
+     * Get a test instance of MasterDoctorView.
+     *
+     * @return MasterDoctorView test instance
+     */
+    public static MasterDoctorView getTestMasterDoctorView() {
+        return MasterDoctorView.builder()
+                .id("1")
+                .tcsPersonId(1L)
+                .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+                .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
+                .doctorLastName("old" + DOCTOR_LAST_NAME_VAL)
+                .submissionDate(LocalDate.now())
+                .designatedBody("old" + DESIGNATED_BODY_CODE_VAL)
+                .tisStatus(DRAFT)
+                .lastUpdatedDate(LocalDate.now())
+                .admin("old" + ADMIN)
+                .existsInGmc(false)
+                .build();
+    }
 
-  /**
-   * Get a test instance of an insert DoctorsForDb ChangeStreamDocument.
-   *
-   * @return ChangeStreamDocument DoctorsForDB test instance
-   */
-  public static ChangeStreamDocument<DoctorsForDB> getDoctorInsertChangeStreamDocument() {
-    return new ChangeStreamDocument<>(
-        OperationType.INSERT,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        doctorsForDB,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-  }
+    /**
+     * Get a test instance of an insert DoctorsForDb ChangeStreamDocument.
+     *
+     * @return ChangeStreamDocument DoctorsForDB test instance
+     */
+    public static ChangeStreamDocument<DoctorsForDB> getDoctorInsertChangeStreamDocument() {
+        return new ChangeStreamDocument<>(
+                OperationType.INSERT,
+                BsonDocument.parse("{}"),
+                null,
+                null,
+                doctorsForDB,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 
-  /**
-   * Get a test instance of an insert Recommendation ChangeStreamDocument.
-   *
-   * @return ChangeStreamDocument Recommendation insert test instance
-   */
-  public static ChangeStreamDocument<Recommendation>
-      getRecommendationInsertChangeStreamDocument() {
-    Recommendation recommendation = Recommendation.builder()
-        .id("1")
-        .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-        .recommendationType(RecommendationType.REVALIDATE)
-        .recommendationStatus(DRAFT)
-        .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-        .admin(ADMIN_VAL)
-        .build();
+    /**
+     * Get a test instance of an insert Recommendation ChangeStreamDocument.
+     *
+     * @return ChangeStreamDocument Recommendation insert test instance
+     */
+    public static ChangeStreamDocument<Recommendation>
+    getRecommendationInsertChangeStreamDocument() {
+        Recommendation recommendation = Recommendation.builder()
+                .id("1")
+                .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+                .recommendationType(RecommendationType.REVALIDATE)
+                .recommendationStatus(DRAFT)
+                .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+                .admin(ADMIN_VAL)
+                .build();
 
-    return new ChangeStreamDocument<>(
-        OperationType.INSERT,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        recommendation,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-  }
+        return new ChangeStreamDocument<>(
+                OperationType.INSERT,
+                BsonDocument.parse("{}"),
+                null,
+                null,
+                recommendation,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 
-  /**
-   * Get a test instance of an update DoctorsForDB ChangeStreamDocument.
-   *
-   * @return ChangeStreamDocument DoctorsForDB update test instance
-   */
-  public static ChangeStreamDocument<DoctorsForDB> getDoctorUpdateChangeStreamDocument() {
-    var updatesBson = new BsonDocument();
-    updatesBson.put(DOCTOR_FIRST_NAME, new BsonString(DOCTOR_FIRST_NAME_VAL));
-    updatesBson.put(DOCTOR_LAST_NAME, new BsonString(DOCTOR_LAST_NAME_VAL));
-    updatesBson.put(SUBMISSION_DATE, SUBMISSION_DATE_VAL);
-    updatesBson.put(UNDER_NOTICE, new BsonString(UNDER_NOTICE_VAL.value()));
-    updatesBson.put(DOCTOR_STATUS, new BsonString(DOCTOR_STATUS_VAL.toString()));
-    updatesBson.put(LAST_UPDATED_DATE, new BsonString(LAST_UPDATED_DATE));
-    updatesBson.put(DESIGNATED_BODY_CODE, new BsonString(DESIGNATED_BODY_CODE_VAL));
-    updatesBson.put(ADMIN, new BsonString(ADMIN_VAL));
-    updatesBson.put(EXISTS_IN_GMC, new BsonBoolean(EXISTS_IN_GMC_VAL));
+    /**
+     * Get a test instance of an update DoctorsForDB ChangeStreamDocument.
+     *
+     * @return ChangeStreamDocument DoctorsForDB update test instance
+     */
+    public static ChangeStreamDocument<DoctorsForDB> getDoctorUpdateChangeStreamDocument() {
+        var updatesBson = new BsonDocument();
+        updatesBson.put(DOCTOR_FIRST_NAME, new BsonString(DOCTOR_FIRST_NAME_VAL));
+        updatesBson.put(DOCTOR_LAST_NAME, new BsonString(DOCTOR_LAST_NAME_VAL));
+        updatesBson.put(SUBMISSION_DATE, SUBMISSION_DATE_VAL);
+        updatesBson.put(UNDER_NOTICE, new BsonString(UNDER_NOTICE_VAL.value()));
+        updatesBson.put(DOCTOR_STATUS, new BsonString(DOCTOR_STATUS_VAL.toString()));
+        updatesBson.put(LAST_UPDATED_DATE, new BsonString(LAST_UPDATED_DATE));
+        updatesBson.put(DESIGNATED_BODY_CODE, new BsonString(DESIGNATED_BODY_CODE_VAL));
+        updatesBson.put(ADMIN, new BsonString(ADMIN_VAL));
+        updatesBson.put(EXISTS_IN_GMC, new BsonBoolean(EXISTS_IN_GMC_VAL));
 
-    return new ChangeStreamDocument<DoctorsForDB>(
-        OperationType.UPDATE,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        doctorsForDB,
-        null,
-        null,
-        new UpdateDescription(null, updatesBson),
-        null,
-        null
-    );
-  }
+        return new ChangeStreamDocument<DoctorsForDB>(
+                OperationType.UPDATE,
+                BsonDocument.parse("{}"),
+                null,
+                null,
+                doctorsForDB,
+                null,
+                null,
+                new UpdateDescription(null, updatesBson),
+                null,
+                null
+        );
+    }
 
-  /**
-   * Get a test instance of an update Recommendation ChangeStreamDocument.
-   *
-   * @return ChangeStreamDocument Recommendation update test instance
-   */
-  public static ChangeStreamDocument<Recommendation>
-      getRecommendationUpdateChangeStreamDocument() {
+    /**
+     * Get a test instance of an update Recommendation ChangeStreamDocument.
+     *
+     * @return ChangeStreamDocument Recommendation update test instance
+     */
+    public static ChangeStreamDocument<Recommendation>
+    getRecommendationUpdateChangeStreamDocument() {
 
-    var updatesBson = new BsonDocument();
-    updatesBson.put(OUTCOME, new BsonString(APPROVED.getOutcome()));
-    updatesBson.put(LAST_UPDATED_DATE, new BsonDateTime(Instant.now().getEpochSecond()));
+        var updatesBson = new BsonDocument();
+        updatesBson.put(OUTCOME, new BsonString(APPROVED.getOutcome()));
+        updatesBson.put(LAST_UPDATED_DATE, new BsonDateTime(Instant.now().getEpochSecond()));
 
-    return new ChangeStreamDocument<Recommendation>(
-        OperationType.UPDATE,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        recommendation,
-        null,
-        null,
-        new UpdateDescription(null, updatesBson),
-        null,
-        null
-    );
-  }
+        return new ChangeStreamDocument<Recommendation>(
+                OperationType.UPDATE,
+                BsonDocument.parse("{}"),
+                null,
+                null,
+                recommendation,
+                null,
+                null,
+                new UpdateDescription(null, updatesBson),
+                null,
+                null
+        );
+    }
 
-  /**
-   * Get a test instance of an unsupported doctor change operation.
-   *
-   * @return ChangeStreamDocument DoctorsForDB unsupported test instance
-   */
-  public static ChangeStreamDocument<DoctorsForDB> getDoctorUnsupportedChangeStreamDocument() {
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
+    /**
+     * Get a test instance of an unsupported doctor change operation.
+     *
+     * @return ChangeStreamDocument DoctorsForDB unsupported test instance
+     */
+    public static ChangeStreamDocument<DoctorsForDB> getDoctorUnsupportedChangeStreamDocument() {
+        DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
 
-    return new ChangeStreamDocument<>(
-        OperationType.DROP,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        doctorsForDB,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-  }
+        return new ChangeStreamDocument<>(
+                OperationType.DROP,
+                BsonDocument.parse("{}"),
+                null,
+                null,
+                doctorsForDB,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 
-  /**
-   * Get a test instance of an unsupported recommendation change operation.
-   *
-   * @return ChangeStreamDocument Recommendation unsupported test instance
-   */
-  public static ChangeStreamDocument<Recommendation>
-      getRecommendationUnsupportedChangeStreamDocument() {
-    Recommendation doctorsForDB = Recommendation.builder().build();
+    /**
+     * Get a test instance of an unsupported recommendation change operation.
+     *
+     * @return ChangeStreamDocument Recommendation unsupported test instance
+     */
+    public static ChangeStreamDocument<Recommendation>
+    getRecommendationUnsupportedChangeStreamDocument() {
+        Recommendation doctorsForDB = Recommendation.builder().build();
 
-    return new ChangeStreamDocument<>(
-        OperationType.DROP,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        doctorsForDB,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-  }
+        return new ChangeStreamDocument<>(
+                OperationType.DROP,
+                BsonDocument.parse("{}"),
+                null,
+                null,
+                doctorsForDB,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 
 }

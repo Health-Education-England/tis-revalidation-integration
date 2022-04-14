@@ -36,48 +36,48 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGener
 @ExtendWith(MockitoExtension.class)
 class CdcSqsMessageListenerTest {
 
-  @InjectMocks
-  CdcSqsMessageListener cdcSqsMessageListener;
+    @InjectMocks
+    CdcSqsMessageListener cdcSqsMessageListener;
 
-  @Mock
-  CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
+    @Mock
+    CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
 
-  @Mock
-  CdcDoctorMessageHandler cdcDoctorMessageHandler;
+    @Mock
+    CdcDoctorMessageHandler cdcDoctorMessageHandler;
 
-  @Test
-  void shouldPassDoctorInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
-    cdcSqsMessageListener.getDoctorMessage(testMessage);
+    @Test
+    void shouldPassDoctorInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
+        var testMessage =
+                CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
+        cdcSqsMessageListener.getDoctorMessage(testMessage);
 
-    verify(cdcDoctorMessageHandler).handleMessage(testMessage);
-  }
+        verify(cdcDoctorMessageHandler).handleMessage(testMessage);
+    }
 
-  @Test
-  void shouldPassDoctorUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
-    cdcSqsMessageListener.getDoctorMessage(testMessage);
+    @Test
+    void shouldPassDoctorUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
+        var testMessage =
+                CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+        cdcSqsMessageListener.getDoctorMessage(testMessage);
 
-    verify(cdcDoctorMessageHandler).handleMessage(testMessage);
-  }
+        verify(cdcDoctorMessageHandler).handleMessage(testMessage);
+    }
 
-  @Test
-  void shouldPassRecommendationInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
-    cdcSqsMessageListener.getRecommendationMessage(testMessage);
+    @Test
+    void shouldPassRecommendationInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
+        var testMessage =
+                CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+        cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
-    verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
-  }
+        verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
+    }
 
-  @Test
-  void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
-    cdcSqsMessageListener.getRecommendationMessage(testMessage);
+    @Test
+    void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
+        var testMessage =
+                CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+        cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
-    verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
-  }
+        verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
+    }
 }

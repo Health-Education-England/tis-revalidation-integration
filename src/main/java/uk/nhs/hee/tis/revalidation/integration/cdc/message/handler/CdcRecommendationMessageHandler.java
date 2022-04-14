@@ -21,15 +21,14 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @Component
 public class CdcRecommendationMessageHandler
-    extends CdcMessageHandler<Recommendation> {
-  public CdcRecommendationMessageHandler(CdcRecommendationService cdcRecommendationService) {
-    super(cdcRecommendationService);
-  }
+        extends CdcMessageHandler<Recommendation> {
+    public CdcRecommendationMessageHandler(CdcRecommendationService cdcRecommendationService) {
+        super(cdcRecommendationService);
+    }
 }

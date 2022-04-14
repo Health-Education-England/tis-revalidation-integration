@@ -24,8 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 
 public interface CdcService<T> {
-  void addNewEntity(T entity);
+    void addNewEntity(T entity);
 
-  void updateSubsetOfFields(ChangeStreamDocument<T> changes);
+    void updateSubsetOfFields(ChangeStreamDocument<T> changes);
 
 }

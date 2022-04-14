@@ -36,56 +36,56 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 public class CdcDoctorService implements CdcService<DoctorsForDB> {
 
-  private MasterDoctorElasticSearchRepository repository;
-  private MasterDoctorViewMapper mapper;
-  private CdcDoctorFieldUpdateHelper fieldUpdateHelper;
+    private MasterDoctorElasticSearchRepository repository;
+    private MasterDoctorViewMapper mapper;
+    private CdcDoctorFieldUpdateHelper fieldUpdateHelper;
 
-  public CdcDoctorService(
-      MasterDoctorElasticSearchRepository repository,
-      MasterDoctorViewMapper mapper,
-      CdcDoctorFieldUpdateHelper fieldUpdateHelper
-  ) {
-    this.repository = repository;
-    this.mapper = mapper;
-    this.fieldUpdateHelper = fieldUpdateHelper;
-  }
-
-  /**
-   * Add new doctor to index.
-   *
-   * @param entity doctorsForDb to add to index
-   */
-  @Override
-  public void addNewEntity(DoctorsForDB entity) {
-    MasterDoctorView newView = mapper.doctorToMasterView(entity);
-    try {
-      repository.save(newView);
-    } catch (Exception e) {
-      log.error(
-          "Failed to insert new record for gmcId: {}, error: {}",
-          entity.getGmcReferenceNumber(),
-          e.getMessage()
-      );
-    }
-  }
-
-  /**
-   * Update doctor fields in index.
-   *
-   * @param changes ChangeStreamDocument containing changed fields
-   */
-  @Override
-  public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
-    String gmcId = changes.getFullDocument().getGmcReferenceNumber();
-    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if (!masterDoctorViewList.isEmpty()) {
-      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-      BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-      updatedFields.keySet().forEach(key ->
-          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-      );
-      repository.save(masterDoctorView);
+    public CdcDoctorService(
+            MasterDoctorElasticSearchRepository repository,
+            MasterDoctorViewMapper mapper,
+            CdcDoctorFieldUpdateHelper fieldUpdateHelper
+    ) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.fieldUpdateHelper = fieldUpdateHelper;
     }
 
-  }
+    /**
+     * Add new doctor to index.
+     *
+     * @param entity doctorsForDb to add to index
+     */
+    @Override
+    public void addNewEntity(DoctorsForDB entity) {
+        MasterDoctorView newView = mapper.doctorToMasterView(entity);
+        try {
+            repository.save(newView);
+        } catch (Exception e) {
+            log.error(
+                    "Failed to insert new record for gmcId: {}, error: {}",
+                    entity.getGmcReferenceNumber(),
+                    e.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Update doctor fields in index.
+     *
+     * @param changes ChangeStreamDocument containing changed fields
+     */
+    @Override
+    public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
+        String gmcId = changes.getFullDocument().getGmcReferenceNumber();
+        List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+        if (!masterDoctorViewList.isEmpty()) {
+            MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+            BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
+            updatedFields.keySet().forEach(key ->
+                    fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+            );
+            repository.save(masterDoctorView);
+        }
+
+    }
 }
