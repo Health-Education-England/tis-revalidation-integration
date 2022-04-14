@@ -29,7 +29,7 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
 import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
 
 @Component
-public class CdcMessageHandler<T> implements MessageHandler<ChangeStreamDocument<T>> {
+public abstract class CdcMessageHandler<T> implements MessageHandler<ChangeStreamDocument<T>> {
 
     CdcService<T> cdcService;
 
