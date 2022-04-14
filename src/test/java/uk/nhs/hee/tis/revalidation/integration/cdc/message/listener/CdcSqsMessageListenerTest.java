@@ -62,4 +62,22 @@ class CdcSqsMessageListenerTest {
 
     verify(cdcDoctorMessageHandler).handleMessage(testMessage);
   }
+
+  @Test
+  void shouldPassRecommendationInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+    cdcSqsMessageListener.getRecommendationMessage(testMessage);
+
+    verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
+  }
+
+  @Test
+  void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+    cdcSqsMessageListener.getRecommendationMessage(testMessage);
+
+    verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
+  }
 }

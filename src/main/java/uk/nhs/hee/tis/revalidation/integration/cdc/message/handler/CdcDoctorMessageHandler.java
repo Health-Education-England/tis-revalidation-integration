@@ -28,7 +28,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 
 @Component
 public class CdcDoctorMessageHandler
-    extends CdcMessageHandler<ChangeStreamDocument<DoctorsForDB>, DoctorsForDB> {
+    extends CdcMessageHandler<DoctorsForDB> {
   public CdcDoctorMessageHandler(CdcDoctorService cdcDoctorService) {
     super(cdcDoctorService);
   }

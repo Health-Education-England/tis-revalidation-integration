@@ -29,20 +29,20 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
 import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
 
 @Component
-public class CdcMessageHandler<T extends ChangeStreamDocument, U> implements MessageHandler<T> {
+public class CdcMessageHandler<T> implements MessageHandler<ChangeStreamDocument<T>> {
 
-  CdcService<U> cdcService;
+  CdcService<T> cdcService;
 
-  public CdcMessageHandler(CdcService<U> cdcService) {
+  public CdcMessageHandler(CdcService<T> cdcService) {
     this.cdcService = cdcService;
   }
 
   @Override
-  public void handleMessage(T message) throws OperationNotSupportedException {
+  public void handleMessage(ChangeStreamDocument<T> message) throws OperationNotSupportedException {
     final OperationType operation = message.getOperationType();
     switch (operation) {
       case INSERT:
-        cdcService.addNewEntity((U) message.getFullDocument());
+        cdcService.addNewEntity(message.getFullDocument());
         break;
       case UPDATE:
         cdcService.updateSubsetOfFields(message);
