@@ -38,15 +38,15 @@ import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Component
-public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper {
+public class CdcDoctorFieldUpdateHelper implements CdcFieldUpdateHelper {
   @Override
   public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
     switch (key) {
       case DOCTOR_FIRST_NAME:
-        masterDoctorView.setDoctorFirstName(String.valueOf(updates.getString(DOCTOR_FIRST_NAME)));
+        masterDoctorView.setDoctorFirstName(updates.getString(DOCTOR_FIRST_NAME).getValue());
         break;
       case DOCTOR_LAST_NAME:
-        masterDoctorView.setDoctorLastName(String.valueOf(updates.getString(DOCTOR_LAST_NAME)));
+        masterDoctorView.setDoctorLastName(updates.getString(DOCTOR_LAST_NAME).getValue());
         break;
       case SUBMISSION_DATE:
         masterDoctorView.setSubmissionDate(
@@ -55,12 +55,12 @@ public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper {
         break;
       case UNDER_NOTICE:
         masterDoctorView.setUnderNotice(
-            UnderNotice.valueOf(String.valueOf(updates.getString(UNDER_NOTICE)))
+            UnderNotice.fromString(updates.getString(UNDER_NOTICE).getValue())
         );
         break;
       case DOCTOR_STATUS:
         masterDoctorView.setTisStatus(
-            RecommendationStatus.valueOf(String.valueOf(updates.getString(DOCTOR_STATUS)))
+            RecommendationStatus.valueOf(updates.getString(DOCTOR_STATUS).getValue())
         );
         break;
       case LAST_UPDATED_DATE:
@@ -69,14 +69,14 @@ public class CdcDoctorFieldUpdateHelper extends CdcFieldUpdateHelper {
         );
         break;
       case DESIGNATED_BODY_CODE:
-        masterDoctorView.setDesignatedBody(String.valueOf(updates.getString(DESIGNATED_BODY_CODE)));
+        masterDoctorView.setDesignatedBody(updates.getString(DESIGNATED_BODY_CODE).getValue());
         break;
       case ADMIN:
-        masterDoctorView.setAdmin(String.valueOf(updates.getString(ADMIN)));
+        masterDoctorView.setAdmin(updates.getString(ADMIN).getValue());
         break;
       case EXISTS_IN_GMC:
         masterDoctorView.setExistsInGmc(
-            Boolean.valueOf(String.valueOf((updates.getBoolean(EXISTS_IN_GMC))))
+            updates.getBoolean(EXISTS_IN_GMC).getValue()
         );
         break;
       default:

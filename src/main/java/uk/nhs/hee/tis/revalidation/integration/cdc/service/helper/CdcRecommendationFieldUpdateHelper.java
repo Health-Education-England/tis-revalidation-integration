@@ -21,26 +21,20 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service.helper;
 
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
 
-import java.time.LocalDate;
 import org.bson.BsonDocument;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Component
-public class CdcRecommendationFieldUpdateHelper extends CdcFieldUpdateHelper {
+public class CdcRecommendationFieldUpdateHelper implements CdcFieldUpdateHelper {
   @Override
   public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
     switch (key) {
       case OUTCOME:
-        masterDoctorView.setGmcStatus(String.valueOf(updates.getString(OUTCOME)));
+        masterDoctorView.setGmcStatus(updates.getString(OUTCOME).getValue());
         break;
-      case LAST_UPDATED_DATE: {
-        masterDoctorView.setLastUpdatedDate(LocalDate.now());
-      }
-      break;
       default:
         break;
     }

@@ -59,6 +59,8 @@ class CdcRecommendationServiceTest {
     var newRecommendation =
         CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
     cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+
+    verify(repository).save(any());
   }
 
   @Test

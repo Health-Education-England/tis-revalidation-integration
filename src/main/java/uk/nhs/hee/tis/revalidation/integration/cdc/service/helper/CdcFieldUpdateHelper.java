@@ -28,13 +28,13 @@ import org.bson.BsonDateTime;
 import org.bson.BsonDocument;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-public abstract class CdcFieldUpdateHelper {
+public interface CdcFieldUpdateHelper {
 
-  public abstract void updateField(
+  void updateField(
       MasterDoctorView masterDoctorView, String key, BsonDocument updates
   );
 
-  public LocalDate getLocalDateFromBsonDateTime(final BsonDateTime bsonDateTime) {
+  default LocalDate getLocalDateFromBsonDateTime(final BsonDateTime bsonDateTime) {
     final long bsonInstant = bsonDateTime.getValue();
     return LocalDate.ofInstant(Instant.ofEpochMilli(bsonInstant), ZoneId.systemDefault());
   }

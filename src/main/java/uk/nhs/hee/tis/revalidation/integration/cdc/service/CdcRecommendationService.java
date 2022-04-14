@@ -56,6 +56,7 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
     if (!masterDoctorViewList.isEmpty()) {
       MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
       masterDoctorView.setAdmin(entity.getAdmin());
+      repository.save(masterDoctorView);
     }
   }
 
