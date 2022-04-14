@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
@@ -34,6 +35,7 @@ import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_U
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.SUBMISSION_DATE;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.UNDER_NOTICE;
 
+import java.util.Collections;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,6 +120,18 @@ class CdcDoctorServiceTest {
     verify(fieldUpdateHelper)
         .updateField(
             masterDoctorView, EXISTS_IN_GMC, changes.getUpdateDescription().getUpdatedFields());
+  }
+
+  @Test
+  void shouldNotUpdateSubsetOfFieldsIfDoctorDoesNotExist() {
+    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
+
+    var changes =
+        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+    cdcDoctorService.updateSubsetOfFields(changes);
+
+    verify(repository, never()).save(mapper.doctorToMasterView(any()));
   }
 
 }
