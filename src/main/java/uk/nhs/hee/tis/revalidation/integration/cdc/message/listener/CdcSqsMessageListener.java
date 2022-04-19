@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
+import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
@@ -30,7 +31,6 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommenda
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
-import javax.naming.OperationNotSupportedException;
 
 @Slf4j
 @Component

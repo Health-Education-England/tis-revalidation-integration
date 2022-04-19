@@ -23,7 +23,6 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
 import org.springframework.stereotype.Service;
@@ -58,7 +57,7 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
     try {
       List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
       if (!masterDoctorViewList.isEmpty()) {
-        if(masterDoctorViewList.size() > 1) {
+        if (masterDoctorViewList.size() > 1) {
           log.error("Multiple doctors assigned to the same GMC number!");
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
@@ -66,6 +65,7 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
         repository.save(masterDoctorView);
       }
     } catch (Exception e) {
+      log.error(String.format("CDC error adding recommendation: %s, exception: %s"), entity, e);
       throw e;
     }
   }
@@ -89,6 +89,7 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
         repository.save(masterDoctorView);
       }
     } catch (Exception e) {
+      log.error(String.format("CDC error updating recommendation: %s, exception: %s"), changes, e);
       throw e;
     }
   }

@@ -97,6 +97,7 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
         repository.save(masterDoctorView);
       }
     } catch (Exception e) {
+      log.error(String.format("CDC error updating doctor: %s, exception: %s"), changes, e);
       throw e;
     }
   }
