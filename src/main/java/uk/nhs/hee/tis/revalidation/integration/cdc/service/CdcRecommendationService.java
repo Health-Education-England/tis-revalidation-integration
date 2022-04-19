@@ -24,7 +24,6 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonDocument;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcRecommendationFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
@@ -33,7 +32,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 @Service
-public class CdcRecommendationService implements CdcService<Recommendation> {
+public class CdcRecommendationService extends CdcService<Recommendation> {
 
   private MasterDoctorElasticSearchRepository repository;
   private CdcRecommendationFieldUpdateHelper fieldUpdateHelper;
@@ -42,6 +41,7 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
       MasterDoctorElasticSearchRepository repository,
       CdcRecommendationFieldUpdateHelper fieldUpdateHelper
   ) {
+    super(repository, fieldUpdateHelper);
     this.repository = repository;
     this.fieldUpdateHelper = fieldUpdateHelper;
   }
@@ -80,17 +80,9 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
    */
   @Override
   public void updateSubsetOfFields(ChangeStreamDocument<Recommendation> changes) {
-    String gmcId = changes.getFullDocument().getGmcNumber();
+    String gmcNumber = changes.getFullDocument().getGmcNumber();
     try {
-      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-      if (!masterDoctorViewList.isEmpty()) {
-        MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-        BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-        updatedFields.keySet().forEach(key ->
-                fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-        );
-        repository.save(masterDoctorView);
-      }
+      updateFields(changes, gmcNumber);
     } catch (Exception e) {
       log.error(String.format("CDC error updating recommendation: %s, exception: %s",
           changes,

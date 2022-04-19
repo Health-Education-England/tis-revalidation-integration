@@ -22,9 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonDocument;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -37,7 +35,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
  */
 @Service
 @Slf4j
-public class CdcDoctorService implements CdcService<DoctorsForDB> {
+public class CdcDoctorService extends CdcService<DoctorsForDB> {
 
   private MasterDoctorElasticSearchRepository repository;
   private MasterDoctorViewMapper mapper;
@@ -55,6 +53,7 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
       MasterDoctorViewMapper mapper,
       CdcDoctorFieldUpdateHelper fieldUpdateHelper
   ) {
+    super(repository, fieldUpdateHelper);
     this.repository = repository;
     this.mapper = mapper;
     this.fieldUpdateHelper = fieldUpdateHelper;
@@ -85,17 +84,9 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
    */
   @Override
   public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
-    String gmcId = changes.getFullDocument().getGmcReferenceNumber();
+    String gmcNumber = changes.getFullDocument().getGmcReferenceNumber();
     try {
-      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-      if (!masterDoctorViewList.isEmpty()) {
-        MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-        BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-        updatedFields.keySet().forEach(key ->
-                fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-        );
-        repository.save(masterDoctorView);
-      }
+      updateFields(changes, gmcNumber);
     } catch (Exception e) {
       log.error(String.format("CDC error updating doctor: %s, exception: %s",
           changes,

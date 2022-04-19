@@ -22,10 +22,44 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonDocument;
+import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcFieldUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-public interface CdcService<T> {
-  void addNewEntity(T entity);
+@Slf4j
+public abstract class CdcService<T> {
+  private MasterDoctorElasticSearchRepository repository;
+  private CdcFieldUpdateHelper fieldUpdateHelper;
 
-  void updateSubsetOfFields(ChangeStreamDocument<T> changes);
+  public CdcService(
+      MasterDoctorElasticSearchRepository repository,
+      CdcFieldUpdateHelper fieldUpdateHelper
+  ) {
+    this.repository = repository;
+    this.fieldUpdateHelper = fieldUpdateHelper;
+  }
+
+  public abstract void addNewEntity(T entity);
+
+  public abstract void updateSubsetOfFields(ChangeStreamDocument<T> changes);
+
+  public void updateFields(ChangeStreamDocument<T> changes, String gmcNumber) {
+
+    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcNumber);
+    if (!masterDoctorViewList.isEmpty()) {
+      if (masterDoctorViewList.size() > 1) {
+        log.error("Multiple doctors assigned to the same GMC number!");
+      }
+      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+      BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
+      updatedFields.keySet().forEach(key ->
+              fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+      );
+      repository.save(masterDoctorView);
+    }
+  }
 
 }
