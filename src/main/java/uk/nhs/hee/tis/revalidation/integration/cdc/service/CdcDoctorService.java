@@ -33,7 +33,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElast
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
- * Service responsible for updating the repository of composite Doctor records used for searching
+ * Service responsible for updating the repository of composite Doctor records used for searching.
  */
 @Service
 @Slf4j
@@ -43,6 +43,13 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
   private MasterDoctorViewMapper mapper;
   private CdcDoctorFieldUpdateHelper fieldUpdateHelper;
 
+  /**
+   * Create a service.
+   *
+   * @param repository        The ElasticSearch repository with the index managed by the service
+   * @param mapper            A mapper for converting to/from the persisted composite view
+   * @param fieldUpdateHelper Provides access to fields within a CDC document
+   */
   public CdcDoctorService(
       MasterDoctorElasticSearchRepository repository,
       MasterDoctorViewMapper mapper,
