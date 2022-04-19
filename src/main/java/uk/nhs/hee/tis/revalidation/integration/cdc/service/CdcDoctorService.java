@@ -32,6 +32,9 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMap
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+/**
+ * Service responsible for updating the repository of composite Doctor records used for searching
+ */
 @Service
 @Slf4j
 public class CdcDoctorService implements CdcService<DoctorsForDB> {
@@ -61,11 +64,9 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
     try {
       repository.save(newView);
     } catch (Exception e) {
-      log.error(
-          "Failed to insert new record for gmcId: {}, error: {}",
-          entity.getGmcReferenceNumber(),
-          e.getMessage()
-      );
+      log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
+          entity.getGmcReferenceNumber(), e.getMessage()),
+          e);
     }
   }
 
