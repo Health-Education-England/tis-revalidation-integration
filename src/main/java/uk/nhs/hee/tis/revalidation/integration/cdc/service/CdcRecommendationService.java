@@ -65,7 +65,10 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
         repository.save(masterDoctorView);
       }
     } catch (Exception e) {
-      log.error(String.format("CDC error adding recommendation: %s, exception: %s"), entity, e);
+      log.error(String.format("CDC error adding recommendation: %s, exception: %s",
+          entity,
+          e.getMessage()),
+          e);
       throw e;
     }
   }
@@ -89,7 +92,10 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
         repository.save(masterDoctorView);
       }
     } catch (Exception e) {
-      log.error(String.format("CDC error updating recommendation: %s, exception: %s"), changes, e);
+      log.error(String.format("CDC error updating recommendation: %s, exception: %s",
+          changes,
+          e.getMessage()),
+          e);
       throw e;
     }
   }
