@@ -35,15 +35,16 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public class CdcRecommendationService extends CdcService<Recommendation> {
 
   private MasterDoctorElasticSearchRepository repository;
-  private CdcRecommendationFieldUpdateHelper fieldUpdateHelper;
 
+  /**
+   * Service responsible for updating the Recommendation composite fields used for searching.
+   */
   public CdcRecommendationService(
       MasterDoctorElasticSearchRepository repository,
       CdcRecommendationFieldUpdateHelper fieldUpdateHelper
   ) {
     super(repository, fieldUpdateHelper);
     this.repository = repository;
-    this.fieldUpdateHelper = fieldUpdateHelper;
   }
 
   /**

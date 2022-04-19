@@ -34,7 +34,7 @@ public abstract class CdcService<T> {
   private MasterDoctorElasticSearchRepository repository;
   private CdcFieldUpdateHelper fieldUpdateHelper;
 
-  public CdcService(
+  protected CdcService(
       MasterDoctorElasticSearchRepository repository,
       CdcFieldUpdateHelper fieldUpdateHelper
   ) {
@@ -46,6 +46,12 @@ public abstract class CdcService<T> {
 
   public abstract void updateSubsetOfFields(ChangeStreamDocument<T> changes);
 
+  /**
+   * Validate changes and update the master doctor index.
+   *
+   * @param changes ChangeStreamDocument containing changed fields
+   * @param gmcNumber Gmc number of doctor to update
+   */
   public void updateFields(ChangeStreamDocument<T> changes, String gmcNumber) {
 
     List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcNumber);

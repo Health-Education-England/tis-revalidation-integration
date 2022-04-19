@@ -39,7 +39,6 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
 
   private MasterDoctorElasticSearchRepository repository;
   private MasterDoctorViewMapper mapper;
-  private CdcDoctorFieldUpdateHelper fieldUpdateHelper;
 
   /**
    * Create a service.
@@ -56,7 +55,6 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
     super(repository, fieldUpdateHelper);
     this.repository = repository;
     this.mapper = mapper;
-    this.fieldUpdateHelper = fieldUpdateHelper;
   }
 
   /**
