@@ -56,6 +56,6 @@ public class DoctorsForDB {
   private String designatedBodyCode;
   private String admin;
   @Nullable
-  private Boolean existsInGmc = false;
+  private Boolean existsInGmc;
 
 }

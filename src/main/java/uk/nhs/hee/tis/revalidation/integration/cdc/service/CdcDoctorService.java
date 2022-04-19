@@ -74,6 +74,7 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
           entity.getGmcReferenceNumber(), e.getMessage()),
           e);
+      throw e;
     }
   }
 
@@ -85,15 +86,18 @@ public class CdcDoctorService implements CdcService<DoctorsForDB> {
   @Override
   public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
     String gmcId = changes.getFullDocument().getGmcReferenceNumber();
-    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if (!masterDoctorViewList.isEmpty()) {
-      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-      BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-      updatedFields.keySet().forEach(key ->
-          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-      );
-      repository.save(masterDoctorView);
+    try {
+      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+      if (!masterDoctorViewList.isEmpty()) {
+        MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+        BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
+        updatedFields.keySet().forEach(key ->
+                fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+        );
+        repository.save(masterDoctorView);
+      }
+    } catch (Exception e) {
+      throw e;
     }
-
   }
 }

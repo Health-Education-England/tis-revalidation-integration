@@ -23,6 +23,8 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcRecommendationFieldUpdateHelper;
@@ -30,6 +32,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+@Slf4j
 @Service
 public class CdcRecommendationService implements CdcService<Recommendation> {
 
@@ -52,11 +55,18 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
   @Override
   public void addNewEntity(Recommendation entity) {
     String gmcId = entity.getGmcNumber();
-    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if (!masterDoctorViewList.isEmpty()) {
-      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-      masterDoctorView.setAdmin(entity.getAdmin());
-      repository.save(masterDoctorView);
+    try {
+      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+      if (!masterDoctorViewList.isEmpty()) {
+        if(masterDoctorViewList.size() > 1) {
+          log.error("Multiple doctors assigned to the same GMC number!");
+        }
+        MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+        masterDoctorView.setAdmin(entity.getAdmin());
+        repository.save(masterDoctorView);
+      }
+    } catch (Exception e) {
+      throw e;
     }
   }
 
@@ -68,14 +78,18 @@ public class CdcRecommendationService implements CdcService<Recommendation> {
   @Override
   public void updateSubsetOfFields(ChangeStreamDocument<Recommendation> changes) {
     String gmcId = changes.getFullDocument().getGmcNumber();
-    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if (!masterDoctorViewList.isEmpty()) {
-      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-      BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-      updatedFields.keySet().forEach(key ->
-          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-      );
-      repository.save(masterDoctorView);
+    try {
+      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+      if (!masterDoctorViewList.isEmpty()) {
+        MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
+        BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
+        updatedFields.keySet().forEach(key ->
+                fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+        );
+        repository.save(masterDoctorView);
+      }
+    } catch (Exception e) {
+      throw e;
     }
   }
 }

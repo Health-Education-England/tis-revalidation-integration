@@ -30,6 +30,8 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommenda
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
+import javax.naming.OperationNotSupportedException;
+
 @Slf4j
 @Component
 public class CdcSqsMessageListener {
@@ -53,7 +55,7 @@ public class CdcSqsMessageListener {
   public void getRecommendationMessage(ChangeStreamDocument<Recommendation> message) {
     try {
       cdcRecommendationMessageHandler.handleMessage(message);
-    } catch (Exception e) {
+    } catch (OperationNotSupportedException e) {
       log.error(e.getMessage());
     }
   }
@@ -67,7 +69,7 @@ public class CdcSqsMessageListener {
   public void getDoctorMessage(ChangeStreamDocument<DoctorsForDB> message) {
     try {
       cdcDoctorMessageHandler.handleMessage(message);
-    } catch (Exception e) {
+    } catch (OperationNotSupportedException e) {
       log.error(e.getMessage());
     }
   }
