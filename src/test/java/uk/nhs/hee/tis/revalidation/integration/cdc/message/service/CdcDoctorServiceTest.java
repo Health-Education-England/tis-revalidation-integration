@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
@@ -65,14 +66,29 @@ class CdcDoctorServiceTest {
   MasterDoctorViewMapper mapper;
 
   @Test
-  void shouldAddNewFields() {
-    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+  void shouldAddNewFieldsIfDoctorDoesNotExist() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     DoctorsForDB newDoctor =
         CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
     verify(repository).save(mapper.doctorToMasterView(newDoctor));
+  }
+
+  @Test
+  void shouldUpdateFieldsIfDoctorExistsOnAdd() {
+    var existingDoctor = CdcTestDataGenerator.getTestMasterDoctorView();
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(
+        List.of(existingDoctor)
+    );
+
+    DoctorsForDB newDoctor =
+        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
+    cdcDoctorService.addNewEntity(newDoctor);
+
+    verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
+    verify(repository).save(any());
   }
 
   @Test
