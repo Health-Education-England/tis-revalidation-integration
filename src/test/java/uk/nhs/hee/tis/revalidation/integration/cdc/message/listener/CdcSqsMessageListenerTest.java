@@ -65,7 +65,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassRecommendationInsertMessageFromSqsQueueToHandler()
-          throws OperationNotSupportedException {
+      throws OperationNotSupportedException {
     var testMessage =
         CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
@@ -75,7 +75,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler()
-          throws OperationNotSupportedException {
+      throws OperationNotSupportedException {
     var testMessage =
         CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
     cdcSqsMessageListener.getRecommendationMessage(testMessage);

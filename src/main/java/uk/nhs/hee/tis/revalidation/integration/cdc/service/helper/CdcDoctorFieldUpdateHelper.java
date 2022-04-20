@@ -39,6 +39,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Component
 public class CdcDoctorFieldUpdateHelper implements CdcFieldUpdateHelper {
+
   @Override
   public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
     switch (key) {

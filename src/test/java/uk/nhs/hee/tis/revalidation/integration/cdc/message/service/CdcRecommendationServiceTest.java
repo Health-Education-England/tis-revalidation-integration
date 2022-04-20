@@ -44,6 +44,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class CdcRecommendationServiceTest {
+
   @InjectMocks
   CdcRecommendationService cdcRecommendationService;
 

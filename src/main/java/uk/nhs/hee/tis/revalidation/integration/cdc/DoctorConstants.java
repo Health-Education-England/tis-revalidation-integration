@@ -25,6 +25,7 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DoctorConstants {
+
   public static final String DOCTOR_FIRST_NAME = "doctorFirstName";
   public static final String DOCTOR_LAST_NAME = "doctorLastName";
   public static final String SUBMISSION_DATE = "submissionDate";

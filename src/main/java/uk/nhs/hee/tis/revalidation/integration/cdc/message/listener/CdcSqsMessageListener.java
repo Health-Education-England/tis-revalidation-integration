@@ -35,6 +35,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 @Slf4j
 @Component
 public class CdcSqsMessageListener {
+
   private CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
   private CdcDoctorMessageHandler cdcDoctorMessageHandler;
 

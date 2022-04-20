@@ -31,6 +31,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 public abstract class CdcService<T> {
+
   private MasterDoctorElasticSearchRepository repository;
   private CdcFieldUpdateHelper fieldUpdateHelper;
 
@@ -49,7 +50,7 @@ public abstract class CdcService<T> {
   /**
    * Validate changes and update the master doctor index.
    *
-   * @param changes ChangeStreamDocument containing changed fields
+   * @param changes   ChangeStreamDocument containing changed fields
    * @param gmcNumber Gmc number of doctor to update
    */
   public void updateFields(ChangeStreamDocument<T> changes, String gmcNumber) {
@@ -62,7 +63,7 @@ public abstract class CdcService<T> {
       MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
       BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
       updatedFields.keySet().forEach(key ->
-              fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
+          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
       );
       repository.save(masterDoctorView);
     }

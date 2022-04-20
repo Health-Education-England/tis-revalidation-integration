@@ -28,6 +28,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 @Component
 public class CdcRecommendationMessageHandler
     extends CdcMessageHandler<Recommendation> {
+
   public CdcRecommendationMessageHandler(CdcRecommendationService cdcRecommendationService) {
     super(cdcRecommendationService);
   }

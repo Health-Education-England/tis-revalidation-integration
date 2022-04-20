@@ -25,5 +25,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class RecommendationConstants {
+
   public static final String OUTCOME = "outcome";
 }
