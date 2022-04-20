@@ -66,9 +66,8 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         repository.save(masterDoctorView);
       }
     } catch (Exception e) {
-      log.error(String.format("CDC error adding recommendation: %s, exception: %s",
-          entity,
-          e.getMessage()),
+      log.error(String
+              .format("CDC error adding recommendation: %s, exception: %s", entity, e.getMessage()),
           e);
       throw e;
     }
@@ -85,8 +84,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
     try {
       updateFields(changes, gmcNumber);
     } catch (Exception e) {
-      log.error(String.format("CDC error updating recommendation: %s, exception: %s",
-          changes,
+      log.error(String.format("CDC error updating recommendation: %s, exception: %s", gmcNumber,
           e.getMessage()),
           e);
       throw e;

@@ -57,7 +57,7 @@ public class CdcSqsMessageListener {
     try {
       cdcRecommendationMessageHandler.handleMessage(message);
     } catch (OperationNotSupportedException e) {
-      log.error(e.getMessage());
+      log.error(e.getMessage(), e);
     }
   }
 
@@ -71,7 +71,7 @@ public class CdcSqsMessageListener {
     try {
       cdcDoctorMessageHandler.handleMessage(message);
     } catch (OperationNotSupportedException e) {
-      log.error(e.getMessage());
+      log.error(e.getMessage(), e);
     }
   }
 }

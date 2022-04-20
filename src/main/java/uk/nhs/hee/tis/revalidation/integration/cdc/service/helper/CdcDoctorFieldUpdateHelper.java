@@ -51,23 +51,19 @@ public class CdcDoctorFieldUpdateHelper implements CdcFieldUpdateHelper {
         break;
       case SUBMISSION_DATE:
         masterDoctorView.setSubmissionDate(
-            getLocalDateFromBsonDateTime(updates.getDateTime(SUBMISSION_DATE))
-        );
+            getLocalDateFromBsonDateTime(updates.getDateTime(SUBMISSION_DATE)));
         break;
       case UNDER_NOTICE:
         masterDoctorView.setUnderNotice(
-            UnderNotice.fromString(updates.getString(UNDER_NOTICE).getValue())
-        );
+            UnderNotice.fromString(updates.getString(UNDER_NOTICE).getValue()));
         break;
       case DOCTOR_STATUS:
         masterDoctorView.setTisStatus(
-            RecommendationStatus.valueOf(updates.getString(DOCTOR_STATUS).getValue())
-        );
+            RecommendationStatus.valueOf(updates.getString(DOCTOR_STATUS).getValue()));
         break;
       case LAST_UPDATED_DATE:
         masterDoctorView.setLastUpdatedDate(
-            getLocalDateFromBsonDateTime(updates.getDateTime(LAST_UPDATED_DATE))
-        );
+            getLocalDateFromBsonDateTime(updates.getDateTime(LAST_UPDATED_DATE)));
         break;
       case DESIGNATED_BODY_CODE:
         masterDoctorView.setDesignatedBody(updates.getString(DESIGNATED_BODY_CODE).getValue());
@@ -76,9 +72,7 @@ public class CdcDoctorFieldUpdateHelper implements CdcFieldUpdateHelper {
         masterDoctorView.setAdmin(updates.getString(ADMIN).getValue());
         break;
       case EXISTS_IN_GMC:
-        masterDoctorView.setExistsInGmc(
-            updates.getBoolean(EXISTS_IN_GMC).getValue()
-        );
+        masterDoctorView.setExistsInGmc(updates.getBoolean(EXISTS_IN_GMC).getValue());
         break;
       default:
         break;

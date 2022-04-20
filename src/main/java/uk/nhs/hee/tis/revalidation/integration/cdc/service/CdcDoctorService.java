@@ -86,9 +86,8 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
     try {
       updateFields(changes, gmcNumber);
     } catch (Exception e) {
-      log.error(String.format("CDC error updating doctor: %s, exception: %s",
-          changes,
-          e.getMessage()),
+      log.error(
+          String.format("CDC error updating doctor: %s, exception: %s", gmcNumber, e.getMessage()),
           e);
       throw e;
     }

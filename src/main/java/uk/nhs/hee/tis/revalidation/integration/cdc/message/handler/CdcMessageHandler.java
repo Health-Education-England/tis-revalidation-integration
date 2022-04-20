@@ -24,11 +24,9 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import javax.naming.OperationNotSupportedException;
-import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
 import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
 
-@Component
 public abstract class CdcMessageHandler<T> implements MessageHandler<ChangeStreamDocument<T>> {
 
   CdcService<T> cdcService;
