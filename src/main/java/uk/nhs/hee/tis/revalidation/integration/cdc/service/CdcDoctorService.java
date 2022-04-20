@@ -28,7 +28,6 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorField
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
  * Service responsible for updating the repository of composite Doctor records used for searching.
@@ -37,7 +36,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 public class CdcDoctorService extends CdcService<DoctorsForDB> {
 
-  private MasterDoctorElasticSearchRepository repository;
   private MasterDoctorViewMapper mapper;
 
   /**
@@ -53,7 +51,6 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
       CdcDoctorFieldUpdateHelper fieldUpdateHelper
   ) {
     super(repository, fieldUpdateHelper);
-    this.repository = repository;
     this.mapper = mapper;
   }
 
@@ -64,9 +61,23 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    */
   @Override
   public void addNewEntity(DoctorsForDB entity) {
-    MasterDoctorView newView = mapper.doctorToMasterView(entity);
+
+    final var repository = getRepository();
+    final var existingDoctors = repository
+        .findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     try {
-      repository.save(newView);
+      if (existingDoctors.isEmpty()){
+         repository.save(mapper.doctorToMasterView(entity));
+      } else {
+        if (existingDoctors.size() > 1) {
+          log.error("Multiple doctors assigned to the same GMC number!");
+        }
+        var updatedDoctor = mapper.updateMasterDoctorView(
+            existingDoctors.get(0),
+            mapper.doctorToMasterView(entity)
+        );
+        repository.save(updatedDoctor);
+      }
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
           entity.getGmcReferenceNumber(), e.getMessage()),

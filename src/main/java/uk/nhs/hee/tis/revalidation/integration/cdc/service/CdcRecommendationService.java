@@ -34,8 +34,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcRecommendationService extends CdcService<Recommendation> {
 
-  private MasterDoctorElasticSearchRepository repository;
-
   /**
    * Service responsible for updating the Recommendation composite fields used for searching.
    */
@@ -44,7 +42,6 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
       CdcRecommendationFieldUpdateHelper fieldUpdateHelper
   ) {
     super(repository, fieldUpdateHelper);
-    this.repository = repository;
   }
 
   /**
@@ -55,6 +52,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
   @Override
   public void addNewEntity(Recommendation entity) {
     String gmcId = entity.getGmcNumber();
+    final var repository = getRepository();
     try {
       List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
       if (!masterDoctorViewList.isEmpty()) {
@@ -85,7 +83,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
       updateFields(changes, gmcNumber);
     } catch (Exception e) {
       log.error(String.format("CDC error updating recommendation: %s, exception: %s", gmcNumber,
-          e.getMessage()),
+              e.getMessage()),
           e);
       throw e;
     }

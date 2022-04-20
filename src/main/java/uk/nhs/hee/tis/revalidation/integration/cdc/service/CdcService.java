@@ -43,6 +43,10 @@ public abstract class CdcService<T> {
     this.fieldUpdateHelper = fieldUpdateHelper;
   }
 
+  protected MasterDoctorElasticSearchRepository getRepository() {
+    return this.repository;
+  }
+
   public abstract void addNewEntity(T entity);
 
   public abstract void updateSubsetOfFields(ChangeStreamDocument<T> changes);
@@ -68,5 +72,4 @@ public abstract class CdcService<T> {
       repository.save(masterDoctorView);
     }
   }
-
 }
