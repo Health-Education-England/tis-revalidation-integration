@@ -143,7 +143,7 @@ public class CdcTestDataGenerator {
    * @return ChangeStreamDocument Recommendation insert test instance
    */
   public static ChangeStreamDocument<Recommendation>
-    getRecommendationInsertChangeStreamDocument() {
+      getRecommendationInsertChangeStreamDocument() {
     Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -204,7 +204,7 @@ public class CdcTestDataGenerator {
    * @return ChangeStreamDocument Recommendation update test instance
    */
   public static ChangeStreamDocument<Recommendation>
-    getRecommendationUpdateChangeStreamDocument() {
+      getRecommendationUpdateChangeStreamDocument() {
 
     var updatesBson = new BsonDocument();
     updatesBson.put(OUTCOME, new BsonString(APPROVED.getOutcome()));
@@ -252,7 +252,7 @@ public class CdcTestDataGenerator {
    * @return ChangeStreamDocument Recommendation unsupported test instance
    */
   public static ChangeStreamDocument<Recommendation>
-    getRecommendationUnsupportedChangeStreamDocument() {
+      getRecommendationUnsupportedChangeStreamDocument() {
     Recommendation doctorsForDB = Recommendation.builder().build();
 
     return new ChangeStreamDocument<>(
