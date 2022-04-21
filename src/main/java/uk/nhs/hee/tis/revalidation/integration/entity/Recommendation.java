@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2021 Crown Copyright (Health Education England)
+ * Copyright 2022 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,41 +21,34 @@
 
 package uk.nhs.hee.tis.revalidation.integration.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
+import org.springframework.data.annotation.Id;
+import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
+import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationType;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DoctorsForDB {
+public class Recommendation {
 
-  private String gmcReferenceNumber;
-  private String doctorFirstName;
-  private String doctorLastName;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
-  @JsonSerialize(using = LocalDateSerializer.class)
-  private LocalDate submissionDate;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
-  @JsonSerialize(using = LocalDateSerializer.class)
-  private LocalDate dateAdded;
-  private UnderNotice underNotice;
-  private String sanction;
-  private RecommendationStatus doctorStatus;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
-  @JsonSerialize(using = LocalDateSerializer.class)
-  private LocalDate lastUpdatedDate;
-  private String designatedBodyCode;
+  @Id
+  private String id;
+  private String gmcNumber;
+  private RecommendationGmcOutcome outcome;
+  private RecommendationType recommendationType;
+  private RecommendationStatus recommendationStatus;
+  private LocalDate gmcSubmissionDate;
+  private LocalDate actualSubmissionDate;
+  private String gmcRevalidationId;
+  private LocalDate deferralDate;
+  private String deferralReason;
+  private String deferralSubReason;
+  private List<String> comments;
   private String admin;
-  @Nullable
-  private Boolean existsInGmc;
-
 }

@@ -84,4 +84,6 @@ public class MasterDoctorView {
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate membershipEndDate;
+  @Nullable
+  private Boolean existsInGmc;
 }

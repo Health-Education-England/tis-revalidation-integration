@@ -1,6 +1,7 @@
 /*
  * The MIT License (MIT)
- * Copyright 2021 Crown Copyright (Health Education England)
+ *
+ * Copyright 2022 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,23 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.enums;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
+public enum RecommendationGmcOutcome {
 
-@Mapper(componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MasterDoctorViewMapper {
+  APPROVED("Approved"), REJECTED("Rejected"), UNDER_REVIEW("Under Review");
 
-  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-                                          @MappingTarget MasterDoctorView target);
+  private final String outcome;
 
-  @Mapping(source = "doctorStatus", target = "tisStatus")
-  @Mapping(source = "designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
+  RecommendationGmcOutcome(final String outcome) {
+    this.outcome = outcome;
+  }
+
+  /**
+   * Return corresponding enum from string input, defaults to UNDER_REVIEW.
+   *
+   * @param value String form of enum
+   * @return RecommendationGmcOutcome corresponding enum
+   */
+  public static RecommendationGmcOutcome fromString(final String value) {
+    for (final RecommendationGmcOutcome gmcOutcome : RecommendationGmcOutcome.values()) {
+      if (gmcOutcome.outcome.equals(value)) {
+        return gmcOutcome;
+      }
+    }
+    return UNDER_REVIEW;
+  }
+
+  public String getOutcome() {
+    return this.outcome;
+  }
 }

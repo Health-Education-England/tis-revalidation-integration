@@ -84,6 +84,11 @@ dependencies {
 
   // Faker
   implementation "com.github.javafaker:javafaker:1.0.2"
+
+  // MongoDB
+  ext.mongoDriverVersion = "4.5.1"
+  implementation "org.mongodb:mongodb-driver-core:$mongoDriverVersion"
+  implementation "org.mongodb:bson:$mongoDriverVersion"
 }
 
 checkstyle {

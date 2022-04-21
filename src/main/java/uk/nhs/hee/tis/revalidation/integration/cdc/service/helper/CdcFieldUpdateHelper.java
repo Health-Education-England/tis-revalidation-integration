@@ -1,6 +1,7 @@
 /*
  * The MIT License (MIT)
- * Copyright 2021 Crown Copyright (Health Education England)
+ *
+ * Copyright 2022 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,23 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.cdc.service.helper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import org.bson.BsonDateTime;
+import org.bson.BsonDocument;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Mapper(componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MasterDoctorViewMapper {
+public interface CdcFieldUpdateHelper {
 
-  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-                                          @MappingTarget MasterDoctorView target);
+  void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates);
 
-  @Mapping(source = "doctorStatus", target = "tisStatus")
-  @Mapping(source = "designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
+  default LocalDate getLocalDateFromBsonDateTime(final BsonDateTime bsonDateTime) {
+    final long bsonInstant = bsonDateTime.getValue();
+    return LocalDate.ofInstant(Instant.ofEpochMilli(bsonInstant), ZoneId.systemDefault());
+  }
+
 }
