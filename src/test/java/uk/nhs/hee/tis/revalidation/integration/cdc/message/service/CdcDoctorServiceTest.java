@@ -41,12 +41,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcDoctor;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 
@@ -69,11 +68,11 @@ class CdcDoctorServiceTest {
   void shouldAddNewFieldsIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
+    CdcDoctor newDoctor =
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
-    verify(repository).save(mapper.doctorToMasterView(newDoctor));
+    verify(repository).save(mapper.cdcDoctorToMasterView(newDoctor));
   }
 
   @Test
@@ -83,11 +82,11 @@ class CdcDoctorServiceTest {
         List.of(existingDoctor)
     );
 
-    DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
+    CdcDoctor newDoctor =
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
-    verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
+    verify(mapper).updateMasterDoctorView(existingDoctor, mapper.cdcDoctorToMasterView(newDoctor));
     verify(repository).save(any());
   }
 
@@ -97,7 +96,7 @@ class CdcDoctorServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var changes =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
     cdcDoctorService.updateSubsetOfFields(changes);
 
     verify(fieldUpdateHelper)
@@ -144,10 +143,10 @@ class CdcDoctorServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     var changes =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
     cdcDoctorService.updateSubsetOfFields(changes);
 
-    verify(repository, never()).save(mapper.doctorToMasterView(any()));
+    verify(repository, never()).save(mapper.cdcDoctorToMasterView(any()));
   }
 
 }

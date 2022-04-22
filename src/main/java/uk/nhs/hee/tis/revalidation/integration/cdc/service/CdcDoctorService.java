@@ -24,6 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcDoctor;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
@@ -34,7 +36,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElast
  */
 @Service
 @Slf4j
-public class CdcDoctorService extends CdcService<DoctorsForDB> {
+public class CdcDoctorService extends CdcService<CdcDoctor> {
 
   private MasterDoctorViewMapper mapper;
 
@@ -60,21 +62,21 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param entity doctorsForDb to add to index
    */
   @Override
-  public void addNewEntity(DoctorsForDB entity) {
+  public void addNewEntity(CdcDoctor entity) {
 
     final var repository = getRepository();
     final var existingDoctors = repository
         .findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     try {
       if (existingDoctors.isEmpty()) {
-        repository.save(mapper.doctorToMasterView(entity));
+        repository.save(mapper.cdcDoctorToMasterView(entity));
       } else {
         if (existingDoctors.size() > 1) {
           log.error("Multiple doctors assigned to the same GMC number!");
         }
         var updatedDoctor = mapper.updateMasterDoctorView(
             existingDoctors.get(0),
-            mapper.doctorToMasterView(entity)
+            mapper.cdcDoctorToMasterView(entity)
         );
         repository.save(updatedDoctor);
       }
@@ -92,7 +94,7 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param changes ChangeStreamDocument containing changed fields
    */
   @Override
-  public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
+  public void updateSubsetOfFields(CdcDocumentDto<CdcDoctor> changes) {
     String gmcNumber = changes.getFullDocument().getGmcReferenceNumber();
     try {
       updateFields(changes, gmcNumber);

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil;
 
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DESIGNATED_BODY_CODE;
@@ -36,7 +36,6 @@ import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatu
 import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
 import static uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome.APPROVED;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import com.mongodb.client.model.changestream.UpdateDescription;
 import java.time.Instant;
@@ -46,8 +45,9 @@ import org.bson.BsonDateTime;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcDoctor;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcRecommendation;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationType;
@@ -72,7 +72,7 @@ public class CdcTestDataGenerator {
   public static final String ADMIN_VAL = "admin";
   public static final Boolean EXISTS_IN_GMC_VAL = true;
 
-  private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
+  private static CdcDoctor doctorsForDB = CdcDoctor.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
       .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
       .doctorFirstName(DOCTOR_LAST_NAME_VAL)
@@ -87,7 +87,7 @@ public class CdcTestDataGenerator {
       .existsInGmc(EXISTS_IN_GMC_VAL)
       .build();
 
-  private static Recommendation recommendation = Recommendation.builder()
+  private static CdcRecommendation recommendation = CdcRecommendation.builder()
       .id("1")
       .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
       .recommendationType(RecommendationType.REVALIDATE)
@@ -118,33 +118,26 @@ public class CdcTestDataGenerator {
   }
 
   /**
-   * Get a test instance of an insert DoctorsForDb ChangeStreamDocument.
+   * Get a test instance of an insert DoctorsForDb CdcDocumentDto.
    *
-   * @return ChangeStreamDocument DoctorsForDB test instance
+   * @return CdcDocumentDto CdcDoctor test instance
    */
-  public static ChangeStreamDocument<DoctorsForDB> getDoctorInsertChangeStreamDocument() {
-    return new ChangeStreamDocument<>(
-        OperationType.INSERT,
-        BsonDocument.parse("{}"),
-        null,
-        null,
+  public static CdcDocumentDto<CdcDoctor> getCdcDoctorInsertCdcDocumentDto() {
+    return new CdcDocumentDto<CdcDoctor>(
+        OperationType.INSERT.getValue(),
         doctorsForDB,
-        null,
-        null,
-        null,
-        null,
         null
     );
   }
 
   /**
-   * Get a test instance of an insert Recommendation ChangeStreamDocument.
+   * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
    *
-   * @return ChangeStreamDocument Recommendation insert test instance
+   * @return CdcDocumentDto CdcRecommendation insert test instance
    */
-  public static ChangeStreamDocument<Recommendation>
-      getRecommendationInsertChangeStreamDocument() {
-    Recommendation recommendation = Recommendation.builder()
+  public static CdcDocumentDto<CdcRecommendation>
+      getCdcRecommendationInsertCdcDocumentDto() {
+    CdcRecommendation recommendation = CdcRecommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
         .recommendationType(RecommendationType.REVALIDATE)
@@ -153,26 +146,19 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new ChangeStreamDocument<>(
-        OperationType.INSERT,
-        BsonDocument.parse("{}"),
-        null,
-        null,
+    return new CdcDocumentDto<CdcRecommendation>(
+        OperationType.INSERT.getValue(),
         recommendation,
-        null,
-        null,
-        null,
-        null,
         null
     );
   }
 
   /**
-   * Get a test instance of an update DoctorsForDB ChangeStreamDocument.
+   * Get a test instance of an update CdcDoctor CdcDocumentDto.
    *
-   * @return ChangeStreamDocument DoctorsForDB update test instance
+   * @return CdcDocumentDto CdcDoctor update test instance
    */
-  public static ChangeStreamDocument<DoctorsForDB> getDoctorUpdateChangeStreamDocument() {
+  public static CdcDocumentDto<CdcDoctor> getCdcDoctorUpdateCdcDocumentDto() {
     var updatesBson = new BsonDocument();
     updatesBson.put(DOCTOR_FIRST_NAME, new BsonString(DOCTOR_FIRST_NAME_VAL));
     updatesBson.put(DOCTOR_LAST_NAME, new BsonString(DOCTOR_LAST_NAME_VAL));
@@ -184,64 +170,43 @@ public class CdcTestDataGenerator {
     updatesBson.put(ADMIN, new BsonString(ADMIN_VAL));
     updatesBson.put(EXISTS_IN_GMC, new BsonBoolean(EXISTS_IN_GMC_VAL));
 
-    return new ChangeStreamDocument<DoctorsForDB>(
-        OperationType.UPDATE,
-        BsonDocument.parse("{}"),
-        null,
-        null,
+    return new CdcDocumentDto<CdcDoctor>(
+        OperationType.UPDATE.getValue(),
         doctorsForDB,
-        null,
-        null,
-        new UpdateDescription(null, updatesBson),
-        null,
-        null
+        new UpdateDescription(null, updatesBson)
     );
   }
 
   /**
-   * Get a test instance of an update Recommendation ChangeStreamDocument.
+   * Get a test instance of an update CdcRecommendation CdcDocumentDto.
    *
-   * @return ChangeStreamDocument Recommendation update test instance
+   * @return CdcDocumentDto CdcRecommendation update test instance
    */
-  public static ChangeStreamDocument<Recommendation>
-      getRecommendationUpdateChangeStreamDocument() {
+  public static CdcDocumentDto<CdcRecommendation>
+      getCdcRecommendationUpdateCdcDocumentDto() {
 
     var updatesBson = new BsonDocument();
     updatesBson.put(OUTCOME, new BsonString(APPROVED.getOutcome()));
     updatesBson.put(LAST_UPDATED_DATE, new BsonDateTime(Instant.now().getEpochSecond()));
 
-    return new ChangeStreamDocument<Recommendation>(
-        OperationType.UPDATE,
-        BsonDocument.parse("{}"),
-        null,
-        null,
+    return new CdcDocumentDto<CdcRecommendation>(
+        OperationType.UPDATE.getValue(),
         recommendation,
-        null,
-        null,
-        new UpdateDescription(null, updatesBson),
-        null,
-        null
+        new UpdateDescription(null, updatesBson)
     );
   }
 
   /**
    * Get a test instance of an unsupported doctor change operation.
    *
-   * @return ChangeStreamDocument DoctorsForDB unsupported test instance
+   * @return CdcDocumentDto CdcDoctor unsupported test instance
    */
-  public static ChangeStreamDocument<DoctorsForDB> getDoctorUnsupportedChangeStreamDocument() {
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
+  public static CdcDocumentDto<CdcDoctor> getCdcDoctorUnsupportedCdcDocumentDto() {
+    CdcDoctor doctorsForDB = CdcDoctor.builder().build();
 
-    return new ChangeStreamDocument<>(
-        OperationType.DROP,
-        BsonDocument.parse("{}"),
-        null,
-        null,
+    return new CdcDocumentDto<CdcDoctor>(
+        OperationType.DROP.getValue(),
         doctorsForDB,
-        null,
-        null,
-        null,
-        null,
         null
     );
   }
@@ -249,22 +214,15 @@ public class CdcTestDataGenerator {
   /**
    * Get a test instance of an unsupported recommendation change operation.
    *
-   * @return ChangeStreamDocument Recommendation unsupported test instance
+   * @return CdcDocumentDto CdcRecommendation unsupported test instance
    */
-  public static ChangeStreamDocument<Recommendation>
-      getRecommendationUnsupportedChangeStreamDocument() {
-    Recommendation doctorsForDB = Recommendation.builder().build();
+  public static CdcDocumentDto<CdcRecommendation>
+      getCdcRecommendationUnsupportedCdcDocumentDto() {
+    CdcRecommendation recommendation = CdcRecommendation.builder().build();
 
-    return new ChangeStreamDocument<>(
-        OperationType.DROP,
-        BsonDocument.parse("{}"),
-        null,
-        null,
-        doctorsForDB,
-        null,
-        null,
-        null,
-        null,
+    return new CdcDocumentDto<CdcRecommendation>(
+        OperationType.DROP.getValue(),
+        recommendation,
         null
     );
   }

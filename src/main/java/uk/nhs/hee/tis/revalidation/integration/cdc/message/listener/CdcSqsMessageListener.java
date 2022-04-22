@@ -21,11 +21,17 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcDoctor;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcRecommendation;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -38,38 +44,44 @@ public class CdcSqsMessageListener {
 
   private CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
   private CdcDoctorMessageHandler cdcDoctorMessageHandler;
+  private ObjectMapper mapper;
 
   public CdcSqsMessageListener(
       CdcRecommendationMessageHandler cdcRecommendationMessageHandler,
-      CdcDoctorMessageHandler cdcDoctorMessageHandler
+      CdcDoctorMessageHandler cdcDoctorMessageHandler,
+      ObjectMapper mapper
   ) {
     this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
     this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
+    this.mapper = mapper;
   }
 
   /**
-   * Get recommendation cdc message.
+   * Get recommendation cdc message which is a json string.
    *
    * @param message containing change data for recommendation
    */
   @SqsListener("${cloud.aws.end-point.cdc.recommendation}")
-  public void getRecommendationMessage(ChangeStreamDocument<Recommendation> message) {
+  public void getRecommendationMessage(String message) throws JsonProcessingException {
     try {
-      cdcRecommendationMessageHandler.handleMessage(message);
+      CdcDocumentDto<CdcRecommendation> cdcDocument =
+          mapper.readValue(message, CdcDocumentDto.class);
+      cdcRecommendationMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
     }
   }
 
   /**
-   * Get doctor cdc message.
+   * Get doctor cdc message which is a json string.
    *
    * @param message containing change data for doctorsForDb
    */
   @SqsListener("${cloud.aws.end-point.cdc.doctor}")
-  public void getDoctorMessage(ChangeStreamDocument<DoctorsForDB> message) {
+  public void getDoctorMessage(String message) throws JsonProcessingException{
     try {
-      cdcDoctorMessageHandler.handleMessage(message);
+      CdcDocumentDto<CdcDoctor> cdcDocument = mapper.readValue(message, CdcDocumentDto.class);
+      cdcDoctorMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
     }

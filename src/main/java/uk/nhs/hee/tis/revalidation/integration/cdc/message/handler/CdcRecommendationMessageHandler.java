@@ -22,12 +22,12 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcRecommendation;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
-import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @Component
 public class CdcRecommendationMessageHandler
-    extends CdcMessageHandler<Recommendation> {
+    extends CdcMessageHandler<CdcRecommendation> {
 
   public CdcRecommendationMessageHandler(CdcRecommendationService cdcRecommendationService) {
     super(cdcRecommendationService);

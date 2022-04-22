@@ -21,10 +21,11 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcRecommendation;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcRecommendationFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -32,7 +33,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 @Service
-public class CdcRecommendationService extends CdcService<Recommendation> {
+public class CdcRecommendationService extends CdcService<CdcRecommendation> {
 
   /**
    * Service responsible for updating the Recommendation composite fields used for searching.
@@ -50,7 +51,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    * @param entity recommendation to add to index
    */
   @Override
-  public void addNewEntity(Recommendation entity) {
+  public void addNewEntity(CdcRecommendation entity) {
     String gmcId = entity.getGmcNumber();
     final var repository = getRepository();
     try {
@@ -77,7 +78,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    * @param changes ChangeStreamDocument containing changed fields
    */
   @Override
-  public void updateSubsetOfFields(ChangeStreamDocument<Recommendation> changes) {
+  public void updateSubsetOfFields(CdcDocumentDto<CdcRecommendation> changes) {
     String gmcNumber = changes.getFullDocument().getGmcNumber();
     try {
       updateFields(changes, gmcNumber);

@@ -24,6 +24,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import uk.nhs.hee.tis.revalidation.integration.cdc.entity.CdcDoctor;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -36,5 +37,5 @@ public interface MasterDoctorViewMapper {
 
   @Mapping(source = "doctorStatus", target = "tisStatus")
   @Mapping(source = "designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
+  MasterDoctorView cdcDoctorToMasterView(CdcDoctor cdcDoctor);
 }
