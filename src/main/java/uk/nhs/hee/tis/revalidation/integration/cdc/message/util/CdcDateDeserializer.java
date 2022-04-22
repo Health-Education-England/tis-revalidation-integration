@@ -38,7 +38,7 @@ public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
   @Override
   public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String dateString = p.getText();
     try {

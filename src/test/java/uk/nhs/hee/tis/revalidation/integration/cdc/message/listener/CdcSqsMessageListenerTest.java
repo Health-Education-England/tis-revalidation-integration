@@ -92,7 +92,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, IOException{
+      throws OperationNotSupportedException, IOException {
     var testMessage = objectMapper.writeValueAsString(
         CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto()
     );
