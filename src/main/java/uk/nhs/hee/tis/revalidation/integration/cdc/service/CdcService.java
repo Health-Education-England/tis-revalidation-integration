@@ -21,10 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -49,7 +49,7 @@ public abstract class CdcService<T> {
 
   public abstract void addNewEntity(T entity);
 
-  public abstract void updateSubsetOfFields(ChangeStreamDocument<T> changes);
+  public abstract void updateSubsetOfFields(CdcDocumentDto<T> changes);
 
   /**
    * Validate changes and update the master doctor index.
@@ -57,7 +57,7 @@ public abstract class CdcService<T> {
    * @param changes   ChangeStreamDocument containing changed fields
    * @param gmcNumber Gmc number of doctor to update
    */
-  public void updateFields(ChangeStreamDocument<T> changes, String gmcNumber) {
+  public void updateFields(CdcDocumentDto<T> changes, String gmcNumber) {
 
     List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcNumber);
     if (!masterDoctorViewList.isEmpty()) {

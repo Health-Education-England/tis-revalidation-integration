@@ -21,9 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
@@ -92,7 +92,7 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param changes ChangeStreamDocument containing changed fields
    */
   @Override
-  public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
+  public void updateSubsetOfFields(CdcDocumentDto<DoctorsForDB> changes) {
     String gmcNumber = changes.getFullDocument().getGmcReferenceNumber();
     try {
       updateFields(changes, gmcNumber);

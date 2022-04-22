@@ -19,34 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
+package uk.nhs.hee.tis.revalidation.integration.cdc.dto;
 
-import com.mongodb.client.model.changestream.OperationType;
-import javax.naming.OperationNotSupportedException;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
-import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.mongodb.client.model.changestream.UpdateDescription;
+import com.mongodb.lang.Nullable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocumentDto<T>> {
-
-  CdcService<T> cdcService;
-
-  protected CdcMessageHandler(CdcService<T> cdcService) {
-    this.cdcService = cdcService;
-  }
-
-  @Override
-  public void handleMessage(CdcDocumentDto<T> message) throws OperationNotSupportedException {
-    final OperationType operation = OperationType.valueOf(message.getOperationType().toUpperCase());
-    switch (operation) {
-      case INSERT:
-        cdcService.addNewEntity(message.getFullDocument());
-        break;
-      case UPDATE:
-        cdcService.updateSubsetOfFields(message);
-        break;
-      default:
-        throw new OperationNotSupportedException("CDC operation not supported: " + operation);
-    }
-  }
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CdcDocumentDto<T> {
+  private String operationType;
+  private T fullDocument;
+  @Nullable
+  private UpdateDescription updateDescription;
 }

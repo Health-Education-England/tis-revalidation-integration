@@ -30,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +46,7 @@ class CdcDoctorMessageHandlerTest {
   void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException {
     var testMessage =
-        CdcTestDataGenerator.getDoctorUnsupportedChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorUnsupportedCdcDocumentDto();
     assertThrows(OperationNotSupportedException.class, () -> {
       cdcDoctorMessageHandler.handleMessage(testMessage);
     });
@@ -55,7 +55,7 @@ class CdcDoctorMessageHandlerTest {
   @Test
   void shouldHandleInserts() throws OperationNotSupportedException {
     var testMessage =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
@@ -64,7 +64,7 @@ class CdcDoctorMessageHandlerTest {
   @Test
   void shouldHandleUpdates() throws OperationNotSupportedException {
     var testMessage =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).updateSubsetOfFields(testMessage);

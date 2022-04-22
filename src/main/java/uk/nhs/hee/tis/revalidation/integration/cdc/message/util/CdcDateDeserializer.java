@@ -19,34 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
-import com.mongodb.client.model.changestream.OperationType;
-import javax.naming.OperationNotSupportedException;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
-import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
-public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocumentDto<T>> {
-
-  CdcService<T> cdcService;
-
-  protected CdcMessageHandler(CdcService<T> cdcService) {
-    this.cdcService = cdcService;
-  }
+public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
   @Override
-  public void handleMessage(CdcDocumentDto<T> message) throws OperationNotSupportedException {
-    final OperationType operation = OperationType.valueOf(message.getOperationType().toUpperCase());
-    switch (operation) {
-      case INSERT:
-        cdcService.addNewEntity(message.getFullDocument());
-        break;
-      case UPDATE:
-        cdcService.updateSubsetOfFields(message);
-        break;
-      default:
-        throw new OperationNotSupportedException("CDC operation not supported: " + operation);
+  public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
+      throws IOException {
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String dateString = p.getText();
+    try {
+      Date date = format.parse(dateString);
+      return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    } catch (ParseException e) {
+      LocalDateDeserializer lds = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
+      return lds.deserialize(p,ctx);
     }
   }
 }

@@ -36,5 +36,5 @@ public interface MasterDoctorViewMapper {
 
   @Mapping(source = "doctorStatus", target = "tisStatus")
   @Mapping(source = "designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB doctorsForDB);
+  MasterDoctorView doctorToMasterView(DoctorsForDB cdcDoctor);
 }

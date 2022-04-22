@@ -35,7 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcRecommendationFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -61,7 +61,7 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var newRecommendation =
-        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
 
     verify(repository).save(any());
@@ -72,7 +72,7 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var changes =
-        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto();
     cdcRecommendationService.updateSubsetOfFields(changes);
 
     verify(fieldUpdateHelper)
@@ -90,7 +90,7 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     var newRecommendation =
-        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
 
     verify(repository, never()).save(any());
@@ -101,7 +101,7 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     var changes =
-        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto();
     cdcRecommendationService.updateSubsetOfFields(changes);
 
     verify(fieldUpdateHelper, never())

@@ -41,9 +41,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
+
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -70,7 +70,7 @@ class CdcDoctorServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
     verify(repository).save(mapper.doctorToMasterView(newDoctor));
@@ -84,7 +84,7 @@ class CdcDoctorServiceTest {
     );
 
     DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument().getFullDocument();
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
@@ -97,7 +97,7 @@ class CdcDoctorServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var changes =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
     cdcDoctorService.updateSubsetOfFields(changes);
 
     verify(fieldUpdateHelper)
@@ -144,7 +144,7 @@ class CdcDoctorServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     var changes =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
     cdcDoctorService.updateSubsetOfFields(changes);
 
     verify(repository, never()).save(mapper.doctorToMasterView(any()));

@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.entity;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -31,26 +34,30 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDateDeserializer;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DoctorsForDB {
 
+  @JsonProperty("_id")
+  @JsonAlias("gmcReferenceNumber")
   private String gmcReferenceNumber;
   private String doctorFirstName;
   private String doctorLastName;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonDeserialize(using = CdcDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   private LocalDate submissionDate;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonDeserialize(using = CdcDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   private LocalDate dateAdded;
   private UnderNotice underNotice;
   private String sanction;
   private RecommendationStatus doctorStatus;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonDeserialize(using = CdcDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   private LocalDate lastUpdatedDate;
   private String designatedBodyCode;
