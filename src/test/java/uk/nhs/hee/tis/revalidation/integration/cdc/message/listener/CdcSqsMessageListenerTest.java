@@ -23,8 +23,8 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import static org.mockito.Mockito.verify;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +53,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassDoctorInsertMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, JsonProcessingException {
+      throws OperationNotSupportedException, IOException {
     var testMessage = objectMapper.writeValueAsString(
         CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto()
     );
@@ -66,7 +66,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassDoctorUpdateMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, JsonProcessingException {
+      throws OperationNotSupportedException, IOException {
     var testMessage = objectMapper.writeValueAsString(
         CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto()
     );
@@ -79,7 +79,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassRecommendationInsertMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, JsonProcessingException {
+      throws OperationNotSupportedException, IOException {
     var testMessage = objectMapper.writeValueAsString(
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto()
     );
@@ -92,7 +92,7 @@ class CdcSqsMessageListenerTest {
 
   @Test
   void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, JsonProcessingException {
+      throws OperationNotSupportedException, IOException{
     var testMessage = objectMapper.writeValueAsString(
         CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto()
     );

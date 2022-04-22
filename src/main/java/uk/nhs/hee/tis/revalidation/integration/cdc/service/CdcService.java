@@ -21,7 +21,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;

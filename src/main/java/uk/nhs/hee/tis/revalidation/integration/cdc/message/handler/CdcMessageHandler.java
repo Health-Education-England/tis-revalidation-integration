@@ -21,7 +21,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.OperationType;
 import javax.naming.OperationNotSupportedException;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
