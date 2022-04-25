@@ -62,6 +62,15 @@ class CdcRecommendationMessageHandlerTest {
   }
 
   @Test
+  void shouldHandleReplace() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getCdcRecommendationReplaceCdcDocumentDto();
+    cdcRecommendationMessageHandler.handleMessage(testMessage);
+
+    verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
+  }
+
+  @Test
   void shouldHandleUpdates() throws OperationNotSupportedException {
     var testMessage =
         CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto();

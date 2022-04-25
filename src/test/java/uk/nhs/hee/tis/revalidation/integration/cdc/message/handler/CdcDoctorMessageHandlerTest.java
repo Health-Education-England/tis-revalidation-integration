@@ -62,6 +62,16 @@ class CdcDoctorMessageHandlerTest {
   }
 
   @Test
+  void shouldHandleReplace() throws OperationNotSupportedException {
+    var testMessage =
+        CdcTestDataGenerator.getCdcDoctorReplaceCdcDocumentDto();
+    cdcDoctorMessageHandler.handleMessage(testMessage);
+
+    verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
+  }
+
+
+  @Test
   void shouldHandleUpdates() throws OperationNotSupportedException {
     var testMessage =
         CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();

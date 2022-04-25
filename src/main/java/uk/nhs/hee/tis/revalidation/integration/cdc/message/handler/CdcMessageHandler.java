@@ -40,6 +40,7 @@ public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocument
     final OperationType operation = OperationType.valueOf(message.getOperationType().toUpperCase());
     switch (operation) {
       case INSERT:
+      case REPLACE:
         cdcService.addNewEntity(message.getFullDocument());
         break;
       case UPDATE:

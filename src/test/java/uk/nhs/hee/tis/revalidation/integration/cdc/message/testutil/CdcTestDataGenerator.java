@@ -131,6 +131,19 @@ public class CdcTestDataGenerator {
   }
 
   /**
+   * Get a test instance of an replace DoctorsForDb CdcDocumentDto.
+   *
+   * @return CdcDocumentDto CdcDoctor test instance
+   */
+  public static CdcDocumentDto<DoctorsForDB> getCdcDoctorReplaceCdcDocumentDto() {
+    return new CdcDocumentDto<DoctorsForDB>(
+        OperationType.REPLACE.getValue(),
+        doctorsForDB,
+        null
+    );
+  }
+
+  /**
    * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
    *
    * @return CdcDocumentDto CdcRecommendation insert test instance
@@ -148,6 +161,29 @@ public class CdcTestDataGenerator {
 
     return new CdcDocumentDto<Recommendation>(
         OperationType.INSERT.getValue(),
+        recommendation,
+        null
+    );
+  }
+
+  /**
+   * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
+   *
+   * @return CdcDocumentDto CdcRecommendation insert test instance
+   */
+  public static CdcDocumentDto<Recommendation>
+  getCdcRecommendationReplaceCdcDocumentDto() {
+    Recommendation recommendation = Recommendation.builder()
+        .id("1")
+        .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+        .recommendationType(RecommendationType.REVALIDATE)
+        .recommendationStatus(DRAFT)
+        .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+        .admin(ADMIN_VAL)
+        .build();
+
+    return new CdcDocumentDto<Recommendation>(
+        OperationType.REPLACE.getValue(),
         recommendation,
         null
     );
