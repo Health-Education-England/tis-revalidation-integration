@@ -169,7 +169,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
   public static CdcDocumentDto<Recommendation>
-  getCdcRecommendationReplaceCdcDocumentDto() {
+    getCdcRecommendationReplaceCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
