@@ -22,28 +22,14 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil;
 
 import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DESIGNATED_BODY_CODE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_FIRST_NAME;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_LAST_NAME;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_STATUS;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.EXISTS_IN_GMC;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.SUBMISSION_DATE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.UNDER_NOTICE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
 import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus.DRAFT;
 import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus.SUBMITTED_TO_GMC;
 import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
-import static uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome.APPROVED;
 
 import com.mongodb.client.model.changestream.OperationType;
-import com.mongodb.client.model.changestream.UpdateDescription;
 import java.time.Instant;
 import java.time.LocalDate;
-import org.bson.BsonBoolean;
 import org.bson.BsonDateTime;
-import org.bson.BsonDocument;
-import org.bson.BsonString;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -169,7 +155,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
   public static CdcDocumentDto<Recommendation>
-    getCdcRecommendationReplaceCdcDocumentDto() {
+      getCdcRecommendationReplaceCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
