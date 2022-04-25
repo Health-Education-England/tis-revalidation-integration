@@ -22,18 +22,8 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.ADMIN;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DESIGNATED_BODY_CODE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_FIRST_NAME;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_LAST_NAME;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.DOCTOR_STATUS;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.EXISTS_IN_GMC;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.LAST_UPDATED_DATE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.SUBMISSION_DATE;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants.UNDER_NOTICE;
 
 import java.util.Collections;
 import org.elasticsearch.common.collect.List;
@@ -44,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -57,9 +46,6 @@ class CdcDoctorServiceTest {
 
   @Mock
   MasterDoctorElasticSearchRepository repository;
-
-  @Mock
-  CdcDoctorFieldUpdateHelper fieldUpdateHelper;
 
   @Mock
   MasterDoctorViewMapper mapper;
@@ -89,64 +75,4 @@ class CdcDoctorServiceTest {
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
     verify(repository).save(any());
   }
-
-  @Test
-  void shouldUpdateSubsetOfFields() {
-    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-
-    var changes =
-        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
-    cdcDoctorService.updateSubsetOfFields(changes);
-
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, DOCTOR_FIRST_NAME, changes.getUpdateDescription().getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, DOCTOR_LAST_NAME, changes.getUpdateDescription().getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, SUBMISSION_DATE, changes.getUpdateDescription().getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, UNDER_NOTICE, changes.getUpdateDescription().getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, DOCTOR_STATUS, changes.getUpdateDescription().getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, LAST_UPDATED_DATE, changes.getUpdateDescription().getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, DESIGNATED_BODY_CODE, changes
-                .getUpdateDescription()
-                .getUpdatedFields()
-        );
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, ADMIN, changes.getUpdateDescription().getUpdatedFields());
-    verify(fieldUpdateHelper)
-        .updateField(
-            masterDoctorView, EXISTS_IN_GMC, changes.getUpdateDescription().getUpdatedFields());
-  }
-
-  @Test
-  void shouldNotUpdateSubsetOfFieldsIfDoctorDoesNotExist() {
-    var masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
-
-    var changes =
-        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
-    cdcDoctorService.updateSubsetOfFields(changes);
-
-    verify(repository, never()).save(mapper.doctorToMasterView(any()));
-  }
-
 }

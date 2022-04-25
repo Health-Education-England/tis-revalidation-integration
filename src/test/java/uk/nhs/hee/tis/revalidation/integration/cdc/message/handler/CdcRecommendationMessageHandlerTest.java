@@ -69,14 +69,4 @@ class CdcRecommendationMessageHandlerTest {
 
     verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
   }
-
-  @Test
-  void shouldHandleUpdates() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto();
-    cdcRecommendationMessageHandler.handleMessage(testMessage);
-
-    verify(cdcRecommendationService).updateSubsetOfFields(testMessage);
-  }
-
 }

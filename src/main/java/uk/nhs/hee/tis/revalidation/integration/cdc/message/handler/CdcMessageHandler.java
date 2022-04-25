@@ -43,9 +43,6 @@ public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocument
       case REPLACE:
         cdcService.addNewEntity(message.getFullDocument());
         break;
-      case UPDATE:
-        cdcService.updateSubsetOfFields(message);
-        break;
       default:
         throw new OperationNotSupportedException("CDC operation not supported: " + operation);
     }

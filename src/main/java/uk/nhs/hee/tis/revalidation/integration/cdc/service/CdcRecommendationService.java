@@ -24,8 +24,6 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcRecommendationFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -38,10 +36,9 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    * Service responsible for updating the Recommendation composite fields used for searching.
    */
   public CdcRecommendationService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcRecommendationFieldUpdateHelper fieldUpdateHelper
+      MasterDoctorElasticSearchRepository repository
   ) {
-    super(repository, fieldUpdateHelper);
+    super(repository);
   }
 
   /**
@@ -66,24 +63,6 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
     } catch (Exception e) {
       log.error(String
               .format("CDC error adding recommendation: %s, exception: %s", entity, e.getMessage()),
-          e);
-      throw e;
-    }
-  }
-
-  /**
-   * Update recommendation fields in index.
-   *
-   * @param changes ChangeStreamDocument containing changed fields
-   */
-  @Override
-  public void updateSubsetOfFields(CdcDocumentDto<Recommendation> changes) {
-    String gmcNumber = changes.getFullDocument().getGmcNumber();
-    try {
-      updateFields(changes, gmcNumber);
-    } catch (Exception e) {
-      log.error(String.format("CDC error updating recommendation: %s, exception: %s", gmcNumber,
-              e.getMessage()),
           e);
       throw e;
     }

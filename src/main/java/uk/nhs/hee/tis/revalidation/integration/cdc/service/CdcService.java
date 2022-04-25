@@ -21,26 +21,18 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonDocument;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 public abstract class CdcService<T> {
 
   private MasterDoctorElasticSearchRepository repository;
-  private CdcFieldUpdateHelper fieldUpdateHelper;
 
   protected CdcService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcFieldUpdateHelper fieldUpdateHelper
+      MasterDoctorElasticSearchRepository repository
   ) {
     this.repository = repository;
-    this.fieldUpdateHelper = fieldUpdateHelper;
   }
 
   protected MasterDoctorElasticSearchRepository getRepository() {
@@ -49,27 +41,4 @@ public abstract class CdcService<T> {
 
   public abstract void addNewEntity(T entity);
 
-  public abstract void updateSubsetOfFields(CdcDocumentDto<T> changes);
-
-  /**
-   * Validate changes and update the master doctor index.
-   *
-   * @param changes   ChangeStreamDocument containing changed fields
-   * @param gmcNumber Gmc number of doctor to update
-   */
-  public void updateFields(CdcDocumentDto<T> changes, String gmcNumber) {
-
-    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcNumber);
-    if (!masterDoctorViewList.isEmpty()) {
-      if (masterDoctorViewList.size() > 1) {
-        log.error("Multiple doctors assigned to the same GMC number!");
-      }
-      MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-      BsonDocument updatedFields = changes.getUpdateDescription().getUpdatedFields();
-      updatedFields.keySet().forEach(key ->
-          fieldUpdateHelper.updateField(masterDoctorView, key, updatedFields)
-      );
-      repository.save(masterDoctorView);
-    }
-  }
 }

@@ -125,8 +125,7 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorInsertCdcDocumentDto() {
     return new CdcDocumentDto<DoctorsForDB>(
         OperationType.INSERT.getValue(),
-        doctorsForDB,
-        null
+        doctorsForDB
     );
   }
 
@@ -138,8 +137,7 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorReplaceCdcDocumentDto() {
     return new CdcDocumentDto<DoctorsForDB>(
         OperationType.REPLACE.getValue(),
-        doctorsForDB,
-        null
+        doctorsForDB
     );
   }
 
@@ -161,8 +159,7 @@ public class CdcTestDataGenerator {
 
     return new CdcDocumentDto<Recommendation>(
         OperationType.INSERT.getValue(),
-        recommendation,
-        null
+        recommendation
     );
   }
 
@@ -184,51 +181,7 @@ public class CdcTestDataGenerator {
 
     return new CdcDocumentDto<Recommendation>(
         OperationType.REPLACE.getValue(),
-        recommendation,
-        null
-    );
-  }
-
-  /**
-   * Get a test instance of an update CdcDoctor CdcDocumentDto.
-   *
-   * @return CdcDocumentDto CdcDoctor update test instance
-   */
-  public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUpdateCdcDocumentDto() {
-    var updatesBson = new BsonDocument();
-    updatesBson.put(DOCTOR_FIRST_NAME, new BsonString(DOCTOR_FIRST_NAME_VAL));
-    updatesBson.put(DOCTOR_LAST_NAME, new BsonString(DOCTOR_LAST_NAME_VAL));
-    updatesBson.put(SUBMISSION_DATE, SUBMISSION_DATE_VAL);
-    updatesBson.put(UNDER_NOTICE, new BsonString(UNDER_NOTICE_VAL.value()));
-    updatesBson.put(DOCTOR_STATUS, new BsonString(DOCTOR_STATUS_VAL.toString()));
-    updatesBson.put(LAST_UPDATED_DATE, new BsonString(LAST_UPDATED_DATE));
-    updatesBson.put(DESIGNATED_BODY_CODE, new BsonString(DESIGNATED_BODY_CODE_VAL));
-    updatesBson.put(ADMIN, new BsonString(ADMIN_VAL));
-    updatesBson.put(EXISTS_IN_GMC, new BsonBoolean(EXISTS_IN_GMC_VAL));
-
-    return new CdcDocumentDto<DoctorsForDB>(
-        OperationType.UPDATE.getValue(),
-        doctorsForDB,
-        new UpdateDescription(null, updatesBson)
-    );
-  }
-
-  /**
-   * Get a test instance of an update CdcRecommendation CdcDocumentDto.
-   *
-   * @return CdcDocumentDto CdcRecommendation update test instance
-   */
-  public static CdcDocumentDto<Recommendation>
-      getCdcRecommendationUpdateCdcDocumentDto() {
-
-    var updatesBson = new BsonDocument();
-    updatesBson.put(OUTCOME, new BsonString(APPROVED.getOutcome()));
-    updatesBson.put(LAST_UPDATED_DATE, new BsonDateTime(Instant.now().getEpochSecond()));
-
-    return new CdcDocumentDto<Recommendation>(
-        OperationType.UPDATE.getValue(),
-        recommendation,
-        new UpdateDescription(null, updatesBson)
+        recommendation
     );
   }
 
@@ -242,8 +195,7 @@ public class CdcTestDataGenerator {
 
     return new CdcDocumentDto<DoctorsForDB>(
         OperationType.DROP.getValue(),
-        doctorsForDB,
-        null
+        doctorsForDB
     );
   }
 
@@ -258,8 +210,7 @@ public class CdcTestDataGenerator {
 
     return new CdcDocumentDto<Recommendation>(
         OperationType.DROP.getValue(),
-        recommendation,
-        null
+        recommendation
     );
   }
 

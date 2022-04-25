@@ -69,36 +69,10 @@ class CdcSqsMessageListenerTest {
   }
 
   @Test
-  void shouldPassDoctorUpdateMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto()
-    );
-    cdcSqsMessageListener.getDoctorMessage(testMessage);
-
-    verify(cdcDoctorMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {})
-    );
-  }
-
-  @Test
   void shouldPassRecommendationInsertMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException, IOException {
     var testMessage = objectMapper.writeValueAsString(
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto()
-    );
-    cdcSqsMessageListener.getRecommendationMessage(testMessage);
-
-    verify(cdcRecommendationMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
-    );
-  }
-
-  @Test
-  void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcRecommendationUpdateCdcDocumentDto()
     );
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
 

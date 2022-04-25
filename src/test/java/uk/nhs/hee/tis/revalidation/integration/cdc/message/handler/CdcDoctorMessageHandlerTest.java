@@ -69,14 +69,4 @@ class CdcDoctorMessageHandlerTest {
 
     verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
   }
-
-
-  @Test
-  void shouldHandleUpdates() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto();
-    cdcDoctorMessageHandler.handleMessage(testMessage);
-
-    verify(cdcDoctorService).updateSubsetOfFields(testMessage);
-  }
 }
