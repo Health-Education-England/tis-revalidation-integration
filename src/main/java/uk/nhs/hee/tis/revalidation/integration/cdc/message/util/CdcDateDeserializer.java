@@ -35,17 +35,23 @@ import java.util.Date;
 
 public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
+  private SimpleDateFormat simpleDateFormat;
+  private LocalDateDeserializer localDateDeserializer;
+
+  public CdcDateDeserializer() {
+    this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    this.localDateDeserializer = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
+  }
+
   @Override
   public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
       throws IOException {
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String dateString = p.getText();
     try {
-      Date date = format.parse(dateString);
+      Date date = simpleDateFormat.parse(dateString);
       return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     } catch (ParseException e) {
-      LocalDateDeserializer lds = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
-      return lds.deserialize(p,ctx);
+      return localDateDeserializer.deserialize(p,ctx);
     }
   }
 }

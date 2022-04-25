@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
@@ -30,11 +31,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @ExtendWith(MockitoExtension.class)
 class CdcSqsMessageListenerTest {
@@ -48,7 +52,7 @@ class CdcSqsMessageListenerTest {
   @Mock
   CdcDoctorMessageHandler cdcDoctorMessageHandler;
 
-  @Mock
+  @Spy
   ObjectMapper objectMapper;
 
   @Test
@@ -60,7 +64,7 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getDoctorMessage(testMessage);
 
     verify(cdcDoctorMessageHandler).handleMessage(
-        objectMapper.convertValue(testMessage, CdcDocumentDto.class)
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {})
     );
   }
 
@@ -73,7 +77,7 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getDoctorMessage(testMessage);
 
     verify(cdcDoctorMessageHandler).handleMessage(
-        objectMapper.convertValue(testMessage, CdcDocumentDto.class)
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {})
     );
   }
 
@@ -86,7 +90,7 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
     verify(cdcRecommendationMessageHandler).handleMessage(
-        objectMapper.convertValue(testMessage, CdcDocumentDto.class)
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
     );
   }
 
@@ -99,7 +103,7 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
     verify(cdcRecommendationMessageHandler).handleMessage(
-        objectMapper.convertValue(testMessage, CdcDocumentDto.class)
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
     );
   }
 }
