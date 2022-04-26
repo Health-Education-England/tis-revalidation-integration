@@ -25,20 +25,23 @@ import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javax.naming.OperationNotSupportedException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDateDeserializer;
 
 @ExtendWith(MockitoExtension.class)
 class CdcSqsMessageListenerTest {
@@ -55,6 +58,16 @@ class CdcSqsMessageListenerTest {
   @Spy
   ObjectMapper objectMapper;
 
+  @BeforeEach
+  void initTestClass() {
+    SimpleModule customDeserializationModule = new SimpleModule();
+    customDeserializationModule.addDeserializer(LocalDate.class, new CdcDateDeserializer());
+    //TODO: Remove the serializer here or `@JsonSerialize` on entity attributes
+    customDeserializationModule.addSerializer(LocalDate.class, new LocalDateSerializer(
+        DateTimeFormatter.ISO_DATE));
+    objectMapper.registerModule(customDeserializationModule);
+  }
+
   @Test
   void shouldPassDoctorInsertMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException, IOException {
@@ -64,7 +77,8 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getDoctorMessage(testMessage);
 
     verify(cdcDoctorMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {})
+        objectMapper.readValue(testMessage, new TypeReference<>() {
+        })
     );
   }
 
@@ -77,7 +91,8 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
     verify(cdcRecommendationMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
+        objectMapper.readValue(testMessage, new TypeReference<>() {
+        })
     );
   }
 }

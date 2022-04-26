@@ -6,6 +6,11 @@ import static org.hamcrest.core.Is.is;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,7 +20,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 @ExtendWith(MockitoExtension.class)
 class CdcDateDeserializerTest {
 
-  private ObjectMapper mapper = new ObjectMapper();
+  private ObjectMapper mapper;
   private String cdcDocumentJson = "{\"_id\":{\"_data\":\"01625a0706000001c001000001c000020042\"},"
       + "\"operationType\":\"replace\",\"clusterTime\":\"Timestamp(1650067206, 448)\",\"ns\""
       + ":{\"db\":\"revalidation\",\"coll\":\"doctorsForDB\"},\"documentKey\""
@@ -37,10 +42,22 @@ class CdcDateDeserializerTest {
           + "\"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB\"}}";
   private String gmcId = "1234567";
 
+  @BeforeEach
+  void initTestClass() {
+    mapper = new ObjectMapper();
+    SimpleModule customDeserializationModule = new SimpleModule();
+    customDeserializationModule.addDeserializer(LocalDate.class, new CdcDateDeserializer());
+    //TODO: Remove the serializer here or `@JsonSerialize` on entity attributes
+    customDeserializationModule.addSerializer(LocalDate.class, new LocalDateSerializer(
+        DateTimeFormatter.ISO_DATE));
+    mapper.registerModule(customDeserializationModule);
+  }
+
   @Test
   void shouldDeserializeGmcReferenceNumber() throws JsonProcessingException {
     CdcDocumentDto<DoctorsForDB> document =
-        mapper.readValue(cdcDocumentJson, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {}
+        mapper.readValue(cdcDocumentJson, new TypeReference<>() {
+            }
         );
 
     assertThat(document.getFullDocument().getGmcReferenceNumber(), is(gmcId));
@@ -50,7 +67,8 @@ class CdcDateDeserializerTest {
   void shouldDeserializeGmcReferenceNumberFromAlias() throws JsonProcessingException {
     CdcDocumentDto<DoctorsForDB> document =
         mapper.readValue(cdcDocumentJsonGmcReferencNumber,
-            new TypeReference<CdcDocumentDto<DoctorsForDB>>() {}
+            new TypeReference<>() {
+            }
         );
 
     assertThat(document.getFullDocument().getGmcReferenceNumber(), is(gmcId));
@@ -59,7 +77,8 @@ class CdcDateDeserializerTest {
   @Test
   void shouldDeserializeMongoDateString() throws JsonProcessingException {
     CdcDocumentDto<DoctorsForDB> document =
-        mapper.readValue(cdcDocumentJson, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {}
+        mapper.readValue(cdcDocumentJson, new TypeReference<>() {
+            }
         );
 
     assertThat(document.getFullDocument().getDateAdded().getDayOfMonth(), is(7));
@@ -70,7 +89,8 @@ class CdcDateDeserializerTest {
   @Test
   void shouldDeserializeLocalDateString() throws JsonProcessingException {
     CdcDocumentDto<DoctorsForDB> document =
-        mapper.readValue(cdcDocumentJson, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {}
+        mapper.readValue(cdcDocumentJson, new TypeReference<>() {
+            }
         );
     var newJson = mapper.writeValueAsString(document.getFullDocument());
     var doctorsForDb = mapper.readValue(newJson, DoctorsForDB.class);

@@ -22,6 +22,10 @@
 package uk.nhs.hee.tis.revalidation.integration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -34,6 +38,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDateDeserializer;
 
 @Configuration
 public class RabbitConfig {
@@ -97,6 +102,13 @@ public class RabbitConfig {
   @Bean
   public MessageConverter jsonMessageConverter() {
     final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    ObjectMapper objectMapper = new ObjectMapper();
+    SimpleModule customDeserializationModule = new SimpleModule();
+    customDeserializationModule.addDeserializer(LocalDate.class, new CdcDateDeserializer());
+    //TODO: Remove the serializer here or `@JsonSerialize` on entity attributes
+    customDeserializationModule.addSerializer(LocalDate.class, new LocalDateSerializer(
+        DateTimeFormatter.ISO_DATE));
+    objectMapper.registerModule(customDeserializationModule);
     return new Jackson2JsonMessageConverter(mapper);
   }
 
