@@ -101,14 +101,13 @@ public class RabbitConfig {
 
   @Bean
   public MessageConverter jsonMessageConverter() {
-    final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-    ObjectMapper objectMapper = new ObjectMapper();
     SimpleModule customDeserializationModule = new SimpleModule();
     customDeserializationModule.addDeserializer(LocalDate.class, new CdcDateDeserializer());
     //TODO: Remove the serializer here or `@JsonSerialize` on entity attributes
     customDeserializationModule.addSerializer(LocalDate.class, new LocalDateSerializer(
         DateTimeFormatter.ISO_DATE));
-    objectMapper.registerModule(customDeserializationModule);
+    final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules()
+        .registerModule(customDeserializationModule);
     return new Jackson2JsonMessageConverter(mapper);
   }
 
