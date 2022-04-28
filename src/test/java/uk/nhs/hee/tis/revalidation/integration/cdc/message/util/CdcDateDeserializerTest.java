@@ -6,16 +6,18 @@ import static org.hamcrest.core.Is.is;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.RevalidationIntegrationApplication;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 
 @ExtendWith(MockitoExtension.class)
 class CdcDateDeserializerTest {
 
-  private ObjectMapper mapper = new ObjectMapper();
+  private ObjectMapper mapper;
   private String cdcDocumentJson = "{\"_id\":{\"_data\":\"01625a0706000001c001000001c000020042\"},"
       + "\"operationType\":\"replace\",\"clusterTime\":\"Timestamp(1650067206, 448)\",\"ns\""
       + ":{\"db\":\"revalidation\",\"coll\":\"doctorsForDB\"},\"documentKey\""
@@ -36,6 +38,11 @@ class CdcDateDeserializerTest {
           + "\"designatedBodyCode\":\"1-AIIDWI\",\"existsInGmc\":false,\"_class\":"
           + "\"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB\"}}";
   private String gmcId = "1234567";
+
+  @BeforeEach
+  void setup() {
+    this.mapper = new RevalidationIntegrationApplication().mapper();
+  }
 
   @Test
   void shouldDeserializeGmcReferenceNumber() throws JsonProcessingException {

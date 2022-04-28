@@ -27,30 +27,27 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.time.format.DateTimeParseException;
 
 public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
-  private SimpleDateFormat simpleDateFormat;
+  private static final java.time.format.DateTimeFormatter cdcDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
   private LocalDateDeserializer localDateDeserializer;
 
   public CdcDateDeserializer() {
-    this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     this.localDateDeserializer = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
   }
 
   @Override
   public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
       throws IOException {
-    String dateString = p.getText();
     try {
-      Date date = simpleDateFormat.parse(dateString);
-      return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    } catch (ParseException e) {
+      String dateString = p.getText();
+      return LocalDate.parse(dateString, cdcDateFormat);
+    } catch (DateTimeParseException e) {
       return localDateDeserializer.deserialize(p,ctx);
     }
   }
