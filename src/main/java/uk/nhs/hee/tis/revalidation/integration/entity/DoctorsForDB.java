@@ -42,8 +42,8 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDateDeseriali
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DoctorsForDB {
 
-  @JsonProperty("_id")
-  @JsonAlias("gmcReferenceNumber")
+  @JsonProperty("gmcReferenceNumber")
+  @JsonAlias("_id")
   private String gmcReferenceNumber;
   private String doctorFirstName;
   private String doctorLastName;
