@@ -66,7 +66,8 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
         repository.save(mapper.doctorToMasterView(entity));
       } else {
         if (existingDoctors.size() > 1) {
-          log.error("Multiple doctors assigned to the same GMC number!");
+          log.error("Multiple doctors assigned to the same GMC number: {}",
+              entity.getGmcReferenceNumber());
         }
         var updatedDoctor = mapper.updateMasterDoctorView(
             existingDoctors.get(0),

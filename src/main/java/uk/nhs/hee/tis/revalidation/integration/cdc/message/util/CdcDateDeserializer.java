@@ -26,14 +26,14 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
-  private static final java.time.format.DateTimeFormatter cdcDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private static final java.time.format.DateTimeFormatter cdcDateFormat =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   private LocalDateDeserializer localDateDeserializer;
 
