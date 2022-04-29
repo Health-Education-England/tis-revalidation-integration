@@ -45,6 +45,7 @@ class RabbitCdcMessagePublisherTest {
   private MasterDoctorView masterDoctorView;
   private String gmcReferenceNumber = "1234567";
   private String routingKey = "reval.masterdoctorview.updated";
+  private String exchange = "reval.exchange";
 
   @BeforeEach
   void setup() {
@@ -52,13 +53,15 @@ class RabbitCdcMessagePublisherTest {
         .gmcReferenceNumber(gmcReferenceNumber)
         .build();
     setField(rabbitCdcMessagePublisher, "routingKey", routingKey);
+    setField(rabbitCdcMessagePublisher, "exchange", exchange);
+
   }
 
   @Test
   void shouldPublishUpdatesUsingRabbitTemplate() {
     rabbitCdcMessagePublisher.publishCdcUpdate(masterDoctorView);
 
-    verify(rabbitTemplate).convertAndSend(routingKey, masterDoctorView);
+    verify(rabbitTemplate).convertAndSend(exchange, routingKey, masterDoctorView);
   }
 
 }

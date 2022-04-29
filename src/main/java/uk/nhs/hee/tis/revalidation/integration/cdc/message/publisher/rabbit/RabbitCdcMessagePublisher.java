@@ -35,6 +35,9 @@ public class RabbitCdcMessagePublisher implements CdcMessagePublisher {
   @Value("${app.rabbit.reval.routingKey.masterdoctorview.updated}")
   private String routingKey;
 
+  @Value("${app.rabbit.reval.exchange}")
+  private String exchange;
+
   public RabbitCdcMessagePublisher(RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
   }
@@ -46,6 +49,6 @@ public class RabbitCdcMessagePublisher implements CdcMessagePublisher {
    */
   @Override
   public void publishCdcUpdate(MasterDoctorView update) {
-    rabbitTemplate.convertAndSend(routingKey, update);
+    rabbitTemplate.convertAndSend(exchange, routingKey, update);
   }
 }
