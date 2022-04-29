@@ -19,40 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.service;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.rabbit;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Slf4j
-public abstract class CdcService<T> {
+@Component
+public class RabbitCdcMessagePublisher implements CdcMessagePublisher {
 
-  private MasterDoctorElasticSearchRepository repository;
+  private RabbitTemplate rabbitTemplate;
 
-  private CdcMessagePublisher cdcMessagePublisher;
+  @Value("${app.rabbit.reval.routingKey.masterdoctorview.updated}")
+  private String routingKey;
 
-  protected CdcService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher
-  ) {
-    this.repository = repository;
-    this.cdcMessagePublisher = cdcMessagePublisher;
+  @Value("${app.rabbit.reval.exchange}")
+  private String exchange;
+
+  public RabbitCdcMessagePublisher(RabbitTemplate rabbitTemplate) {
+    this.rabbitTemplate = rabbitTemplate;
   }
-
-  protected MasterDoctorElasticSearchRepository getRepository() {
-    return this.repository;
-  }
-
-  public abstract void addNewEntity(T entity);
 
   /**
-   * Publish MasterDoctorView update using injected CdcMessagePublisher.
+   * Publish MasterDoctorView update to fanout exchange using rabbit template.
    *
-   * @param masterDoctorView the updated MasterDoctorView to be published
+   * @param update the updated MasterDoctorView to be published
    */
-  public final void publishUpdate(MasterDoctorView masterDoctorView) {
-    cdcMessagePublisher.publishCdcUpdate(masterDoctorView);
+  @Override
+  public void publishCdcUpdate(MasterDoctorView update) {
+    rabbitTemplate.convertAndSend(exchange, routingKey, update);
   }
 }

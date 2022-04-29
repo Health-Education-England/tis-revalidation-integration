@@ -19,40 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.service;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher;
 
-import lombok.extern.slf4j.Slf4j;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-@Slf4j
-public abstract class CdcService<T> {
+public interface CdcMessagePublisher {
 
-  private MasterDoctorElasticSearchRepository repository;
+  void publishCdcUpdate(MasterDoctorView update);
 
-  private CdcMessagePublisher cdcMessagePublisher;
-
-  protected CdcService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher
-  ) {
-    this.repository = repository;
-    this.cdcMessagePublisher = cdcMessagePublisher;
-  }
-
-  protected MasterDoctorElasticSearchRepository getRepository() {
-    return this.repository;
-  }
-
-  public abstract void addNewEntity(T entity);
-
-  /**
-   * Publish MasterDoctorView update using injected CdcMessagePublisher.
-   *
-   * @param masterDoctorView the updated MasterDoctorView to be published
-   */
-  public final void publishUpdate(MasterDoctorView masterDoctorView) {
-    cdcMessagePublisher.publishCdcUpdate(masterDoctorView);
-  }
 }
