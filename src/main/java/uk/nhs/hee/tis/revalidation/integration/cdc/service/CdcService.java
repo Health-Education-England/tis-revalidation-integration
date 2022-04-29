@@ -48,7 +48,7 @@ public abstract class CdcService<T> {
   public abstract void addNewEntity(T entity);
 
   /**
-   * Publish MasterDoctorView update to Connections Service using injected CdcMessagePublisher
+   * Publish MasterDoctorView update to Connections Service using injected CdcMessagePublisher.
    *
    * @param masterDoctorView the updated MasterDoctorView to be published
    */
@@ -57,7 +57,7 @@ public abstract class CdcService<T> {
   }
 
   /**
-   * Publish MasterDoctorView update to Recommendations Service using injected CdcMessagePublisher
+   * Publish MasterDoctorView update to Recommendations Service using injected CdcMessagePublisher.
    *
    * @param masterDoctorView the updated MasterDoctorView to be published
    */

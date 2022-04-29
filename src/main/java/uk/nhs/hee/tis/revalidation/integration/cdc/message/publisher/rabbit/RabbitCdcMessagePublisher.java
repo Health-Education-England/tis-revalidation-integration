@@ -22,7 +22,7 @@ public class RabbitCdcMessagePublisher implements CdcMessagePublisher {
   }
 
   /**
-   * Publish MasterDoctorView update to Connections Service using rabbit template
+   * Publish MasterDoctorView update to Connections Service using rabbit template.
    *
    * @param update the updated MasterDoctorView to be published
    */
@@ -33,7 +33,7 @@ public class RabbitCdcMessagePublisher implements CdcMessagePublisher {
   }
 
   /**
-   * Publish MasterDoctorView update to Recommendations Service using rabbit template
+   * Publish MasterDoctorView update to Recommendations Service using rabbit template.
    *
    * @param update the updated MasterDoctorView to be published
    */
