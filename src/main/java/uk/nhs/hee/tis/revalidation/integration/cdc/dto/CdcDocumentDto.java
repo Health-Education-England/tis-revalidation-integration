@@ -19,22 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.service.helper;
+package uk.nhs.hee.tis.revalidation.integration.cdc.dto;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import org.bson.BsonDateTime;
-import org.bson.BsonDocument;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface CdcFieldUpdateHelper {
-
-  void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates);
-
-  default LocalDate getLocalDateFromBsonDateTime(final BsonDateTime bsonDateTime) {
-    final long bsonInstant = bsonDateTime.getValue();
-    return LocalDate.ofInstant(Instant.ofEpochMilli(bsonInstant), ZoneId.systemDefault());
-  }
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CdcDocumentDto<T> {
+  private String operationType;
+  private T fullDocument;
 }

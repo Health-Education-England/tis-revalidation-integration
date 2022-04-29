@@ -23,15 +23,22 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @ExtendWith(MockitoExtension.class)
 class CdcSqsMessageListenerTest {
@@ -45,41 +52,32 @@ class CdcSqsMessageListenerTest {
   @Mock
   CdcDoctorMessageHandler cdcDoctorMessageHandler;
 
-  @Test
-  void shouldPassDoctorInsertMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getDoctorInsertChangeStreamDocument();
-    cdcSqsMessageListener.getDoctorMessage(testMessage);
-
-    verify(cdcDoctorMessageHandler).handleMessage(testMessage);
-  }
+  @Spy
+  ObjectMapper objectMapper;
 
   @Test
-  void shouldPassDoctorUpdateMessageFromSqsQueueToHandler() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getDoctorUpdateChangeStreamDocument();
+  void shouldPassDoctorInsertMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException, IOException {
+    var testMessage = objectMapper.writeValueAsString(
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto()
+    );
     cdcSqsMessageListener.getDoctorMessage(testMessage);
 
-    verify(cdcDoctorMessageHandler).handleMessage(testMessage);
+    verify(cdcDoctorMessageHandler).handleMessage(
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {})
+    );
   }
 
   @Test
   void shouldPassRecommendationInsertMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getRecommendationInsertChangeStreamDocument();
+      throws OperationNotSupportedException, IOException {
+    var testMessage = objectMapper.writeValueAsString(
+        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto()
+    );
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
-    verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
-  }
-
-  @Test
-  void shouldPassRecommendationUpdateMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getRecommendationUpdateChangeStreamDocument();
-    cdcSqsMessageListener.getRecommendationMessage(testMessage);
-
-    verify(cdcRecommendationMessageHandler).handleMessage(testMessage);
+    verify(cdcRecommendationMessageHandler).handleMessage(
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
+    );
   }
 }

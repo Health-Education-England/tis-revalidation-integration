@@ -21,10 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.helper.CdcDoctorFieldUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -43,14 +41,12 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    *
    * @param repository        The ElasticSearch repository with the index managed by the service
    * @param mapper            A mapper for converting to/from the persisted composite view
-   * @param fieldUpdateHelper Provides access to fields within a CDC document
    */
   public CdcDoctorService(
       MasterDoctorElasticSearchRepository repository,
-      MasterDoctorViewMapper mapper,
-      CdcDoctorFieldUpdateHelper fieldUpdateHelper
+      MasterDoctorViewMapper mapper
   ) {
-    super(repository, fieldUpdateHelper);
+    super(repository);
     this.mapper = mapper;
   }
 
@@ -70,7 +66,8 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
         repository.save(mapper.doctorToMasterView(entity));
       } else {
         if (existingDoctors.size() > 1) {
-          log.error("Multiple doctors assigned to the same GMC number!");
+          log.error("Multiple doctors assigned to the same GMC number: {}",
+              entity.getGmcReferenceNumber());
         }
         var updatedDoctor = mapper.updateMasterDoctorView(
             existingDoctors.get(0),
@@ -81,24 +78,6 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
               entity.getGmcReferenceNumber(), e.getMessage()),
-          e);
-      throw e;
-    }
-  }
-
-  /**
-   * Update doctor fields in index.
-   *
-   * @param changes ChangeStreamDocument containing changed fields
-   */
-  @Override
-  public void updateSubsetOfFields(ChangeStreamDocument<DoctorsForDB> changes) {
-    String gmcNumber = changes.getFullDocument().getGmcReferenceNumber();
-    try {
-      updateFields(changes, gmcNumber);
-    } catch (Exception e) {
-      log.error(
-          String.format("CDC error updating doctor: %s, exception: %s", gmcNumber, e.getMessage()),
           e);
       throw e;
     }

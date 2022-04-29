@@ -19,21 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.service.helper;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
-import static uk.nhs.hee.tis.revalidation.integration.cdc.RecommendationConstants.OUTCOME;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
-import org.bson.BsonDocument;
-import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
+public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
-@Component
-public class CdcRecommendationFieldUpdateHelper implements CdcFieldUpdateHelper {
+  private static final java.time.format.DateTimeFormatter cdcDateFormat =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+  private LocalDateDeserializer localDateDeserializer;
+
+  public CdcDateDeserializer() {
+    this.localDateDeserializer = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
+  }
 
   @Override
-  public void updateField(MasterDoctorView masterDoctorView, String key, BsonDocument updates) {
-    if (key.equals(OUTCOME)) {
-      masterDoctorView.setGmcStatus(updates.getString(OUTCOME).getValue());
+  public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
+      throws IOException {
+    try {
+      String dateString = p.getText();
+      return LocalDate.parse(dateString, cdcDateFormat);
+    } catch (DateTimeParseException e) {
+      return localDateDeserializer.deserialize(p,ctx);
     }
   }
 }
