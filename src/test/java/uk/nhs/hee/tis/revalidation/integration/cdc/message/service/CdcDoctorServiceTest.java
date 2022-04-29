@@ -32,11 +32,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class CdcDoctorServiceTest {
@@ -48,7 +50,12 @@ class CdcDoctorServiceTest {
   MasterDoctorElasticSearchRepository repository;
 
   @Mock
+  CdcMessagePublisher publisher;
+
+  @Mock
   MasterDoctorViewMapper mapper;
+
+  private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
   @Test
   void shouldAddNewFieldsIfDoctorDoesNotExist() {
@@ -74,5 +81,18 @@ class CdcDoctorServiceTest {
 
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
     verify(repository).save(any());
+  }
+
+  @Test
+  void shouldPublishUpdates() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+    when(repository.save(any())).thenReturn(masterDoctorView);
+
+    DoctorsForDB newDoctor =
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
+    cdcDoctorService.addNewEntity(newDoctor);
+
+    verify(publisher).publishCdcRecommendationUpdate(masterDoctorView);
+    verify(publisher).publishCdcConnectionUpdate(masterDoctorView);
   }
 }

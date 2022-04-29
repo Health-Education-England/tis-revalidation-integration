@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -36,9 +37,10 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    * Service responsible for updating the Recommendation composite fields used for searching.
    */
   public CdcRecommendationService(
-      MasterDoctorElasticSearchRepository repository
+      MasterDoctorElasticSearchRepository repository,
+      CdcMessagePublisher cdcMessagePublisher
   ) {
-    super(repository);
+    super(repository, cdcMessagePublisher);
   }
 
   /**
@@ -58,7 +60,9 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
         masterDoctorView.setAdmin(entity.getAdmin());
-        repository.save(masterDoctorView);
+        final var updatedView = repository.save(masterDoctorView);
+        publishUpdateToRecommendations(updatedView);
+        publishUpdateToConnections(updatedView);
       }
     } catch (Exception e) {
       log.error(String

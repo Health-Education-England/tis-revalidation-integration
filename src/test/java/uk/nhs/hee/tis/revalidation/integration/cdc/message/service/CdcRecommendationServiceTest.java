@@ -32,7 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.rabbit.RabbitCdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -43,10 +46,14 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 class CdcRecommendationServiceTest {
 
   @InjectMocks
+  @Spy
   CdcRecommendationService cdcRecommendationService;
 
   @Mock
   MasterDoctorElasticSearchRepository repository;
+
+  @Mock
+  CdcMessagePublisher publisher;
 
   private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
@@ -70,5 +77,18 @@ class CdcRecommendationServiceTest {
     cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
 
     verify(repository, never()).save(any());
+  }
+
+  @Test
+  void shouldPublishUpdates() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+    when(repository.save(any())).thenReturn(masterDoctorView);
+
+    var newRecommendation =
+        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+
+    verify(publisher).publishCdcRecommendationUpdate(masterDoctorView);
+    verify(publisher).publishCdcConnectionUpdate(masterDoctorView);
   }
 }
