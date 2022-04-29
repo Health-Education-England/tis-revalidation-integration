@@ -92,7 +92,6 @@ class CdcDoctorServiceTest {
         CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
     cdcDoctorService.addNewEntity(newDoctor);
 
-    verify(publisher).publishCdcRecommendationUpdate(masterDoctorView);
-    verify(publisher).publishCdcConnectionUpdate(masterDoctorView);
+    verify(publisher).publishCdcUpdate(masterDoctorView);;
   }
 }

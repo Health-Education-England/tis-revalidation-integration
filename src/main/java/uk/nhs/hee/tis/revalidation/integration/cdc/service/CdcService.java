@@ -48,20 +48,11 @@ public abstract class CdcService<T> {
   public abstract void addNewEntity(T entity);
 
   /**
-   * Publish MasterDoctorView update to Connections Service using injected CdcMessagePublisher.
+   * Publish MasterDoctorView update using injected CdcMessagePublisher.
    *
    * @param masterDoctorView the updated MasterDoctorView to be published
    */
-  public final void publishUpdateToConnections(MasterDoctorView masterDoctorView) {
-    cdcMessagePublisher.publishCdcConnectionUpdate(masterDoctorView);
-  }
-
-  /**
-   * Publish MasterDoctorView update to Recommendations Service using injected CdcMessagePublisher.
-   *
-   * @param masterDoctorView the updated MasterDoctorView to be published
-   */
-  public final void publishUpdateToRecommendations(MasterDoctorView masterDoctorView) {
-    cdcMessagePublisher.publishCdcRecommendationUpdate(masterDoctorView);
+  public final void publishUpdate(MasterDoctorView masterDoctorView) {
+    cdcMessagePublisher.publishCdcUpdate(masterDoctorView);
   }
 }

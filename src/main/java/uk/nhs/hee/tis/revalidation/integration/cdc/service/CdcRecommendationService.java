@@ -61,8 +61,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
         masterDoctorView.setAdmin(entity.getAdmin());
         final var updatedView = repository.save(masterDoctorView);
-        publishUpdateToRecommendations(updatedView);
-        publishUpdateToConnections(updatedView);
+        publishUpdate(updatedView);
       }
     } catch (Exception e) {
       log.error(String

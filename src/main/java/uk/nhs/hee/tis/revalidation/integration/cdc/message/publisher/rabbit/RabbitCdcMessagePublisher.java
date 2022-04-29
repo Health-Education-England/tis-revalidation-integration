@@ -32,35 +32,20 @@ public class RabbitCdcMessagePublisher implements CdcMessagePublisher {
 
   private RabbitTemplate rabbitTemplate;
 
-  @Value("${app.rabbit.reval.routingKey.connection.update}")
-  private String connectionUpdateKey;
-
   @Value("${app.rabbit.reval.routingKey.masterdoctorview.updated}")
-  private String recommendationUpdateKey;
+  private String routingKey;
 
   public RabbitCdcMessagePublisher(RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
   }
 
   /**
-   * Publish MasterDoctorView update to Connections Service using rabbit template.
+   * Publish MasterDoctorView update to fanout exchange using rabbit template.
    *
    * @param update the updated MasterDoctorView to be published
    */
   @Override
-  public void publishCdcConnectionUpdate(
-      MasterDoctorView update) {
-    rabbitTemplate.convertAndSend(connectionUpdateKey, update);
-  }
-
-  /**
-   * Publish MasterDoctorView update to Recommendations Service using rabbit template.
-   *
-   * @param update the updated MasterDoctorView to be published
-   */
-  @Override
-  public void publishCdcRecommendationUpdate(
-      MasterDoctorView update) {
-    rabbitTemplate.convertAndSend(recommendationUpdateKey, update);
+  public void publishCdcUpdate(MasterDoctorView update) {
+    rabbitTemplate.convertAndSend(routingKey, update);
   }
 }

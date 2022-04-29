@@ -88,7 +88,6 @@ class CdcRecommendationServiceTest {
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
 
-    verify(publisher).publishCdcRecommendationUpdate(masterDoctorView);
-    verify(publisher).publishCdcConnectionUpdate(masterDoctorView);
+    verify(publisher).publishCdcUpdate(masterDoctorView);
   }
 }
