@@ -73,8 +73,8 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
               entity.getGmcReferenceNumber());
         }
         var updatedDoctor = mapper.updateMasterDoctorView(
-            existingDoctors.get(0),
-            mapper.doctorToMasterView(entity)
+            mapper.doctorToMasterView(entity),
+            existingDoctors.get(0)
         );
         var updatedView = repository.save(updatedDoctor);
         publishUpdate(updatedView);
