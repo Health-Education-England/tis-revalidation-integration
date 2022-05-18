@@ -1,6 +1,7 @@
 /*
  * The MIT License (MIT)
- * Copyright 2021 Crown Copyright (Health Education England)
+ *
+ * Copyright 2022 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,27 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.mapper;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcTraineeUpdateMessageHandler;
 
-@Mapper(componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MasterDoctorViewMapper {
+@Component
+public class CdcRabbitMessageListener {
 
-  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-                                          @MappingTarget MasterDoctorView target);
+  private CdcTraineeUpdateMessageHandler cdcTraineeUpdateHandler;
 
-  @Mapping(source = "doctorStatus", target = "tisStatus")
-  @Mapping(source = "designatedBodyCode", target = "designatedBody")
-  MasterDoctorView doctorToMasterView(DoctorsForDB cdcDoctor);
+  public CdcRabbitMessageListener (CdcTraineeUpdateMessageHandler cdcTraineeUpdateHandler) {
+    this.cdcTraineeUpdateHandler = cdcTraineeUpdateHandler;
+  }
 
-  @Mapping(ignore = true, target = "gmcReferenceNumber")
-  MasterDoctorView traineeUpdateToMasterView(TraineeUpdateDto traineeUpdateDto);
+  @RabbitListener(queues = "${tis.queue.revalupdate.created}")
+  public void getTraineeUpdateMessage(TraineeUpdateDto message) {
+    this.cdcTraineeUpdateHandler.handleMessage(message);
+  }
+
 }

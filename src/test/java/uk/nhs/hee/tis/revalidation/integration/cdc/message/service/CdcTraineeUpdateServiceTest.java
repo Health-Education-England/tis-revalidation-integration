@@ -34,19 +34,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
+import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-
 @ExtendWith(MockitoExtension.class)
-class CdcRecommendationServiceTest {
+public class CdcTraineeUpdateServiceTest {
 
   @InjectMocks
-  @Spy
-  CdcRecommendationService cdcRecommendationService;
+  CdcTraineeUpdateService cdcTraineeUpdateService;
 
   @Mock
   MasterDoctorElasticSearchRepository repository;
@@ -54,15 +54,17 @@ class CdcRecommendationServiceTest {
   @Mock
   CdcMessagePublisher publisher;
 
+  @Spy
+  MasterDoctorViewMapper mapper;
+
   private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
-  @Test
   void shouldAddNewFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var traineeUpdates =
+        TraineeUpdateDto.builder().build();
+    cdcTraineeUpdateService.addNewEntity(traineeUpdates);
 
     verify(repository).save(any());
   }
@@ -71,9 +73,9 @@ class CdcRecommendationServiceTest {
   void shouldNotInsertRecordIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var traineeUpdates =
+        TraineeUpdateDto.builder().build();
+    cdcTraineeUpdateService.addNewEntity(traineeUpdates);
 
     verify(repository, never()).save(any());
   }
@@ -83,10 +85,11 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var traineeUpdates =
+        TraineeUpdateDto.builder().build();
+    cdcTraineeUpdateService.addNewEntity(traineeUpdates);
 
     verify(publisher).publishCdcUpdate(masterDoctorView);
   }
+
 }
