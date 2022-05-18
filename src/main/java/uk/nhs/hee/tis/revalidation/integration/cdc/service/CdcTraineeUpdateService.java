@@ -54,7 +54,7 @@ public class CdcTraineeUpdateService extends CdcService<TraineeUpdateDto> {
   public void addNewEntity(TraineeUpdateDto entity) {
     final var repository = getRepository();
     final var existingView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
-    if(existingView.isEmpty()) {
+    if (existingView.isEmpty()) {
       log.error("No doctor with GMC number {} found",
           entity.getGmcReferenceNumber()
       );

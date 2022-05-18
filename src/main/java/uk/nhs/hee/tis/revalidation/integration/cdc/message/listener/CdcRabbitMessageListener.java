@@ -31,7 +31,7 @@ public class CdcRabbitMessageListener {
 
   private CdcTraineeUpdateMessageHandler cdcTraineeUpdateHandler;
 
-  public CdcRabbitMessageListener (CdcTraineeUpdateMessageHandler cdcTraineeUpdateHandler) {
+  public CdcRabbitMessageListener(CdcTraineeUpdateMessageHandler cdcTraineeUpdateHandler) {
     this.cdcTraineeUpdateHandler = cdcTraineeUpdateHandler;
   }
 

@@ -43,7 +43,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElast
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
-public class CdcTraineeUpdateServiceTest {
+class CdcTraineeUpdateServiceTest {
 
   @InjectMocks
   CdcTraineeUpdateService cdcTraineeUpdateService;
