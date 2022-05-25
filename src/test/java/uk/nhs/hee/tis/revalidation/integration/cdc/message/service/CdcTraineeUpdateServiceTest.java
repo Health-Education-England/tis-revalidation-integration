@@ -34,7 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
@@ -63,7 +63,7 @@ class CdcTraineeUpdateServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var traineeUpdates =
-        TraineeUpdateDto.builder().build();
+        ConnectionInfoDto.builder().build();
     cdcTraineeUpdateService.addNewEntity(traineeUpdates);
 
     verify(repository).save(any());
@@ -74,7 +74,7 @@ class CdcTraineeUpdateServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
     var traineeUpdates =
-        TraineeUpdateDto.builder().build();
+        ConnectionInfoDto.builder().build();
     cdcTraineeUpdateService.addNewEntity(traineeUpdates);
 
     verify(repository, never()).save(any());
@@ -86,7 +86,7 @@ class CdcTraineeUpdateServiceTest {
     when(repository.save(any())).thenReturn(masterDoctorView);
 
     var traineeUpdates =
-        TraineeUpdateDto.builder().build();
+        ConnectionInfoDto.builder().build();
     cdcTraineeUpdateService.addNewEntity(traineeUpdates);
 
     verify(publisher).publishCdcUpdate(masterDoctorView);

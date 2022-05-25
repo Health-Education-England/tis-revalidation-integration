@@ -23,7 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcTraineeUpdateMessageHandler;
 
 @Component
@@ -35,8 +35,8 @@ public class CdcRabbitMessageListener {
     this.cdcTraineeUpdateHandler = cdcTraineeUpdateHandler;
   }
 
-  @RabbitListener(queues = "${tis.queue.revalupdate.created}")
-  public void getTraineeUpdateMessage(TraineeUpdateDto message) {
+  @RabbitListener(queues = "${reval.queue.connection.update}")
+  public void getTraineeUpdateMessage(ConnectionInfoDto message) {
     this.cdcTraineeUpdateHandler.handleMessage(message);
   }
 

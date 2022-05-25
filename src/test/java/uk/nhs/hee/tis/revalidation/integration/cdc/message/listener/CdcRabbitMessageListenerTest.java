@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcTraineeUpdateMessageHandler;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,12 +19,12 @@ class CdcRabbitMessageListenerTest {
   @Mock
   CdcTraineeUpdateMessageHandler cdcTraineeUpdateHandler;
 
-  private TraineeUpdateDto traineeUpdateDto;
+  private ConnectionInfoDto connectionInfoDto;
 
   @Test
   void shouldReceiveTraineeUpdates() {
-    traineeUpdateDto = TraineeUpdateDto.builder().build();
-    cdcRabbitMessageListener.getTraineeUpdateMessage(traineeUpdateDto);
-    verify(cdcTraineeUpdateHandler).handleMessage(traineeUpdateDto);
+    connectionInfoDto = ConnectionInfoDto.builder().build();
+    cdcRabbitMessageListener.getTraineeUpdateMessage(connectionInfoDto);
+    verify(cdcTraineeUpdateHandler).handleMessage(connectionInfoDto);
   }
 }

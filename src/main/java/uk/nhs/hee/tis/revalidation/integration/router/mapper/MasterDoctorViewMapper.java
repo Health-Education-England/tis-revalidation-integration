@@ -24,7 +24,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -40,5 +40,5 @@ public interface MasterDoctorViewMapper {
   MasterDoctorView doctorToMasterView(DoctorsForDB cdcDoctor);
 
   @Mapping(ignore = true, target = "gmcReferenceNumber")
-  MasterDoctorView traineeUpdateToMasterView(TraineeUpdateDto traineeUpdateDto);
+  MasterDoctorView traineeUpdateToMasterView(ConnectionInfoDto connectionInfoDto);
 }

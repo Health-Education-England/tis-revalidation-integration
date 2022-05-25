@@ -33,7 +33,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeUpdateDto {
+public class ConnectionInfoDto {
+  //TODO - rename this class as it is not used only for connections - TIS21-3031
   Long tcsPersonId;
   String gmcReferenceNumber;
   String doctorFirstName;

@@ -23,7 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
 
 @Component
@@ -38,7 +38,7 @@ public class CdcTraineeUpdateMessageHandler {
     this.cdcTraineeUpdateService = cdcTraineeUpdateService;
   }
 
-  public void handleMessage(TraineeUpdateDto message) {
+  public void handleMessage(ConnectionInfoDto message) {
     cdcTraineeUpdateService.addNewEntity(message);
   }
 

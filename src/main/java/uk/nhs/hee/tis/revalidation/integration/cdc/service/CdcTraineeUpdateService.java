@@ -23,14 +23,14 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 
 @Slf4j
 @Service
-public class CdcTraineeUpdateService extends CdcService<TraineeUpdateDto> {
+public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
   private MasterDoctorViewMapper mapper;
 
@@ -51,7 +51,7 @@ public class CdcTraineeUpdateService extends CdcService<TraineeUpdateDto> {
    * @param entity trainee info to add to index
    */
   @Override
-  public void addNewEntity(TraineeUpdateDto entity) {
+  public void addNewEntity(ConnectionInfoDto entity) {
     final var repository = getRepository();
     final var existingView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     if (existingView.isEmpty()) {

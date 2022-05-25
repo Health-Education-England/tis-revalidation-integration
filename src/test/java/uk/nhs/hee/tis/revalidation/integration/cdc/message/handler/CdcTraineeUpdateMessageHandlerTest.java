@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.TraineeUpdateDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ class CdcTraineeUpdateMessageHandlerTest {
 
   @Test
   void shouldUpdateTraineeInfo() {
-    final var message = TraineeUpdateDto.builder().build();
+    final var message = ConnectionInfoDto.builder().build();
 
     cdcTraineeUpdateMessageHandler.handleMessage(message);
     verify(cdcTraineeUpdateService).addNewEntity(message);
