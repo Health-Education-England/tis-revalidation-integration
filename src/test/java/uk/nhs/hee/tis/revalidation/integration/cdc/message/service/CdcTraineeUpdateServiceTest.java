@@ -69,7 +69,7 @@ class CdcTraineeUpdateServiceTest {
 
   private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
-  private Long tcsPersonId =1L;
+  private Long tcsPersonId = 1L;
   private String gmcRefereneNumber = "1234567";
   private String doctorFirstName = "doctorFirstName";
   private String doctorLastName = "doctorLastName";
