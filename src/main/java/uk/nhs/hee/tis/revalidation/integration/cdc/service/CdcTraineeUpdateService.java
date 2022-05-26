@@ -51,7 +51,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * @param entity trainee info to add to index
    */
   @Override
-  public void addNewEntity(ConnectionInfoDto entity) {
+  public void upsertEntity(ConnectionInfoDto entity) {
     final var repository = getRepository();
     final var existingView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     if (existingView.isEmpty()) {

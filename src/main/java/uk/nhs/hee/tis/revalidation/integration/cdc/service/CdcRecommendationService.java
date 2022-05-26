@@ -49,7 +49,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    * @param entity recommendation to add to index
    */
   @Override
-  public void addNewEntity(Recommendation entity) {
+  public void upsertEntity(Recommendation entity) {
     String gmcId = entity.getGmcNumber();
     final var repository = getRepository();
     try {

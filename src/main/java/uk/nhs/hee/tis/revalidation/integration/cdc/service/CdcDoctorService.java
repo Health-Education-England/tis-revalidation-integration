@@ -58,7 +58,7 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param entity doctorsForDb to add to index
    */
   @Override
-  public void addNewEntity(DoctorsForDB entity) {
+  public void upsertEntity(DoctorsForDB entity) {
 
     final var repository = getRepository();
     final var existingDoctors = repository

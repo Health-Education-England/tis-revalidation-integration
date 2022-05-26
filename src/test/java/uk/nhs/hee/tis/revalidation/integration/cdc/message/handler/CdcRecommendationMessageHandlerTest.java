@@ -58,7 +58,7 @@ class CdcRecommendationMessageHandlerTest {
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationMessageHandler.handleMessage(testMessage);
 
-    verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
+    verify(cdcRecommendationService).upsertEntity(testMessage.getFullDocument());
   }
 
   @Test
@@ -67,6 +67,6 @@ class CdcRecommendationMessageHandlerTest {
         CdcTestDataGenerator.getCdcRecommendationReplaceCdcDocumentDto();
     cdcRecommendationMessageHandler.handleMessage(testMessage);
 
-    verify(cdcRecommendationService).addNewEntity(testMessage.getFullDocument());
+    verify(cdcRecommendationService).upsertEntity(testMessage.getFullDocument());
   }
 }

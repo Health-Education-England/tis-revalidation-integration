@@ -64,7 +64,7 @@ class CdcTraineeUpdateServiceTest {
 
     var traineeUpdates =
         ConnectionInfoDto.builder().build();
-    cdcTraineeUpdateService.addNewEntity(traineeUpdates);
+    cdcTraineeUpdateService.upsertEntity(traineeUpdates);
 
     verify(repository).save(any());
   }
@@ -75,7 +75,7 @@ class CdcTraineeUpdateServiceTest {
 
     var traineeUpdates =
         ConnectionInfoDto.builder().build();
-    cdcTraineeUpdateService.addNewEntity(traineeUpdates);
+    cdcTraineeUpdateService.upsertEntity(traineeUpdates);
 
     verify(repository, never()).save(any());
   }
@@ -87,7 +87,7 @@ class CdcTraineeUpdateServiceTest {
 
     var traineeUpdates =
         ConnectionInfoDto.builder().build();
-    cdcTraineeUpdateService.addNewEntity(traineeUpdates);
+    cdcTraineeUpdateService.upsertEntity(traineeUpdates);
 
     verify(publisher).publishCdcUpdate(masterDoctorView);
   }

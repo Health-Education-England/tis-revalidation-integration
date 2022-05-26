@@ -58,7 +58,7 @@ class CdcDoctorMessageHandlerTest {
         CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
-    verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
+    verify(cdcDoctorService).upsertEntity(testMessage.getFullDocument());
   }
 
   @Test
@@ -67,6 +67,6 @@ class CdcDoctorMessageHandlerTest {
         CdcTestDataGenerator.getCdcDoctorReplaceCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
-    verify(cdcDoctorService).addNewEntity(testMessage.getFullDocument());
+    verify(cdcDoctorService).upsertEntity(testMessage.getFullDocument());
   }
 }

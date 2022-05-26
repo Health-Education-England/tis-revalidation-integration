@@ -45,7 +45,7 @@ public abstract class CdcService<T> {
     return this.repository;
   }
 
-  public abstract void addNewEntity(T entity);
+  public abstract void upsertEntity(T entity);
 
   /**
    * Publish MasterDoctorView update using injected CdcMessagePublisher.

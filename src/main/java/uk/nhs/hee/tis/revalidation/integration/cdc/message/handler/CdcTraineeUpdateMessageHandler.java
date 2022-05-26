@@ -39,7 +39,7 @@ public class CdcTraineeUpdateMessageHandler {
   }
 
   public void handleMessage(ConnectionInfoDto message) {
-    cdcTraineeUpdateService.addNewEntity(message);
+    cdcTraineeUpdateService.upsertEntity(message);
   }
 
 }

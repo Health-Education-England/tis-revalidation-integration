@@ -62,7 +62,7 @@ class CdcRecommendationServiceTest {
 
     var newRecommendation =
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(repository).save(any());
   }
@@ -73,7 +73,7 @@ class CdcRecommendationServiceTest {
 
     var newRecommendation =
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(repository, never()).save(any());
   }
@@ -85,7 +85,7 @@ class CdcRecommendationServiceTest {
 
     var newRecommendation =
         CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(publisher).publishCdcUpdate(masterDoctorView);
   }

@@ -44,7 +44,7 @@ class CdcTraineeUpdateMessageHandlerTest {
     final var message = ConnectionInfoDto.builder().build();
 
     cdcTraineeUpdateMessageHandler.handleMessage(message);
-    verify(cdcTraineeUpdateService).addNewEntity(message);
+    verify(cdcTraineeUpdateService).upsertEntity(message);
   }
 
 

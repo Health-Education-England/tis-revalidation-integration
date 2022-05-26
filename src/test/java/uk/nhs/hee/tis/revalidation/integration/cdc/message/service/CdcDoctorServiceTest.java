@@ -63,7 +63,7 @@ class CdcDoctorServiceTest {
 
     DoctorsForDB newDoctor =
         CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
-    cdcDoctorService.addNewEntity(newDoctor);
+    cdcDoctorService.upsertEntity(newDoctor);
 
     verify(repository).save(mapper.doctorToMasterView(newDoctor));
   }
@@ -77,7 +77,7 @@ class CdcDoctorServiceTest {
 
     DoctorsForDB newDoctor =
         CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
-    cdcDoctorService.addNewEntity(newDoctor);
+    cdcDoctorService.upsertEntity(newDoctor);
 
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
     verify(repository).save(any());
@@ -90,7 +90,7 @@ class CdcDoctorServiceTest {
 
     DoctorsForDB newDoctor =
         CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
-    cdcDoctorService.addNewEntity(newDoctor);
+    cdcDoctorService.upsertEntity(newDoctor);
 
     verify(publisher).publishCdcUpdate(masterDoctorView);;
   }
