@@ -21,15 +21,20 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -38,7 +43,9 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
+import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -55,18 +62,65 @@ class CdcTraineeUpdateServiceTest {
   CdcMessagePublisher publisher;
 
   @Spy
-  MasterDoctorViewMapper mapper;
+  MasterDoctorViewMapper mapper = new MasterDoctorViewMapperImpl();
+
+  @Captor
+  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
   private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
-  void shouldAddNewFields() {
+  private Long tcsPersonId =1L;
+  private String gmcRefereneNumber = "1234567";
+  private String doctorFirstName = "doctorFirstName";
+  private String doctorLastName = "doctorLastName";
+  private LocalDate submissionDate = LocalDate.now();
+  private String programmeName = "programmeName";
+  private String programmeMembershipType = "programmeMembershipType";
+  private String designatedBody = "designatedBody";
+  private String tcsDesignatedBody = "tcsDesignatedBody";
+  private String programmeOwner = "programmeOwner";
+  private String connectionStatus = "connectionStatus";
+  private LocalDate programmeMembershipStartDate = LocalDate.now();
+  private LocalDate programmeMembershipEndDate = LocalDate.now();
+  private LocalDate curriculumEndDate = LocalDate.now();
+  private String dataSource = "dataSource";
+
+  @Test
+  void shouldUpsertNewFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var traineeUpdates =
-        ConnectionInfoDto.builder().build();
+        ConnectionInfoDto.builder()
+            .tcsPersonId(tcsPersonId)
+            .gmcReferenceNumber(gmcRefereneNumber)
+            .doctorFirstName(doctorFirstName)
+            .doctorLastName(doctorLastName)
+            .submissionDate(submissionDate)
+            .programmeName(programmeName)
+            .programmeMembershipType(programmeMembershipType)
+            .designatedBody(designatedBody)
+            .tcsDesignatedBody(tcsDesignatedBody)
+            .programmeOwner(programmeOwner)
+            .connectionStatus(connectionStatus)
+            .programmeMembershipStartDate(programmeMembershipStartDate)
+            .programmeMembershipEndDate(programmeMembershipEndDate)
+            .curriculumEndDate(curriculumEndDate)
+            .dataSource(dataSource)
+            .build();
     cdcTraineeUpdateService.upsertEntity(traineeUpdates);
 
-    verify(repository).save(any());
+    verify(repository).save(masterDoctorViewCaptor.capture());
+
+    //new fields
+    final var savedEntity = masterDoctorViewCaptor.getValue();
+    assertThat(savedEntity.getDoctorFirstName(), is(doctorFirstName));
+    assertThat(savedEntity.getDoctorLastName(), is(doctorLastName));
+    assertThat(savedEntity.getTcsPersonId(), is(tcsPersonId));
+    //existing fields
+    assertThat(savedEntity.getGmcReferenceNumber(), is(masterDoctorView.getGmcReferenceNumber()));
+    assertThat(savedEntity.getTisStatus(), is(masterDoctorView.getTisStatus()));
+    assertThat(savedEntity.getAdmin(), is(masterDoctorView.getAdmin()));
+
   }
 
   @Test
