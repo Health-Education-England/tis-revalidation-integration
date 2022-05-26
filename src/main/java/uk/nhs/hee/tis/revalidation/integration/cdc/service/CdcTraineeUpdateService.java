@@ -55,9 +55,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     final var repository = getRepository();
     final var existingView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     if (existingView.isEmpty()) {
-      log.error("No doctor with GMC number {} found",
-          entity.getGmcReferenceNumber()
-      );
+      upsertTraineeInfoWithNullGmcNumber(entity);
     } else {
       if (existingView.size() > 1) {
         log.error("Multiple doctors assigned to the same GMC number: {}",
@@ -67,6 +65,17 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       final var updatedView = repository
           .save(mapper.updateMasterDoctorView(update, existingView.get(0)));
       publishUpdate(updatedView);
+    }
+  }
+
+  private void upsertTraineeInfoWithNullGmcNumber(ConnectionInfoDto traineeInfo) {
+    final var repository = getRepository();
+    final var existingView = repository.findByTcsPersonId(traineeInfo.getTcsPersonId());
+    final var update = mapper.traineeUpdateToMasterView(traineeInfo);
+    if(existingView.isEmpty()) {
+      repository.save(update);
+    } else {
+      repository.save(mapper.updateMasterDoctorView(update, existingView.get(0)));
     }
   }
 }
