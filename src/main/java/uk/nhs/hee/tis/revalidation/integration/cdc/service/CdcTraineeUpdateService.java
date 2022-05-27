@@ -72,7 +72,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     final var repository = getRepository();
     final var existingView = repository.findByTcsPersonId(traineeInfo.getTcsPersonId());
     final var update = mapper.traineeUpdateToMasterView(traineeInfo);
-    if(existingView.isEmpty()) {
+    if (existingView.isEmpty()) {
       repository.save(update);
     } else {
       repository.save(mapper.updateMasterDoctorView(update, existingView.get(0)));
