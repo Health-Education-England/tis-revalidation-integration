@@ -199,7 +199,8 @@ class CdcTraineeUpdateServiceTest {
 
   @Test
   void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+    when(repository.findByGmcReferenceNumber(any()))
+        .thenReturn(List.of(masterDoctorView, masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
     var traineeUpdates =
