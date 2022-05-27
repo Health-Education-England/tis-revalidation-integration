@@ -33,12 +33,21 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public interface MasterDoctorViewMapper {
 
   MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-                                          @MappingTarget MasterDoctorView target);
+      @MappingTarget MasterDoctorView target);
 
   @Mapping(source = "doctorStatus", target = "tisStatus")
   @Mapping(source = "designatedBodyCode", target = "designatedBody")
   MasterDoctorView doctorToMasterView(DoctorsForDB cdcDoctor);
 
+  /**
+   * Converts a Reval-specific DTO of TCS to a {@link MasterDoctorView}.
+   * <p/>
+   * N.B. The `gmcReferenceNumber` is ignored because the absence is used to indicate there is no
+   * record from the GMC.
+   *
+   * @param connectionInfoDto Information from TCS used in the context of Revalidation
+   * @return a partially populated {@link MasterDoctorView}
+   */
   @Mapping(ignore = true, target = "gmcReferenceNumber")
   MasterDoctorView traineeUpdateToMasterView(ConnectionInfoDto connectionInfoDto);
 }
