@@ -48,34 +48,29 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   /**
    * Add new trainee details to index (this is an aggregation, updating an existing record).
    *
-   * @param entity trainee info to add to index
+   * @param receivedDto trainee info to add to index
    */
   @Override
-  public void upsertEntity(ConnectionInfoDto entity) {
+  public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
-    final var existingView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
+    var existingView = repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber());
     if (existingView.isEmpty()) {
-      upsertTraineeInfoWithNullGmcNumber(entity);
+      existingView = repository.findByTcsPersonId(receivedDto.getTcsPersonId());
+      final var update = mapper.traineeUpdateToMasterView(receivedDto);
+      if (existingView.isEmpty()) {
+        repository.save(update);
+      } else {
+        repository.save(mapper.updateMasterDoctorView(update, existingView.get(0)));
+      }
     } else {
       if (existingView.size() > 1) {
         log.error("Multiple doctors assigned to the same GMC number: {}",
-            entity.getGmcReferenceNumber());
+            receivedDto.getGmcReferenceNumber());
       }
-      final var update = mapper.traineeUpdateToMasterView(entity);
+      final var update = mapper.traineeUpdateToMasterView(receivedDto);
       final var updatedView = repository
           .save(mapper.updateMasterDoctorView(update, existingView.get(0)));
       publishUpdate(updatedView);
-    }
-  }
-
-  private void upsertTraineeInfoWithNullGmcNumber(ConnectionInfoDto traineeInfo) {
-    final var repository = getRepository();
-    final var existingView = repository.findByTcsPersonId(traineeInfo.getTcsPersonId());
-    final var update = mapper.traineeUpdateToMasterView(traineeInfo);
-    if (existingView.isEmpty()) {
-      repository.save(update);
-    } else {
-      repository.save(mapper.updateMasterDoctorView(update, existingView.get(0)));
     }
   }
 }
