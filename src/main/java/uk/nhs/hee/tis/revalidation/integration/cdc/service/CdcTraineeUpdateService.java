@@ -55,25 +55,29 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   @Override
   public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
-    var persistedViews = repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber());
-    var countByGmc = new AtomicInteger(persistedViews.size());
-    if (persistedViews.isEmpty()) {
-      persistedViews = repository.findByTcsPersonId(receivedDto.getTcsPersonId());
-      if (persistedViews.size() > 1 ) {
-        log.error("Multiple doctors assigned to the person ID: {}",
-            receivedDto.getTcsPersonId());
-      }
-    }
-    MasterDoctorView masterDoctorView =
-        persistedViews.isEmpty() ? new MasterDoctorView() : persistedViews.get(0);
-    final var updatedView = repository
-        .save(mapper.updateMasterDoctorView(receivedDto, masterDoctorView));
+    var countByGmcNumber = new AtomicInteger();
+    var countByTisId = new AtomicInteger();
+    final var existingView =
+        repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber())
+            // takeWhile allows us to count and limit to the first record
+            .stream().takeWhile(t -> countByGmcNumber.incrementAndGet() < 2)
+            .findFirst()
+            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId())
+                .stream().takeWhile(t -> countByTisId.incrementAndGet() < 2)
+                .findFirst()
+                .orElse(new MasterDoctorView()));
 
-    if (countByGmc.get() > 1) {
+    final var updatedView = repository
+        .save(mapper.updateMasterDoctorView(receivedDto, existingView));
+
+    if (countByGmcNumber.get() > 1) {
       log.error("Multiple doctors assigned to the same GMC number: {}",
           receivedDto.getGmcReferenceNumber());
+    } else if (countByTisId.get() > 1) {
+      log.error("Multiple doctors assigned to the person ID: {}",
+          receivedDto.getTcsPersonId());
     }
-    if (countByGmc.get() > 0) {
+    if (countByGmcNumber.get() > 0) {
       publishUpdate(updatedView);
     }
   }
