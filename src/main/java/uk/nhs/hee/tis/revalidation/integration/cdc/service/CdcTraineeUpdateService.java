@@ -21,12 +21,14 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 @Service
@@ -53,23 +55,25 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   @Override
   public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
-    var existingView = repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber());
-    if (existingView.isEmpty()) {
-      existingView = repository.findByTcsPersonId(receivedDto.getTcsPersonId());
-      final var update = mapper.traineeUpdateToMasterView(receivedDto);
-      if (existingView.isEmpty()) {
-        repository.save(update);
-      } else {
-        repository.save(mapper.updateMasterDoctorView(update, existingView.get(0)));
+    var persistedViews = repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber());
+    var countByGmc = new AtomicInteger(persistedViews.size());
+    if (persistedViews.isEmpty()) {
+      persistedViews = repository.findByTcsPersonId(receivedDto.getTcsPersonId());
+      if (persistedViews.size() > 1 ) {
+        log.error("Multiple doctors assigned to the person ID: {}",
+            receivedDto.getTcsPersonId());
       }
-    } else {
-      if (existingView.size() > 1) {
-        log.error("Multiple doctors assigned to the same GMC number: {}",
-            receivedDto.getGmcReferenceNumber());
-      }
-      final var update = mapper.traineeUpdateToMasterView(receivedDto);
-      final var updatedView = repository
-          .save(mapper.updateMasterDoctorView(update, existingView.get(0)));
+    }
+    MasterDoctorView masterDoctorView =
+        persistedViews.isEmpty() ? new MasterDoctorView() : persistedViews.get(0);
+    final var updatedView = repository
+        .save(mapper.updateMasterDoctorView(receivedDto, masterDoctorView));
+
+    if (countByGmc.get() > 1) {
+      log.error("Multiple doctors assigned to the same GMC number: {}",
+          receivedDto.getGmcReferenceNumber());
+    }
+    if (countByGmc.get() > 0) {
       publishUpdate(updatedView);
     }
   }

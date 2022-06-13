@@ -21,6 +21,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -29,8 +30,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -143,5 +145,18 @@ class MasterDoctorViewMapperTest {
         dataToSave, currentDoctorView);
 
     assertThat(result, nullValue());
+  }
+
+  @Test
+  void shouldUpdateNonNullFields() {
+    ConnectionInfoDto source = CdcTestDataGenerator
+        .getConnectionInfo();
+    source.setConnectionStatus(null);
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView(source, currentDoctorView);
+    assertThat(result, notNullValue());
+    assertThat(result.getConnectionStatus(), is(currentDoctorView.getConnectionStatus()));
+    assertThat(result.getGmcReferenceNumber(), is(currentDoctorView.getGmcReferenceNumber()));
+    assertThat(result.getTcsPersonId(), is(source.getTcsPersonId()));
   }
 }
