@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import org.bson.BsonDateTime;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
@@ -57,6 +58,12 @@ public class CdcTestDataGenerator {
   public static final String DESIGNATED_BODY_CODE_VAL = "designatedBodyCode";
   public static final String ADMIN_VAL = "admin";
   public static final Boolean EXISTS_IN_GMC_VAL = true;
+  public static final String PROGRAMME_NAME_VAL = "Dev 4 pain";
+  public static final String PROGRAMME_TYPE_VAL = "prog-type";
+  public static final String PROGRAMME_OWNER_VAL = "squad";
+  public static final String CONNECTION_STATUS_VAL = "inappropriate";
+  public static final String DATA_SOURCE_VAL = "Lundan";
+  public static final String C_I = "ci";
 
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -109,10 +116,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorInsertCdcDocumentDto() {
-    return new CdcDocumentDto<DoctorsForDB>(
-        OperationType.INSERT.getValue(),
-        doctorsForDB
-    );
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.INSERT.getValue(), doctorsForDB);
   }
 
   /**
@@ -121,10 +125,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorReplaceCdcDocumentDto() {
-    return new CdcDocumentDto<DoctorsForDB>(
-        OperationType.REPLACE.getValue(),
-        doctorsForDB
-    );
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.REPLACE.getValue(), doctorsForDB);
   }
 
   /**
@@ -132,8 +133,7 @@ public class CdcTestDataGenerator {
    *
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
-  public static CdcDocumentDto<Recommendation>
-      getCdcRecommendationInsertCdcDocumentDto() {
+  public static CdcDocumentDto<Recommendation> getCdcRecommendationInsertCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -143,10 +143,7 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new CdcDocumentDto<Recommendation>(
-        OperationType.INSERT.getValue(),
-        recommendation
-    );
+    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
   }
 
   /**
@@ -154,8 +151,7 @@ public class CdcTestDataGenerator {
    *
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
-  public static CdcDocumentDto<Recommendation>
-      getCdcRecommendationReplaceCdcDocumentDto() {
+  public static CdcDocumentDto<Recommendation> getCdcRecommendationReplaceCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -165,10 +161,7 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new CdcDocumentDto<Recommendation>(
-        OperationType.REPLACE.getValue(),
-        recommendation
-    );
+    return new CdcDocumentDto<Recommendation>(OperationType.REPLACE.getValue(), recommendation);
   }
 
   /**
@@ -179,10 +172,7 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUnsupportedCdcDocumentDto() {
     DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
 
-    return new CdcDocumentDto<DoctorsForDB>(
-        OperationType.DROP.getValue(),
-        doctorsForDB
-    );
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDB);
   }
 
   /**
@@ -190,14 +180,24 @@ public class CdcTestDataGenerator {
    *
    * @return CdcDocumentDto CdcRecommendation unsupported test instance
    */
-  public static CdcDocumentDto<Recommendation>
-      getCdcRecommendationUnsupportedCdcDocumentDto() {
+  public static CdcDocumentDto<Recommendation> getCdcRecommendationUnsupportedCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder().build();
 
-    return new CdcDocumentDto<Recommendation>(
-        OperationType.DROP.getValue(),
-        recommendation
-    );
+    return new CdcDocumentDto<Recommendation>(OperationType.DROP.getValue(), recommendation);
   }
 
+  public static ConnectionInfoDto getConnectionInfo() {
+    return ConnectionInfoDto.builder().tcsPersonId(1984L)
+        .designatedBody(C_I + DESIGNATED_BODY_CODE_VAL)
+        .tcsDesignatedBody(C_I + "tcs" + DESIGNATED_BODY_CODE_VAL)
+        .doctorFirstName(C_I + DOCTOR_FIRST_NAME_VAL).doctorLastName(C_I + DOCTOR_LAST_NAME_VAL)
+        .gmcReferenceNumber(C_I + GMC_REFERENCE_NUMBER_VAL)
+        .programmeName(C_I + PROGRAMME_NAME_VAL).programmeOwner(C_I + PROGRAMME_OWNER_VAL)
+        .programmeMembershipType(C_I + PROGRAMME_TYPE_VAL)
+        .programmeMembershipStartDate(LocalDate.now().minusMonths(2))
+        .programmeMembershipEndDate(LocalDate.now().plusYears(3L).plusMonths(3))
+        .curriculumEndDate(LocalDate.now().plusYears(3L))
+        .connectionStatus(C_I + CONNECTION_STATUS_VAL).dataSource(C_I + DATA_SOURCE_VAL)
+        .build();
+  }
 }

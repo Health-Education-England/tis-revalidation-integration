@@ -21,6 +21,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -29,13 +30,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
-import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class MasterDoctorViewMapperTest {
 
+  private static final String ID = "1a2b3c";
+  private static final long TIS_ID = 1001L;
+  private static final String GMC_REFERENCE_NUMBER = "gmcReferenceNumber";
+  private static final String DOCTOR_FIRST_NAME = "doctorFirstName";
+  private static final String DOCTOR_LAST_NAME = "doctorLastName";
+  private static final String PROGRAMME_NAME = "programmeName";
+  private static final String MEMBERSHIP_TYPE = "membershipType";
+  private static final String DESIGNATED_BODY = "designatedBody";
+  private static final String TCS_DESIGNATED_BODY = "tcsDesignatedBody";
+  private static final String PROGRAMME_OWNER = "programmeOwner";
+  private static final String CONNECTION_YES = "Yes";
+  private static final String POSTFIX_NEW = "_new";
+  private static final String ADMIN = "admin";
+  private static final String GMC_STATUS = "gmcStatus";
+  
   @InjectMocks
   MasterDoctorViewMapperImpl masterDoctorViewMapper;
 
@@ -43,71 +60,70 @@ class MasterDoctorViewMapperTest {
 
   @BeforeEach
   void setUp() {
-
     currentDoctorView = MasterDoctorView.builder()
-        .id("1a2b3c")
-        .tcsPersonId(1001L)
-        .gmcReferenceNumber("gmcReferenceNumber")
-        .doctorFirstName("doctorFirstName")
-        .doctorLastName("doctorLastName")
-        .programmeName("programmeName")
-        .membershipType("membershipType")
-        .designatedBody("designatedBody")
-        .tcsDesignatedBody("tcsDesignatedBody")
-        .programmeOwner("programmeOwner")
-        .connectionStatus("Yes")
+        .id(ID)
+        .tcsPersonId(TIS_ID)
+        .gmcReferenceNumber(GMC_REFERENCE_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME)
+        .doctorLastName(DOCTOR_LAST_NAME)
+        .programmeName(PROGRAMME_NAME)
+        .membershipType(MEMBERSHIP_TYPE)
+        .designatedBody(DESIGNATED_BODY)
+        .tcsDesignatedBody(TCS_DESIGNATED_BODY)
+        .programmeOwner(PROGRAMME_OWNER)
+        .connectionStatus(CONNECTION_YES)
         .build();
   }
 
   @Test
   void shouldUpdateMasterDoctorViewsToNewValues() {
     MasterDoctorView dataToSave = new MasterDoctorView();
-    dataToSave.setProgrammeName("programmeName_new");
-    dataToSave.setMembershipType("membershipType_new");
-    dataToSave.setTcsDesignatedBody("tcsDesignatedBody_new");
-    dataToSave.setProgrammeOwner("programmeOwner_new");
+    dataToSave.setProgrammeName(PROGRAMME_NAME + POSTFIX_NEW);
+    dataToSave.setMembershipType(MEMBERSHIP_TYPE + POSTFIX_NEW);
+    dataToSave.setTcsDesignatedBody(TCS_DESIGNATED_BODY + POSTFIX_NEW);
+    dataToSave.setProgrammeOwner(PROGRAMME_OWNER + POSTFIX_NEW);
 
     MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
         dataToSave, currentDoctorView);
 
-    assertThat(result.getId(), is("1a2b3c"));
-    assertThat(result.getTcsPersonId(), is(1001L));
+    assertThat(result.getId(), is(ID));
+    assertThat(result.getTcsPersonId(), is(TIS_ID));
 
     //mapper will make sure new values are populated
-    assertThat(result.getProgrammeName(), is("programmeName_new"));
-    assertThat(result.getMembershipType(), is("membershipType_new"));
-    assertThat(result.getTcsDesignatedBody(), is("tcsDesignatedBody_new"));
-    assertThat(result.getProgrammeOwner(), is("programmeOwner_new"));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME + POSTFIX_NEW));
+    assertThat(result.getMembershipType(), is(MEMBERSHIP_TYPE + POSTFIX_NEW));
+    assertThat(result.getTcsDesignatedBody(), is(TCS_DESIGNATED_BODY+ POSTFIX_NEW));
+    assertThat(result.getProgrammeOwner(), is(PROGRAMME_OWNER + POSTFIX_NEW));
 
     //other fields will remain same
-    assertThat(result.getGmcReferenceNumber(), is("gmcReferenceNumber"));
-    assertThat(result.getDoctorFirstName(), is("doctorFirstName"));
-    assertThat(result.getDoctorLastName(), is("doctorLastName"));
+    assertThat(result.getGmcReferenceNumber(), is(GMC_REFERENCE_NUMBER));
+    assertThat(result.getDoctorFirstName(), is(DOCTOR_FIRST_NAME));
+    assertThat(result.getDoctorLastName(), is(DOCTOR_LAST_NAME));
   }
 
   @Test
   void shouldUpdateMasterDoctorViewsWithNewFields() {
     MasterDoctorView dataToSave = new MasterDoctorView();
-    dataToSave.setAdmin("admin");
-    dataToSave.setGmcStatus("gmcStatus");
+    dataToSave.setAdmin(ADMIN);
+    dataToSave.setGmcStatus(GMC_STATUS);
     dataToSave.setTisStatus(RecommendationStatus.COMPLETED);
 
     MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
         dataToSave, currentDoctorView);
 
-    assertThat(result.getId(), is("1a2b3c"));
-    assertThat(result.getTcsPersonId(), is(1001L));
+    assertThat(result.getId(), is(ID));
+    assertThat(result.getTcsPersonId(), is(TIS_ID));
 
     //mapper will make sure new fields are populated
-    assertThat(result.getAdmin(), is("admin"));
-    assertThat(result.getGmcStatus(), is("gmcStatus"));
+    assertThat(result.getAdmin(), is(ADMIN));
+    assertThat(result.getGmcStatus(), is(GMC_STATUS));
     assertThat(result.getTisStatus(), is(RecommendationStatus.COMPLETED));
 
     //other fields will remain same
-    assertThat(result.getGmcReferenceNumber(), is("gmcReferenceNumber"));
-    assertThat(result.getDoctorFirstName(), is("doctorFirstName"));
-    assertThat(result.getDoctorLastName(), is("doctorLastName"));
-    assertThat(result.getProgrammeOwner(), is("programmeOwner"));
+    assertThat(result.getGmcReferenceNumber(), is(GMC_REFERENCE_NUMBER));
+    assertThat(result.getDoctorFirstName(), is(DOCTOR_FIRST_NAME));
+    assertThat(result.getDoctorLastName(), is(DOCTOR_LAST_NAME));
+    assertThat(result.getProgrammeOwner(), is(PROGRAMME_OWNER));
   }
 
   @Test
@@ -121,27 +137,41 @@ class MasterDoctorViewMapperTest {
     MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
         dataToSave, currentDoctorView);
 
-    assertThat(result.getId(), is("1a2b3c"));
-    assertThat(result.getTcsPersonId(), is(1001L));
+    assertThat(result.getId(), is(ID));
+    assertThat(result.getTcsPersonId(), is(TIS_ID));
 
     //mapper will make sure null fields will not override the existing values
-    assertThat(result.getProgrammeName(), is("programmeName"));
-    assertThat(result.getMembershipType(), is("membershipType"));
-    assertThat(result.getTcsDesignatedBody(), is("tcsDesignatedBody"));
-    assertThat(result.getProgrammeOwner(), is("programmeOwner"));
+    assertThat(result.getProgrammeName(), is(PROGRAMME_NAME));
+    assertThat(result.getMembershipType(), is(MEMBERSHIP_TYPE));
+    assertThat(result.getTcsDesignatedBody(), is(TCS_DESIGNATED_BODY));
+    assertThat(result.getProgrammeOwner(), is(PROGRAMME_OWNER));
 
     //other fields will remain same
-    assertThat(result.getGmcReferenceNumber(), is("gmcReferenceNumber"));
-    assertThat(result.getDoctorFirstName(), is("doctorFirstName"));
-    assertThat(result.getDoctorLastName(), is("doctorLastName"));
+    assertThat(result.getGmcReferenceNumber(), is(GMC_REFERENCE_NUMBER));
+    assertThat(result.getDoctorFirstName(), is(DOCTOR_FIRST_NAME));
+    assertThat(result.getDoctorLastName(), is(DOCTOR_LAST_NAME));
   }
 
   @Test
   void shouldNotUpdateMasterDoctorViewsWhenNull() {
-    MasterDoctorView dataToSave = null;
     MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
-        dataToSave, currentDoctorView);
+        (MasterDoctorView) null, currentDoctorView);
 
     assertThat(result, nullValue());
+  }
+
+  @Test
+  void shouldUpdateNonNullFields() {
+    ConnectionInfoDto source = CdcTestDataGenerator
+        .getConnectionInfo();
+    source.setConnectionStatus(null);
+
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView(source, currentDoctorView);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
+    assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
+    assertThat(result.getTcsPersonId(), is(source.getTcsPersonId()));
   }
 }

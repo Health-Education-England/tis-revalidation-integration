@@ -21,12 +21,14 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 @Service
@@ -37,10 +39,8 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   /**
    * Service responsible for updating the Trainee composite fields used for searching.
    */
-  protected CdcTraineeUpdateService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher,
-      MasterDoctorViewMapper mapper) {
+  protected CdcTraineeUpdateService(MasterDoctorElasticSearchRepository repository,
+      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
     this.mapper = mapper;
   }
@@ -48,34 +48,33 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   /**
    * Add new trainee details to index (this is an aggregation, updating an existing record).
    *
-   * @param entity trainee info to add to index
+   * @param receivedDto trainee info to add to index
    */
   @Override
-  public void upsertEntity(ConnectionInfoDto entity) {
+  public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
-    final var existingView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
-    if (existingView.isEmpty()) {
-      upsertTraineeInfoWithNullGmcNumber(entity);
-    } else {
-      if (existingView.size() > 1) {
-        log.error("Multiple doctors assigned to the same GMC number: {}",
-            entity.getGmcReferenceNumber());
-      }
-      final var update = mapper.traineeUpdateToMasterView(entity);
-      final var updatedView = repository
-          .save(mapper.updateMasterDoctorView(update, existingView.get(0)));
-      publishUpdate(updatedView);
-    }
-  }
+    var countByGmcNumber = new AtomicInteger();
+    var countByTisId = new AtomicInteger();
+    final var existingView =
+        repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber())
+            // takeWhile allows us to count and limit to the first record
+            .stream().takeWhile(t -> countByGmcNumber.incrementAndGet() < 2)
+            .findFirst()
+            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId())
+                .stream().takeWhile(t -> countByTisId.incrementAndGet() < 2)
+                .findFirst()
+                .orElse(new MasterDoctorView()));
 
-  private void upsertTraineeInfoWithNullGmcNumber(ConnectionInfoDto traineeInfo) {
-    final var repository = getRepository();
-    final var existingView = repository.findByTcsPersonId(traineeInfo.getTcsPersonId());
-    final var update = mapper.traineeUpdateToMasterView(traineeInfo);
-    if (existingView.isEmpty()) {
-      repository.save(update);
-    } else {
-      repository.save(mapper.updateMasterDoctorView(update, existingView.get(0)));
+    final var updatedView = repository
+        .save(mapper.updateMasterDoctorView(receivedDto, existingView));
+
+    if (countByGmcNumber.get() > 1) {
+      log.error("Multiple doctors assigned to the same GMC number: {}",
+          receivedDto.getGmcReferenceNumber());
+    } else if (countByTisId.get() > 1) {
+      log.error("Multiple doctors assigned to the person ID: {}",
+          receivedDto.getTcsPersonId());
     }
+      publishUpdate(updatedView);
   }
 }
