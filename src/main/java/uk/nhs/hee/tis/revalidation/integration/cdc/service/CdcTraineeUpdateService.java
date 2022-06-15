@@ -39,10 +39,8 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   /**
    * Service responsible for updating the Trainee composite fields used for searching.
    */
-  protected CdcTraineeUpdateService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher,
-      MasterDoctorViewMapper mapper) {
+  protected CdcTraineeUpdateService(MasterDoctorElasticSearchRepository repository,
+      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
     this.mapper = mapper;
   }
@@ -77,8 +75,6 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       log.error("Multiple doctors assigned to the person ID: {}",
           receivedDto.getTcsPersonId());
     }
-    if (countByGmcNumber.get() > 0) {
       publishUpdate(updatedView);
-    }
   }
 }
