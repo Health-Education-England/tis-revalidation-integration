@@ -41,14 +41,10 @@ public interface MasterDoctorViewMapper {
 
   /**
    * Updates a {@link MasterDoctorView} from a Reval-specific DTO of TCS data.
-   * <p/>
-   * N.B. The `gmcReferenceNumber` is ignored because the absence is used to indicate there is no
-   * record from the GMC.
    *
    * @param source Information from TCS used in the context of Revalidation
    * @return a partially populated {@link MasterDoctorView}
    */
-  @Mapping(ignore = true, target = "gmcReferenceNumber")
   MasterDoctorView updateMasterDoctorView(ConnectionInfoDto source,
       @MappingTarget MasterDoctorView target);
 }
