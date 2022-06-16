@@ -35,7 +35,7 @@ public class CdcRabbitMessageListener {
     this.cdcTraineeUpdateHandler = cdcTraineeUpdateHandler;
   }
 
-  @RabbitListener(queues = "${reval.queue.connection.update}")
+  @RabbitListener(queues = "${app.rabbit.reval.queue.connection.update}")
   public void getTraineeUpdateMessage(ConnectionInfoDto message) {
     this.cdcTraineeUpdateHandler.handleMessage(message);
   }
