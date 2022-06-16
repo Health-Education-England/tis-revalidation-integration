@@ -21,7 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
@@ -53,28 +53,15 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   @Override
   public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
-    var countByGmcNumber = new AtomicInteger();
-    var countByTisId = new AtomicInteger();
+    final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
     final var existingView =
-        repository.findByGmcReferenceNumber(receivedDto.getGmcReferenceNumber())
-            // takeWhile allows us to count and limit to the first record
-            .stream().takeWhile(t -> countByGmcNumber.incrementAndGet() < 2)
-            .findFirst()
-            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId())
-                .stream().takeWhile(t -> countByTisId.incrementAndGet() < 2)
-                .findFirst()
+        ("UNKNOWN".equalsIgnoreCase(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
+            : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
+            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
                 .orElse(new MasterDoctorView()));
 
     final var updatedView = repository
         .save(mapper.updateMasterDoctorView(receivedDto, existingView));
-
-    if (countByGmcNumber.get() > 1) {
-      log.error("Multiple doctors assigned to the same GMC number: {}",
-          receivedDto.getGmcReferenceNumber());
-    } else if (countByTisId.get() > 1) {
-      log.error("Multiple doctors assigned to the person ID: {}",
-          receivedDto.getTcsPersonId());
-    }
-      publishUpdate(updatedView);
+    publishUpdate(updatedView);
   }
 }

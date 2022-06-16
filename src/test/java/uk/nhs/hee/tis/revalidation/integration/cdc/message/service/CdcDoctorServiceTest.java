@@ -61,8 +61,8 @@ class CdcDoctorServiceTest {
   void shouldAddNewFieldsIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
+    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto()
+        .getFullDocument();
     cdcDoctorService.upsertEntity(newDoctor);
 
     verify(repository).save(mapper.doctorToMasterView(newDoctor));
@@ -71,12 +71,10 @@ class CdcDoctorServiceTest {
   @Test
   void shouldUpdateFieldsIfDoctorExistsOnAdd() {
     var existingDoctor = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(
-        List.of(existingDoctor)
-    );
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(existingDoctor));
 
-    DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
+    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto()
+        .getFullDocument();
     cdcDoctorService.upsertEntity(newDoctor);
 
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
@@ -88,10 +86,10 @@ class CdcDoctorServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    DoctorsForDB newDoctor =
-        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto().getFullDocument();
+    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto()
+        .getFullDocument();
     cdcDoctorService.upsertEntity(newDoctor);
 
-    verify(publisher).publishCdcUpdate(masterDoctorView);;
+    verify(publisher).publishCdcUpdate(masterDoctorView);
   }
 }

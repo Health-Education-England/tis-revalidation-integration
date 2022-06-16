@@ -60,8 +60,7 @@ class CdcRecommendationServiceTest {
   void shouldAddNewFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(repository).save(any());
@@ -71,8 +70,7 @@ class CdcRecommendationServiceTest {
   void shouldNotInsertRecordIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(repository, never()).save(any());
@@ -83,8 +81,7 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(publisher).publishCdcUpdate(masterDoctorView);

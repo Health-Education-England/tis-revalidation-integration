@@ -186,6 +186,11 @@ public class CdcTestDataGenerator {
     return new CdcDocumentDto<Recommendation>(OperationType.DROP.getValue(), recommendation);
   }
 
+  /**
+   * Create a new ConnectionInfoDto based on a trainee on a programme with a "period of grace".
+   *
+   * @return A {@link ConnectionInfoDto} for a trainee on a current Programme
+   */
   public static ConnectionInfoDto getConnectionInfo() {
     return ConnectionInfoDto.builder().tcsPersonId(1984L)
         .designatedBody(C_I + DESIGNATED_BODY_CODE_VAL)

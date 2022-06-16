@@ -33,6 +33,7 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateServi
 
 @ExtendWith(MockitoExtension.class)
 class CdcTraineeUpdateMessageHandlerTest {
+
   @InjectMocks
   CdcTraineeUpdateMessageHandler cdcTraineeUpdateMessageHandler;
 

@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +34,8 @@ import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -139,7 +142,17 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedEntity.getDoctorFirstName(), is(doctorFirstName));
     assertThat(savedEntity.getDoctorLastName(), is(doctorLastName));
     assertThat(savedEntity.getTcsPersonId(), is(tcsPersonId));
-    //TODO Assert null fields not overwritten
+  }
+
+  @ParameterizedTest(name = "Should Find Existing by TIS ID if GMC Number is [{0}]")
+  @CsvSource(value = {"Unknown", "UNKNOWN", "unknown"})
+  void shouldFindExistingByTisIdIfUnknownGmc(String unknown) {
+    traineeUpdate.setGmcReferenceNumber(unknown);
+    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView));
+
+    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
+
+    verify(repository, never()).findByGmcReferenceNumber(any());
   }
 
   @Test
@@ -177,10 +190,8 @@ class CdcTraineeUpdateServiceTest {
   @Test
   void shouldPublishUpdateForTcsId() {
     MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByGmcReferenceNumber(null))
-        .thenReturn(Collections.emptyList());
-    when(repository.findByTcsPersonId(tcsPersonId))
-        .thenReturn(List.of(masterDoctorView, view2));
+    when(repository.findByGmcReferenceNumber(null)).thenReturn(Collections.emptyList());
+    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView, view2));
     MasterDoctorView updatedView = new MasterDoctorView();
     when(repository.save(any())).thenReturn(updatedView);
 

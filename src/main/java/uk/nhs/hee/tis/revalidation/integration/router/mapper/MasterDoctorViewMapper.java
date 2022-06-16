@@ -32,12 +32,12 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MasterDoctorViewMapper {
 
-  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
-      @MappingTarget MasterDoctorView target);
-
   @Mapping(source = "doctorStatus", target = "tisStatus")
   @Mapping(source = "designatedBodyCode", target = "designatedBody")
   MasterDoctorView doctorToMasterView(DoctorsForDB cdcDoctor);
+
+  MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
+      @MappingTarget MasterDoctorView target);
 
   /**
    * Updates a {@link MasterDoctorView} from a Reval-specific DTO of TCS data.

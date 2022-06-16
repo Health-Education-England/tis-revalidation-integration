@@ -52,7 +52,7 @@ class MasterDoctorViewMapperTest {
   private static final String POSTFIX_NEW = "_new";
   private static final String ADMIN = "admin";
   private static final String GMC_STATUS = "gmcStatus";
-  
+
   @InjectMocks
   MasterDoctorViewMapperImpl masterDoctorViewMapper;
 
@@ -83,8 +83,8 @@ class MasterDoctorViewMapperTest {
     dataToSave.setTcsDesignatedBody(TCS_DESIGNATED_BODY + POSTFIX_NEW);
     dataToSave.setProgrammeOwner(PROGRAMME_OWNER + POSTFIX_NEW);
 
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
-        dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView(dataToSave, currentDoctorView);
 
     assertThat(result.getId(), is(ID));
     assertThat(result.getTcsPersonId(), is(TIS_ID));
@@ -92,7 +92,7 @@ class MasterDoctorViewMapperTest {
     //mapper will make sure new values are populated
     assertThat(result.getProgrammeName(), is(PROGRAMME_NAME + POSTFIX_NEW));
     assertThat(result.getMembershipType(), is(MEMBERSHIP_TYPE + POSTFIX_NEW));
-    assertThat(result.getTcsDesignatedBody(), is(TCS_DESIGNATED_BODY+ POSTFIX_NEW));
+    assertThat(result.getTcsDesignatedBody(), is(TCS_DESIGNATED_BODY + POSTFIX_NEW));
     assertThat(result.getProgrammeOwner(), is(PROGRAMME_OWNER + POSTFIX_NEW));
 
     //other fields will remain same
@@ -108,8 +108,8 @@ class MasterDoctorViewMapperTest {
     dataToSave.setGmcStatus(GMC_STATUS);
     dataToSave.setTisStatus(RecommendationStatus.COMPLETED);
 
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
-        dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView(dataToSave, currentDoctorView);
 
     assertThat(result.getId(), is(ID));
     assertThat(result.getTcsPersonId(), is(TIS_ID));
@@ -134,8 +134,8 @@ class MasterDoctorViewMapperTest {
     dataToSave.setTcsDesignatedBody(null);
     dataToSave.setProgrammeOwner(null);
 
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
-        dataToSave, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView(dataToSave, currentDoctorView);
 
     assertThat(result.getId(), is(ID));
     assertThat(result.getTcsPersonId(), is(TIS_ID));
@@ -154,16 +154,15 @@ class MasterDoctorViewMapperTest {
 
   @Test
   void shouldNotUpdateMasterDoctorViewsWhenNull() {
-    MasterDoctorView result = masterDoctorViewMapper.updateMasterDoctorView(
-        (MasterDoctorView) null, currentDoctorView);
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView((MasterDoctorView) null, currentDoctorView);
 
     assertThat(result, nullValue());
   }
 
   @Test
   void shouldUpdateNonNullFields() {
-    ConnectionInfoDto source = CdcTestDataGenerator
-        .getConnectionInfo();
+    ConnectionInfoDto source = CdcTestDataGenerator.getConnectionInfo();
     source.setConnectionStatus(null);
 
     MasterDoctorView result = masterDoctorViewMapper

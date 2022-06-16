@@ -45,17 +45,14 @@ class CdcDoctorMessageHandlerTest {
   @Test
   void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getCdcDoctorUnsupportedCdcDocumentDto();
-    assertThrows(OperationNotSupportedException.class, () -> {
-      cdcDoctorMessageHandler.handleMessage(testMessage);
-    });
+    var testMessage = CdcTestDataGenerator.getCdcDoctorUnsupportedCdcDocumentDto();
+    assertThrows(OperationNotSupportedException.class,
+        () -> cdcDoctorMessageHandler.handleMessage(testMessage));
   }
 
   @Test
   void shouldHandleInserts() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto();
+    var testMessage = CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).upsertEntity(testMessage.getFullDocument());
@@ -63,8 +60,7 @@ class CdcDoctorMessageHandlerTest {
 
   @Test
   void shouldHandleReplace() throws OperationNotSupportedException {
-    var testMessage =
-        CdcTestDataGenerator.getCdcDoctorReplaceCdcDocumentDto();
+    var testMessage = CdcTestDataGenerator.getCdcDoctorReplaceCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).upsertEntity(testMessage.getFullDocument());
