@@ -21,53 +21,47 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
-import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 @Service
-public class CdcRecommendationService extends CdcService<Recommendation> {
+public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
+
+  private MasterDoctorViewMapper mapper;
 
   /**
-   * Service responsible for updating the Recommendation composite fields used for searching.
+   * Service responsible for updating the Trainee composite fields used for searching.
    */
-  public CdcRecommendationService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher
-  ) {
+  protected CdcTraineeUpdateService(MasterDoctorElasticSearchRepository repository,
+      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
+    this.mapper = mapper;
   }
 
   /**
-   * Add new recommendation to index (this is an aggregation, updating an existing record).
+   * Add new trainee details to index (this is an aggregation, updating an existing record).
    *
-   * @param entity recommendation to add to index
+   * @param receivedDto trainee info to add to index
    */
   @Override
-  public void upsertEntity(Recommendation entity) {
-    String gmcId = entity.getGmcNumber();
+  public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
-    try {
-      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-      if (!masterDoctorViewList.isEmpty()) {
-        if (masterDoctorViewList.size() > 1) {
-          log.error("Multiple doctors assigned to the same GMC number!");
-        }
-        MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-        masterDoctorView.setAdmin(entity.getAdmin());
-        final var updatedView = repository.save(masterDoctorView);
-        publishUpdate(updatedView);
-      }
-    } catch (Exception e) {
-      log.error(String
-              .format("CDC error adding recommendation: %s, exception: %s", entity, e.getMessage()),
-          e);
-      throw e;
-    }
+    final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
+    final var existingView =
+        ("UNKNOWN".equalsIgnoreCase(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
+            : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
+            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
+                .orElse(new MasterDoctorView()));
+
+    final var updatedView = repository
+        .save(mapper.updateMasterDoctorView(receivedDto, existingView));
+    publishUpdate(updatedView);
   }
 }

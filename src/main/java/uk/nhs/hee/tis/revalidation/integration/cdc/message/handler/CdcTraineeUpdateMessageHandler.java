@@ -21,30 +21,25 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
-import com.mongodb.client.model.changestream.OperationType;
-import javax.naming.OperationNotSupportedException;
-import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
-import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
 
-public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocumentDto<T>> {
+@Component
+@Slf4j
+public class CdcTraineeUpdateMessageHandler {
 
-  CdcService<T> cdcService;
+  private CdcTraineeUpdateService cdcTraineeUpdateService;
 
-  protected CdcMessageHandler(CdcService<T> cdcService) {
-    this.cdcService = cdcService;
+  public CdcTraineeUpdateMessageHandler(
+      CdcTraineeUpdateService cdcTraineeUpdateService
+  ) {
+    this.cdcTraineeUpdateService = cdcTraineeUpdateService;
   }
 
-  @Override
-  public void handleMessage(CdcDocumentDto<T> message) throws OperationNotSupportedException {
-    final OperationType operation = OperationType.valueOf(message.getOperationType().toUpperCase());
-    switch (operation) {
-      case INSERT:
-      case REPLACE:
-        cdcService.upsertEntity(message.getFullDocument());
-        break;
-      default:
-        throw new OperationNotSupportedException("CDC operation not supported: " + operation);
-    }
+  public void handleMessage(ConnectionInfoDto message) {
+    cdcTraineeUpdateService.upsertEntity(message);
   }
+
 }

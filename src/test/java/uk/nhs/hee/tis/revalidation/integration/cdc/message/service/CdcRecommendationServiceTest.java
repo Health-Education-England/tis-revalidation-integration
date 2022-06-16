@@ -35,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.rabbit.RabbitCdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -61,9 +60,8 @@ class CdcRecommendationServiceTest {
   void shouldAddNewFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(repository).save(any());
   }
@@ -72,9 +70,8 @@ class CdcRecommendationServiceTest {
   void shouldNotInsertRecordIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(repository, never()).save(any());
   }
@@ -84,9 +81,8 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    var newRecommendation =
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.addNewEntity(newRecommendation.getFullDocument());
+    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
+    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(publisher).publishCdcUpdate(masterDoctorView);
   }

@@ -40,14 +40,11 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
   /**
    * Create a service.
    *
-   * @param repository        The ElasticSearch repository with the index managed by the service
-   * @param mapper            A mapper for converting to/from the persisted composite view
+   * @param repository The ElasticSearch repository with the index managed by the service
+   * @param mapper     A mapper for converting to/from the persisted composite view
    */
-  public CdcDoctorService(
-      MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher,
-      MasterDoctorViewMapper mapper
-  ) {
+  public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
+      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
     this.mapper = mapper;
   }
@@ -58,11 +55,10 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param entity doctorsForDb to add to index
    */
   @Override
-  public void addNewEntity(DoctorsForDB entity) {
+  public void upsertEntity(DoctorsForDB entity) {
 
     final var repository = getRepository();
-    final var existingDoctors = repository
-        .findByGmcReferenceNumber(entity.getGmcReferenceNumber());
+    final var existingDoctors = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     try {
       if (existingDoctors.isEmpty()) {
         var newView = repository.save(mapper.doctorToMasterView(entity));
@@ -72,16 +68,14 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
           log.error("Multiple doctors assigned to the same GMC number: {}",
               entity.getGmcReferenceNumber());
         }
-        var updatedDoctor = mapper.updateMasterDoctorView(
-            mapper.doctorToMasterView(entity),
-            existingDoctors.get(0)
-        );
+        var updatedDoctor = mapper
+            .updateMasterDoctorView(mapper.doctorToMasterView(entity), existingDoctors.get(0));
         var updatedView = repository.save(updatedDoctor);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
-              entity.getGmcReferenceNumber(), e.getMessage()),
+          entity.getGmcReferenceNumber(), e.getMessage()),
           e);
       throw e;
     }
