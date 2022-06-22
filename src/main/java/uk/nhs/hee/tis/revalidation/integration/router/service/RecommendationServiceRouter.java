@@ -35,6 +35,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationSummaryAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.RecommendationTcsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandlerProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
@@ -45,6 +47,8 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private static final String API_RECOMMENDATION = "/api/recommendation?bridgeEndpoint=true";
   private static final String API_RECOMMENDATION_GMC_ID =
       "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_RECOMMENDATION_LATEST_GMC_IDS =
+      "/api/recommendation/latest/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_RECOMMENDATION_SUBMIT =
       "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
   private static final String API_CONNECTION =
@@ -59,7 +63,13 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private KeycloakBean keycloakBean;
 
   @Autowired
+  private DoctorRecommendationSummaryAggregationStrategy doctorRecommendationSummaryAggregationStrategy;
+
+  @Autowired
   private DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
+
+  @Autowired
+  private RecommendationTcsAggregationStrategy recommendationTcsAggregationStrategy;
 
   @Autowired
   private ExceptionHandlerProcessor exceptionHandlerProcessor;
@@ -75,6 +85,16 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     onException(HttpOperationFailedException.class)
         .process(exceptionHandlerProcessor);
+
+    // TODO: Remove mapping when tis-revalidation-core is deployed.
+    from("direct:temp-doctors")
+        .to("direct:v1-doctors")
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
+        .enrich("direct:latest-recommendation", doctorRecommendationSummaryAggregationStrategy);
+
+    from("direct:latest-recommendation")
+        .toD(serviceUrl + API_RECOMMENDATION_LATEST_GMC_IDS)
+        .enrich("direct:tcs-trainees", recommendationTcsAggregationStrategy);
 
     from("direct:tcs-trainees")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
