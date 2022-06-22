@@ -19,32 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.api;
+package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RecommendationInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 
-@Component
-public class V1ApiRouter extends RouteBuilder {
+@Mapper(componentModel = "spring")
+public interface TraineeRecommendationMapper {
 
-  @Override
-  public void configure() {
-    restConfiguration().component("servlet");
-
-    rest("/v1/admin")
-        .post().bindingMode(RestBindingMode.off)
-        .to("direct:admin");
-
-    // TODO: Change to direct:doctors when tis-revalidation-core is deployed.
-    rest("/v1/doctors")
-        .get().bindingMode(RestBindingMode.auto)
-        .to("direct:temp-doctors");
-
-    // TODO: Change to use tis-revalidation-core when deployed.
-    rest("/v1/doctors/assign-admin")
-        .post().bindingMode(RestBindingMode.off)
-        .to("direct:temp-doctors-assign-admin");
-  }
+  RecommendationInfoDto mergeTraineeRecommendationResponses(final TraineeInfoDto traineeInfoDto,
+      final TraineeCoreDto traineeCoreDto);
 }
-
