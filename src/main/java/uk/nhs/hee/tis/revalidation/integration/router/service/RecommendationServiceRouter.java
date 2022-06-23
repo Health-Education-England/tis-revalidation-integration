@@ -100,7 +100,8 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .to("direct:reval-officer")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrl + "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true");
+        .toD(serviceUrl
+            + "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true");
 
     from("direct:admin")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))

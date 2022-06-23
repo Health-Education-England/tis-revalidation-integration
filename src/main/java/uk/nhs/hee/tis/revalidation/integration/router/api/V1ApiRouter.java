@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class V1ApiRouter extends RouteBuilder {
 
-
   @Override
   public void configure() {
     restConfiguration().component("servlet");
