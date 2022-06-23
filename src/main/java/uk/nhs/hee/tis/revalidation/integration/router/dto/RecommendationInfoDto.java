@@ -41,5 +41,10 @@ public class RecommendationInfoDto {
   private LocalDate curriculumEndDate;
   private String programmeMembershipType;
   private String programmeName;
+  /**
+   * @deprecated
+   * Field not used in front end and not persisted.
+  */
+  @Deprecated
   private String currentGrade;
 }
