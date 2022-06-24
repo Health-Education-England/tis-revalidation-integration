@@ -35,26 +35,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationSummaryAggregationStrategy;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.RecommendationTcsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandlerProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
-
-  private static final String API_RECOMMENDATION = "/api/recommendation?bridgeEndpoint=true";
-  private static final String API_RECOMMENDATION_GMC_ID =
-      "/api/recommendation/${header.gmcId}?bridgeEndpoint=true";
-  private static final String API_RECOMMENDATION_LATEST_GMC_IDS =
-      "/api/recommendation/latest/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_RECOMMENDATION_SUBMIT =
-      "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}?bridgeEndpoint=true";
-  private static final String API_CONNECTION =
-      "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_DOCTOR_SYNC =
-      "/api/admin/trigger-doctor-sync?bridgeEndpoint=true";
 
   @Autowired
   private GmcIdProcessorBean gmcIdProcessorBean;
@@ -63,13 +49,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private KeycloakBean keycloakBean;
 
   @Autowired
-  private DoctorRecommendationSummaryAggregationStrategy doctorRecommendationSummaryAggregationStrategy;
-
-  @Autowired
   private DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
-
-  @Autowired
-  private RecommendationTcsAggregationStrategy recommendationTcsAggregationStrategy;
 
   @Autowired
   private ExceptionHandlerProcessor exceptionHandlerProcessor;
@@ -86,19 +66,9 @@ public class RecommendationServiceRouter extends RouteBuilder {
     onException(HttpOperationFailedException.class)
         .process(exceptionHandlerProcessor);
 
-    // TODO: Remove mapping when tis-revalidation-core is deployed.
-    from("direct:temp-doctors")
-        .to("direct:v1-doctors")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
-        .enrich("direct:latest-recommendation", doctorRecommendationSummaryAggregationStrategy);
-
-    from("direct:latest-recommendation")
-        .toD(serviceUrl + API_RECOMMENDATION_LATEST_GMC_IDS)
-        .enrich("direct:tcs-trainees", recommendationTcsAggregationStrategy);
-
     from("direct:tcs-trainees")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(tcsServiceUrl + API_CONNECTION)
+        .toD(tcsServiceUrl + "/api/revalidation/trainees/${header.gmcIds}?bridgeEndpoint=true")
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     // TODO: Remove mapping when tis-revalidation-core is deployed.
@@ -110,12 +80,12 @@ public class RecommendationServiceRouter extends RouteBuilder {
     from("direct:recommendation-post")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrl + API_RECOMMENDATION);
+        .toD(serviceUrl + "/api/recommendation?bridgeEndpoint=true");
 
     from("direct:recommendation-put")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.PUT))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrl + API_RECOMMENDATION);
+        .toD(serviceUrl + "/api/recommendation?bridgeEndpoint=true");
 
     from("direct:recommendation-gmc-id")
         .to("direct:recommendation-trainee-by-gmc-id")
@@ -123,17 +93,24 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .enrich("direct:tcs-trainees", doctorRecommendationAggregationStrategy);
 
     from("direct:recommendation-trainee-by-gmc-id")
-        .toD(serviceUrl + API_RECOMMENDATION_GMC_ID)
+        .toD(serviceUrl + "/api/recommendation/${header.gmcId}?bridgeEndpoint=true")
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:recommendation-submit")
         .to("direct:reval-officer")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrl + API_RECOMMENDATION_SUBMIT);
+        .toD(serviceUrl + "/api/recommendation/${header.gmcId}/submit/${header.recommendationId}"
+            + "?bridgeEndpoint=true");
 
     from("direct:admin")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .toD(serviceUrl + API_DOCTOR_SYNC);
+        .toD(serviceUrl + "/api/admin/trigger-doctor-sync?bridgeEndpoint=true");
+
+    from("direct:recommendation-summary")
+        .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true")
+        .transform(
+            body().regexReplaceAll("\\\"traineeInfo\\\"\\:", "\\\"recommendationInfo\\\"\\:"))
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }

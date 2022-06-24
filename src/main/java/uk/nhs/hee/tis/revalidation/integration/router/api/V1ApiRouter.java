@@ -39,12 +39,13 @@ public class V1ApiRouter extends RouteBuilder {
     // TODO: Change to direct:doctors when tis-revalidation-core is deployed.
     rest("/v1/doctors")
         .get().bindingMode(RestBindingMode.auto)
-        .to("direct:temp-doctors");
+        .to("direct:recommendation-summary");
 
     // TODO: Change to use tis-revalidation-core when deployed.
     rest("/v1/doctors/assign-admin")
         .post().bindingMode(RestBindingMode.off)
         .to("direct:temp-doctors-assign-admin");
+
   }
 }
 

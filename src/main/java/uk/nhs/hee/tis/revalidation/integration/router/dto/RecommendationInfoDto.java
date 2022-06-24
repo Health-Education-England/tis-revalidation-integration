@@ -41,5 +41,11 @@ public class RecommendationInfoDto {
   private LocalDate curriculumEndDate;
   private String programmeMembershipType;
   private String programmeName;
+  /**
+   * The current grade of a TCS Trainee, held in TCS.
+   *
+   * @deprecated 2022-06 - Field not used in front end and not persisted
+   */
+  @Deprecated(since = "2022-06", forRemoval = true)
   private String currentGrade;
 }
