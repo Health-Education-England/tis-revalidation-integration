@@ -81,6 +81,7 @@ public class GmcDoctorMessageListener {
           .admin(doctorsForDB.getAdmin())
           .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
           .underNotice(doctorsForDB.getUnderNotice())
+          .existsInGmc(doctorsForDB.getExistsInGmc())
           .build();
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;
