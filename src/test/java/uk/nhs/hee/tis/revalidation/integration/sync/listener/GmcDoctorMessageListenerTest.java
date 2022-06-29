@@ -66,7 +66,8 @@ class GmcDoctorMessageListenerTest {
         .doctorStatus(RecommendationStatus.NOT_STARTED)
         .lastUpdatedDate(LocalDate.now())
         .designatedBodyCode("PQR")
-        .admin("Reval Admin").build();
+        .admin("Reval Admin")
+        .existsInGmc(true).build();
 
     revalidationSummaryDto = RevalidationSummaryDto.builder()
         .doctor(doctorsForDB)
@@ -91,5 +92,6 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getSubmissionDate(), is(LocalDate.now()));
     assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
     assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
+    assertThat(masterDoctorView.getExistsInGmc(), is(true));
   }
 }

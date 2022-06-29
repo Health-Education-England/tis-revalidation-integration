@@ -96,13 +96,11 @@ class TraineeDataMessageListenerTest {
         .gmcReferenceNumber(gmcReferenceNumber)
         .doctorFirstName(doctorFirstName)
         .doctorLastName(doctorLastName)
-        .submissionDate(submissionDate)
         .programmeName(programmeName)
         .programmeMembershipType(programmeMembershipType)
         .designatedBody(designatedBody)
         .tcsDesignatedBody(tcsDesignatedBody)
         .programmeOwner(programmeOwner)
-        .connectionStatus(connectionStatus)
         .programmeMembershipStartDate(programmeMembershipStartDate)
         .programmeMembershipEndDate(programmeMembershipEndDate)
         .curriculumEndDate(curriculumEndDate)
@@ -143,13 +141,11 @@ class TraineeDataMessageListenerTest {
     assertThat(masterDoctorView.getGmcReferenceNumber(), is(gmcReferenceNumber));
     assertThat(masterDoctorView.getDoctorFirstName(), is(doctorFirstName));
     assertThat(masterDoctorView.getDoctorLastName(), is(doctorLastName));
-    assertThat(masterDoctorView.getSubmissionDate(), is(submissionDate));
     assertThat(masterDoctorView.getProgrammeName(), is(programmeName));
     assertThat(masterDoctorView.getMembershipType(), is(programmeMembershipType));
     assertThat(masterDoctorView.getDesignatedBody(), is(designatedBody));
     assertThat(masterDoctorView.getTcsDesignatedBody(), is(tcsDesignatedBody));
     assertThat(masterDoctorView.getProgrammeOwner(), is(programmeOwner));
-    assertThat(masterDoctorView.getConnectionStatus(), is(connectionStatus));
     assertThat(masterDoctorView.getMembershipStartDate(), is(programmeMembershipStartDate));
     assertThat(masterDoctorView.getMembershipEndDate(), is(programmeMembershipEndDate));
     assertThat(masterDoctorView.getCurriculumEndDate(), is(curriculumEndDate));
