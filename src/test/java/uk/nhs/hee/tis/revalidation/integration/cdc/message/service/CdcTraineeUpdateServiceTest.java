@@ -35,7 +35,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -129,7 +130,6 @@ class CdcTraineeUpdateServiceTest {
 
   @Test
   void shouldUpsertTraineeInfoIfGmcNumberNull() {
-    when(repository.findByGmcReferenceNumber(null)).thenReturn(Collections.emptyList());
     final var masterDoctorViewNullGmc = CdcTestDataGenerator.getTestMasterDoctorView();
     masterDoctorViewNullGmc.setGmcReferenceNumber(null);
     when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorViewNullGmc));
@@ -145,7 +145,8 @@ class CdcTraineeUpdateServiceTest {
   }
 
   @ParameterizedTest(name = "Should Find Existing by TIS ID if GMC Number is [{0}]")
-  @CsvSource(value = {"Unknown", "UNKNOWN", "unknown"})
+  @NullAndEmptySource
+  @ValueSource(strings = {"Unknown", "UNKNOWN", "unknown", " "})
   void shouldFindExistingByTisIdIfUnknownGmc(String unknown) {
     traineeUpdate.setGmcReferenceNumber(unknown);
     when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView));
@@ -157,7 +158,6 @@ class CdcTraineeUpdateServiceTest {
 
   @Test
   void shouldInsertTraineeInfoIfNoMatch() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
     final var masterDoctorViewNullGmc = CdcTestDataGenerator.getTestMasterDoctorView();
     masterDoctorViewNullGmc.setGmcReferenceNumber(null);
     when(repository.findByTcsPersonId(any())).thenReturn(Collections.emptyList());
@@ -190,7 +190,6 @@ class CdcTraineeUpdateServiceTest {
   @Test
   void shouldPublishUpdateForTcsId() {
     MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByGmcReferenceNumber(null)).thenReturn(Collections.emptyList());
     when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView, view2));
     MasterDoctorView updatedView = new MasterDoctorView();
     when(repository.save(any())).thenReturn(updatedView);

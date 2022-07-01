@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
@@ -34,7 +35,10 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
-  private MasterDoctorViewMapper mapper;
+  private final Predicate<String> isUnreliableGmcNumber =
+      s -> s == null || s.isBlank() || "UNKNOWN".equalsIgnoreCase(s);
+
+  private final MasterDoctorViewMapper mapper;
 
   /**
    * Service responsible for updating the Trainee composite fields used for searching.
@@ -54,8 +58,9 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   public void upsertEntity(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
     final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
+    log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
     final var existingView =
-        ("UNKNOWN".equalsIgnoreCase(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
+        (isUnreliableGmcNumber.test(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
             : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
             .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
                 .orElse(new MasterDoctorView()));
