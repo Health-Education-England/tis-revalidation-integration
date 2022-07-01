@@ -35,7 +35,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
-  private final Predicate<String> ignoredGMCNumbers =
+  private final Predicate<String> isUnreliableGmcNumber =
       s -> s == null || s.isBlank() || "UNKNOWN".equalsIgnoreCase(s);
 
   private final MasterDoctorViewMapper mapper;
@@ -60,10 +60,10 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
     log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
     final var existingView =
-        (ignoredGMCNumbers.test(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
+        (isUnreliableGmcNumber.test(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
             : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
             .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
-        .orElse(new MasterDoctorView()));
+                .orElse(new MasterDoctorView()));
 
     final var updatedView = repository
         .save(mapper.updateMasterDoctorView(receivedDto, existingView));
