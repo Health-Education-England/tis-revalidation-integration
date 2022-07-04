@@ -60,7 +60,7 @@ public class GmcDoctorMessageListener {
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
   public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
-    if (message.getSyncEnd() != null && message.getSyncEnd().equals(true)) {
+    if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
           traineeCount);
       String getMaster = "getMaster";

@@ -25,10 +25,7 @@ import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
 import org.elasticsearch.index.IndexNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.ReactiveIndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
@@ -42,13 +39,13 @@ public class DoctorUpsertElasticSearchService {
   private static final String ES_INDEX = "masterdoctorindex";
   private final MasterDoctorElasticSearchRepository repository;
   private final MasterDoctorViewMapper mapper;
-  @Autowired
-  private ElasticsearchOperations elasticSearchOperations;
+  private final ElasticsearchOperations elasticSearchOperations;
 
   public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
-      MasterDoctorViewMapper mapper) {
+      MasterDoctorViewMapper mapper, ElasticsearchOperations elasticSearchOperations) {
     this.repository = repository;
     this.mapper = mapper;
+    this.elasticSearchOperations = elasticSearchOperations;
   }
 
   public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) {
@@ -75,35 +72,28 @@ public class DoctorUpsertElasticSearchService {
         result = repository.findByGmcReferenceNumberAndTcsPersonId(
             dataToSave.getGmcReferenceNumber(),
             dataToSave.getTcsPersonId());
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
         log.info("Exception in `findByGmcReferenceNumberAndTcsPersonId`"
                 + "(GmcId: {}; PersonId: {}): {}",
-            dataToSave.getGmcReferenceNumber(),dataToSave.getTcsPersonId(),  ex);
+            dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
       }
-    }
-
-    else if (dataToSave.getGmcReferenceNumber() != null
+    } else if (dataToSave.getGmcReferenceNumber() != null
         && dataToSave.getTcsPersonId() == null) {
       try {
         result = repository.findByGmcReferenceNumber(
             dataToSave.getGmcReferenceNumber());
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
         log.info("Exception in `findByGmcReferenceNumber` (GmcId: {}): {}",
-            dataToSave.getGmcReferenceNumber(),  ex);
+            dataToSave.getGmcReferenceNumber(), ex);
       }
-    }
-
-    else if (dataToSave.getGmcReferenceNumber() == null
+    } else if (dataToSave.getGmcReferenceNumber() == null
         && dataToSave.getTcsPersonId() != null) {
       try {
         result = repository.findByTcsPersonId(
             dataToSave.getTcsPersonId());
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
         log.info("Exception in `findByTcsPersonId` (PersonId: {}): {}",
-            dataToSave.getTcsPersonId(),  ex);
+            dataToSave.getTcsPersonId(), ex);
       }
     }
 
@@ -113,23 +103,20 @@ public class DoctorUpsertElasticSearchService {
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
     try {
-      existingRecords.forEach(currentDoctorView -> {
-        repository.save(mapper.updateMasterDoctorView(dataToSave, currentDoctorView));
-      });
-    }
-    catch (Exception ex) {
+      existingRecords.forEach(currentDoctorView -> repository
+          .save(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)));
+    } catch (Exception ex) {
       log.info("Exception in `updateMasterDoctorViews` (GmcId: {}; PersonId: {}): {}",
-          dataToSave.getGmcReferenceNumber(),dataToSave.getTcsPersonId(),  ex);
+          dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
     }
   }
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
     try {
       repository.save(dataToSave);
-    }
-    catch (Exception ex) {
+    } catch (Exception ex) {
       log.info("Exception in `addMasterDoctorViews` (GmcId: {}; PersonId: {}): {}",
-          dataToSave.getGmcReferenceNumber(),dataToSave.getTcsPersonId(),  ex);
+          dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
     }
   }
 
@@ -150,7 +137,8 @@ public class DoctorUpsertElasticSearchService {
   private void createMasterDoctorIndex() {
     log.info("creating and updating mappings");
     elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).create();
-    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).putMapping(MasterDoctorView.class);
+    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX))
+        .putMapping(MasterDoctorView.class);
   }
 
 }
