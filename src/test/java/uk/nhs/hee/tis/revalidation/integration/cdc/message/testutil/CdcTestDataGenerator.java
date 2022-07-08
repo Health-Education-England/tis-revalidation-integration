@@ -37,6 +37,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
+import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationType;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -139,6 +140,7 @@ public class CdcTestDataGenerator {
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
         .recommendationType(RecommendationType.REVALIDATE)
         .recommendationStatus(DRAFT)
+        .outcome(RecommendationGmcOutcome.APPROVED)
         .gmcSubmissionDate(LocalDate.now().plusMonths(6))
         .admin(ADMIN_VAL)
         .build();
