@@ -60,7 +60,9 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
         masterDoctorView.setAdmin(entity.getAdmin());
-        masterDoctorView.setGmcStatus(entity.getOutcome().getOutcome());
+        if(entity.getOutcome() != null) {
+          masterDoctorView.setGmcStatus(entity.getOutcome().getOutcome());
+        }
         final var updatedView = repository.save(masterDoctorView);
         publishUpdate(updatedView);
       }
