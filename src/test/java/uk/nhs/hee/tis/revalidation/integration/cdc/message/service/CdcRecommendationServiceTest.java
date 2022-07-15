@@ -101,7 +101,8 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDtoNullOutcome();
+    var newRecommendation = CdcTestDataGenerator
+        .getCdcRecommendationInsertCdcDocumentDtoNullOutcome();
     cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
     verify(publisher).publishCdcUpdate(masterDoctorViewCaptor.capture());
