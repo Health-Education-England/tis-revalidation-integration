@@ -149,6 +149,25 @@ public class CdcTestDataGenerator {
   }
 
   /**
+   * Get a test instance of an insert CdcRecommendation CdcDocumentDto with a null outcome.
+   *
+   * @return CdcDocumentDto CdcRecommendation insert test instance
+   */
+  public static CdcDocumentDto<Recommendation>
+  getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
+    Recommendation recommendation = Recommendation.builder()
+        .id("1")
+        .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+        .recommendationType(RecommendationType.REVALIDATE)
+        .recommendationStatus(DRAFT)
+        .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+        .admin(ADMIN_VAL)
+        .build();
+
+    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
+  }
+
+  /**
    * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
    *
    * @return CdcDocumentDto CdcRecommendation insert test instance
