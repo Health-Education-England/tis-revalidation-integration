@@ -114,7 +114,6 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:doctors-autocomplete")
-        .to(serviceUrl + "/api/v1/doctors/autocomplete?bridgeEndpoint=true")
-        .unmarshal().json(JsonLibrary.Jackson);
+        .to(serviceUrl + "/api/v1/doctors/autocomplete?bridgeEndpoint=true");
   }
 }
