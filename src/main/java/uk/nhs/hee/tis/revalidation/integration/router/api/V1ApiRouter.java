@@ -46,6 +46,10 @@ public class V1ApiRouter extends RouteBuilder {
         .post().bindingMode(RestBindingMode.off)
         .to("direct:temp-doctors-assign-admin");
 
+    rest("/v1/doctors/autocomplete")
+        .get().bindingMode(RestBindingMode.off)
+        .to("direct:doctors-autocomplete");
+
   }
 }
 
