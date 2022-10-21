@@ -46,17 +46,17 @@ public interface MasterDoctorViewMapper {
    * @return a partially populated {@link MasterDoctorView}
    */
   @Mapping(source = "programmeName", target = "programmeName",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "programmeMembershipType", target = "membershipType",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "programmeOwner", target = "programmeOwner",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "curriculumEndDate", target = "curriculumEndDate",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "programmeMembershipStartDate", target = "membershipStartDate",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "programmeMembershipEndDate", target = "membershipEndDate",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   MasterDoctorView updateMasterDoctorView(ConnectionInfoDto source,
       @MappingTarget MasterDoctorView target);
 }
