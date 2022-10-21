@@ -173,4 +173,23 @@ class MasterDoctorViewMapperTest {
     assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
     assertThat(result.getTcsPersonId(), is(source.getTcsPersonId()));
   }
+
+  @Test
+  void shouldUpdateNullTcsProgrammeFields() {
+    ConnectionInfoDto source = ConnectionInfoDto.builder().build();
+    source.setGmcReferenceNumber(GMC_REFERENCE_NUMBER);
+
+    MasterDoctorView result = masterDoctorViewMapper
+        .updateMasterDoctorView(source, currentDoctorView);
+
+    assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
+    assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
+    assertThat(result.getTcsPersonId(), is(TIS_ID));
+    assertThat(result.getProgrammeName(), nullValue());
+    assertThat(result.getProgrammeOwner(), nullValue());
+    assertThat(result.getCurriculumEndDate(), nullValue());
+    assertThat(result.getMembershipStartDate(), nullValue());
+    assertThat(result.getMembershipStartDate(), nullValue());
+    assertThat(result.getMembershipEndDate(), nullValue());
+  }
 }
