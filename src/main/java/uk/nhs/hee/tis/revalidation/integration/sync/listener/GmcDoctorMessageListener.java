@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.helper.ElasticsearchIndexHelper;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -39,6 +40,8 @@ public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
+  private final ElasticsearchIndexHelper elasticsearchIndexHelper;
+
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
 
@@ -48,23 +51,27 @@ public class GmcDoctorMessageListener {
   @Value("${app.rabbit.reval.routingKey.indexrebuildgetmastercommand.requested}")
   private String esGetMasterRoutingKey;
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
-
   private long traineeCount;
 
-  public GmcDoctorMessageListener(
-      DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
+  public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
+      ElasticsearchIndexHelper elasticsearchIndexHelper) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
+    this.elasticsearchIndexHelper = elasticsearchIndexHelper;
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
   public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
+      log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
-      String getMaster = "getMaster";
-      rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
+      try{
+        elasticsearchIndexHelper.deleteIndex("recommendationindex");
+        elasticsearchIndexHelper
+            .createIndex("recommendationindex", "JSON GOES HERE");
+        elasticsearchIndexHelper.reindex("masterdoctorindex", "recommendationindex");
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
       traineeCount = 0;
     } else {
       //prepare the MasterDoctorView and call the service method
@@ -77,11 +84,9 @@ public class GmcDoctorMessageListener {
           .designatedBody(doctorsForDB.getDesignatedBodyCode())
           .gmcStatus(message.getPayload().getGmcOutcome())
           .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
-          .connectionStatus(getConnectionStatus(doctorsForDB))
-          .admin(doctorsForDB.getAdmin())
+          .connectionStatus(getConnectionStatus(doctorsForDB)).admin(doctorsForDB.getAdmin())
           .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
-          .underNotice(doctorsForDB.getUnderNotice())
-          .existsInGmc(doctorsForDB.getExistsInGmc())
+          .underNotice(doctorsForDB.getUnderNotice()).existsInGmc(doctorsForDB.getExistsInGmc())
           .build();
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;
