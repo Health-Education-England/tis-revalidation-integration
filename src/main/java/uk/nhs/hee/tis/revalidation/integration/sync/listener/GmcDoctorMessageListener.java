@@ -61,10 +61,12 @@ public class GmcDoctorMessageListener {
   @SqsListener(value = "${cloud.aws.end-point.uri}")
   public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("GMC sync completed. {} trainees in total. Sending message to Connection.",
+      log.info("GMC sync completed. {} trainees in total.",
           traineeCount);
-      String getMaster = "getMaster";
-      rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
+      // TODO implement solution using reindex API TIS21-3416
+      /********* Temporarily disable final stage of resync as it takes hours and kills mongodb ********/
+      // String getMaster = "getMaster";
+      // rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
       traineeCount = 0;
     } else {
       //prepare the MasterDoctorView and call the service method
