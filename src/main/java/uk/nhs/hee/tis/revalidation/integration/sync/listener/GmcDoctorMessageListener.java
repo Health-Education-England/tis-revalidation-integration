@@ -64,9 +64,6 @@ public class GmcDoctorMessageListener {
       log.info("GMC sync completed. {} trainees in total.",
           traineeCount);
       // TODO implement solution using reindex API TIS21-3416
-      /********* Temporarily disable final stage of resync as it takes hours and kills mongodb ********/
-      // String getMaster = "getMaster";
-      // rabbitTemplate.convertAndSend(revalExchange, esGetMasterRoutingKey, getMaster);
       traineeCount = 0;
     } else {
       //prepare the MasterDoctorView and call the service method
