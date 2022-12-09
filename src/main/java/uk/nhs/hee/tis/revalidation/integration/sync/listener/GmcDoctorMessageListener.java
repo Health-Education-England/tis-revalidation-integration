@@ -23,15 +23,13 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
-import uk.nhs.hee.tis.revalidation.integration.router.helper.ElasticsearchIndexHelper;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
+import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
@@ -40,7 +38,7 @@ public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
-  private final ElasticsearchIndexHelper elasticsearchIndexHelper;
+  private final ElasticsearchIndexService elasticsearchIndexService;
 
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
@@ -54,9 +52,9 @@ public class GmcDoctorMessageListener {
   private long traineeCount;
 
   public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
-      ElasticsearchIndexHelper elasticsearchIndexHelper) {
+      ElasticsearchIndexService elasticsearchIndexService) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
-    this.elasticsearchIndexHelper = elasticsearchIndexHelper;
+    this.elasticsearchIndexService = elasticsearchIndexService;
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
@@ -64,13 +62,10 @@ public class GmcDoctorMessageListener {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
-      try{
-        elasticsearchIndexHelper.deleteIndex("recommendationindex");
-        elasticsearchIndexHelper
-            .createIndex("recommendationindex", "JSON GOES HERE");
-        elasticsearchIndexHelper.reindex("masterdoctorindex", "recommendationindex");
+      try {
+        elasticsearchIndexService.resync("masterdoctorindex", "recommendationindex");
       } catch (Exception e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
       }
       traineeCount = 0;
     } else {

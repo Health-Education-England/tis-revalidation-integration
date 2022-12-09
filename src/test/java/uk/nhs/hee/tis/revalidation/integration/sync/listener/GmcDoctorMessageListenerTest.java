@@ -23,6 +23,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
@@ -39,6 +41,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
+import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +55,8 @@ class GmcDoctorMessageListenerTest {
   private GmcDoctorMessageListener gmcDoctorMessageListener;
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
+  @Mock
+  private ElasticsearchIndexService elasticsearchIndexServiceMock;
 
   @BeforeEach
   void setUp() {
@@ -93,5 +98,15 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
     assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
     assertThat(masterDoctorView.getExistsInGmc(), is(true));
+  }
+
+  @Test
+  void shouldNotThrowErrorWhenRecommendationReindexHasException() throws Exception {
+    message.setSyncEnd(true);
+
+    doThrow(Exception.class).when(elasticsearchIndexServiceMock)
+        .resync("masterdoctorindex", "recommendationindex");
+
+    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(message));
   }
 }
