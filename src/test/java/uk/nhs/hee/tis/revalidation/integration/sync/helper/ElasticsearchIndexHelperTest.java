@@ -49,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ElasticsearchIndexHelperTest {
+class ElasticsearchIndexHelperTest {
 
   @Mock
   private RestHighLevelClient highLevelClientMock;
@@ -86,30 +86,30 @@ public class ElasticsearchIndexHelperTest {
   }
 
   @Test
-  void shouldThrowIOExceptionWhenDeleteIndex() throws Exception {
-    IOException expectedIOException = new IOException("expected");
+  void shouldThrowIoExceptionWhenDeleteIndex() throws Exception {
+    IOException expectedIoException = new IOException("expected");
     ResourceNotFoundException expectedResourceNotFoundException = new ResourceNotFoundException(
         "expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.delete(any(DeleteIndexRequest.class), any(RequestOptions.class)))
-        .thenThrow(expectedIOException)
+        .thenThrow(expectedIoException)
         .thenThrow(expectedResourceNotFoundException);
 
     var actual = assertThrows(IOException.class,
         () -> helper.deleteIndex("index"));
 
-    assertEquals(expectedIOException, actual);
+    assertEquals(expectedIoException, actual);
   }
 
   @Test
   void shouldThrowResourceNotFoundExceptionWhenDeleteIndex() throws Exception {
-    IOException expectedIOException = new IOException("expected");
+    IOException expectedIoException = new IOException("expected");
     ResourceNotFoundException expectedResourceNotFoundException = new ResourceNotFoundException(
         "expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.delete(any(DeleteIndexRequest.class), any(RequestOptions.class)))
         .thenThrow(expectedResourceNotFoundException)
-        .thenThrow(expectedIOException);
+        .thenThrow(expectedIoException);
 
     var actual = assertThrows(ResourceNotFoundException.class,
         () -> helper.deleteIndex("index"));
@@ -118,30 +118,30 @@ public class ElasticsearchIndexHelperTest {
   }
 
   @Test
-  void shouldThrowIOExceptionWhenCreateIndex() throws Exception {
-    IOException expectedIOException = new IOException("expected");
+  void shouldThrowIoExceptionWhenCreateIndex() throws Exception {
+    IOException expectedIoException = new IOException("expected");
     ResourceAlreadyExistsException expectedResourceAlreadyExistsException = new ResourceAlreadyExistsException(
         "expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.create(any(CreateIndexRequest.class), any(RequestOptions.class)))
-        .thenThrow(expectedIOException)
+        .thenThrow(expectedIoException)
         .thenThrow(expectedResourceAlreadyExistsException);
 
     var actual = assertThrows(IOException.class,
         () -> helper.createIndex("index", mappingMock));
 
-    assertEquals(expectedIOException, actual);
+    assertEquals(expectedIoException, actual);
   }
 
   @Test
   void shouldThrowResourceAlreadyExistsExceptionWhenDeleteIndex() throws Exception {
-    IOException expectedIOException = new IOException("expected");
+    IOException expectedIoException = new IOException("expected");
     ResourceAlreadyExistsException expectedResourceAlreadyExistsException = new ResourceAlreadyExistsException(
         "expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.create(any(CreateIndexRequest.class), any(RequestOptions.class)))
         .thenThrow(expectedResourceAlreadyExistsException)
-        .thenThrow(expectedIOException);
+        .thenThrow(expectedIoException);
 
     var actual = assertThrows(ResourceAlreadyExistsException.class,
         () -> helper.createIndex("index", mappingMock));
@@ -174,30 +174,30 @@ public class ElasticsearchIndexHelperTest {
   }
 
   @Test
-  void shouldThrowIOExceptionWhenDeleteAlias() throws Exception {
-    IOException expectedIOException = new IOException("expected");
+  void shouldThrowIoExceptionWhenDeleteAlias() throws Exception {
+    IOException expectedIoException = new IOException("expected");
     ResourceNotFoundException expectedResourceNotFoundException = new ResourceNotFoundException(
         "expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.deleteAlias(any(DeleteAliasRequest.class), any(RequestOptions.class)))
-        .thenThrow(expectedIOException)
+        .thenThrow(expectedIoException)
         .thenThrow(expectedResourceNotFoundException);
 
     var actual = assertThrows(IOException.class,
         () -> helper.deleteAlias("index", "alias"));
 
-    assertEquals(expectedIOException, actual);
+    assertEquals(expectedIoException, actual);
   }
 
   @Test
   void shouldThrowResourceNotFoundExceptionWhenDeleteAlias() throws Exception {
-    IOException expectedIOException = new IOException("expected");
+    IOException expectedIoException = new IOException("expected");
     ResourceNotFoundException expectedResourceNotFoundException = new ResourceNotFoundException(
         "expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.deleteAlias(any(DeleteAliasRequest.class), any(RequestOptions.class)))
         .thenThrow(expectedResourceNotFoundException)
-        .thenThrow(expectedIOException);
+        .thenThrow(expectedIoException);
 
     var actual = assertThrows(ResourceNotFoundException.class,
         () -> helper.deleteAlias("index", "alias"));
@@ -207,13 +207,13 @@ public class ElasticsearchIndexHelperTest {
 
   @Test
   void shouldThrowExceptionWhenGetMapping() throws Exception {
-    IOException expectedException = new IOException("expected");
+    IOException expectedIoException = new IOException("expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.getMapping(any(GetMappingsRequest.class),
         any(RequestOptions.class))).thenThrow(
-        expectedException);
+        expectedIoException);
 
     var actual = assertThrows(IOException.class, () -> helper.getMapping("index"));
-    assertEquals(expectedException, actual);
+    assertEquals(expectedIoException, actual);
   }
 }

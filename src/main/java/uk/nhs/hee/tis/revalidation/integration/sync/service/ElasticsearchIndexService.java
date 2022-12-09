@@ -55,7 +55,7 @@ public class ElasticsearchIndexService {
    * Delete historical backups but retain the latest one.
    *
    * @param backupAlias the alias the backup indices marked with
-   * @throws Exception
+   * @throws Exception any exceptions
    */
   protected void deleteBackupIndicesExceptLatest(String backupAlias) throws Exception {
     log.info("Start deleting old backup indices for alias: {}", backupAlias);
@@ -78,7 +78,7 @@ public class ElasticsearchIndexService {
 
     if (latestBackupIndex != null) {
       for (String index : getIndexResponse.getIndices()) {
-        if (index != latestBackupIndex) {
+        if (!index.equals(latestBackupIndex)) {
           elasticsearchIndexHelper.deleteIndex(index);
         }
       }
@@ -90,14 +90,14 @@ public class ElasticsearchIndexService {
    * reindex the index to another name, and delete it, then set alias back to it.
    *
    * @param alias this is the existing index name as well as the alias we want to use.
-   * @throws Exception
+   * @throws Exception any exceptions
    */
   protected String transferOldIndexNameToAlias(String alias) throws Exception {
     String oldIndexName = alias;
     GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(oldIndexName);
     MappingMetadata mapping = getIndexResponse.getMappings().get(oldIndexName);
-    String oldIndexBackupName = alias + "_" +
-        LocalDateTime.now().format(DateTimeFormatter.ofPattern(INDEX_DATETIME_PATTERN));
+    String oldIndexBackupName = alias + "_"
+        + LocalDateTime.now().format(DateTimeFormatter.ofPattern(INDEX_DATETIME_PATTERN));
     if (mapping == null) {
       throw new ResourceNotFoundException(
           String.format("ES mapping for old index \"%s\" is not found.", oldIndexName));
@@ -115,9 +115,9 @@ public class ElasticsearchIndexService {
    *
    * @param alias the alias the current index marked with
    * @return the old index name which marked with the alias
-   * @throws IOException
+   * @throws IOException any IOExceptions
    */
-  protected String markCurrentIndexAsBackup(String alias) throws Exception {
+  protected String markCurrentIndexAsBackup(String alias) throws IOException {
     GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(alias);
     var indexMap = getIndexResponse.getAliases();
 
@@ -134,11 +134,11 @@ public class ElasticsearchIndexService {
   }
 
   /**
-   * reindex from an index to another (known as alias)
+   * reindex from an index to another (known as alias).
    *
    * @param sourceIndexName the index name to reindex from
    * @param targetAlias the alias of index to reindex to
-   * @throws Exception
+   * @throws Exception any exceptions
    */
   public void resync(String sourceIndexName, String targetAlias) throws Exception {
 
@@ -174,7 +174,8 @@ public class ElasticsearchIndexService {
       deleteBackupIndicesExceptLatest(backupAlias);
     } catch (Exception e) {
       log.warn(
-          "Deleting old backup indices for alias: {}. skipped. Please delete unnecessary backups manually. Exception: {}",
+          "Deleting old backup indices for alias: {}. skipped."
+              + "Please delete unnecessary backups manually. Exception: {}",
           backupAlias, e);
     }
     // Finally, remove the alias from the old index

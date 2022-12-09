@@ -64,12 +64,13 @@ public class ElasticsearchIndexHelper {
    * get all information (mappings/settings/aliases) for an index.
    *
    * @param indexName the index name could be an exact index name or an alias
-   * @return getIndexResponse
-   * @throws IOException
+   * @return getIndexResponse including settings, mappings and aliases for the index
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public GetIndexResponse getIndices(String indexName) throws IOException {
+    GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
     GetIndexResponse getIndexResponse = highLevelClient.indices()
-        .get(new GetIndexRequest(indexName), RequestOptions.DEFAULT);
+        .get(getIndexRequest, RequestOptions.DEFAULT);
     return getIndexResponse;
   }
 
@@ -78,7 +79,7 @@ public class ElasticsearchIndexHelper {
    *
    * @param sourceIndex The elasticsearch index from which the data will be indexed
    * @param targetIndex The elasticsearch index to which the data will be indexed
-   * @throws IOException
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public void reindex(String sourceIndex, String targetIndex) throws IOException {
     log.info("Reindexing elastic search index: {} to index: {}.", sourceIndex, targetIndex);
@@ -93,8 +94,9 @@ public class ElasticsearchIndexHelper {
       highLevelClient.reindex(request, options);
     } catch (SocketTimeoutException e) {
       log.error(
-          "Reindexing from index: {} to index: {} needs more wait time, please consider increasing the SocketTimeout. Exception: {}",
-          sourceIndex, targetIndex, e);
+          "Reindexing from index: {} to index: {} needs more wait time."
+              + "Please consider increasing the SocketTimeout.", sourceIndex, targetIndex);
+      log.error(e.getMessage());
       throw e;
     }
   }
@@ -103,8 +105,8 @@ public class ElasticsearchIndexHelper {
    * Delete an elasticsearch index.
    *
    * @param targetIndex The elasticsearch index to be deleted
-   * @throws IOException
-   * @throws ResourceNotFoundException
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
+   * @throws ResourceNotFoundException when the index does not exist
    */
   public void deleteIndex(String targetIndex) throws IOException, ResourceNotFoundException {
     log.info("Deleting elastic search index: {}", targetIndex);
@@ -118,8 +120,8 @@ public class ElasticsearchIndexHelper {
    *
    * @param indexName The name of the elasticsearch index to be created
    * @param mapping   the desired mapping object
-   * @throws IOException
-   * @throws ResourceNotFoundException
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
+   * @throws ResourceAlreadyExistsException when the index name already exists
    */
   public void createIndex(String indexName, MappingMetadata mapping)
       throws IOException, ResourceAlreadyExistsException {
@@ -134,8 +136,8 @@ public class ElasticsearchIndexHelper {
    * Check if an alias exists in ES.
    *
    * @param alias the alias to search with
-   * @return the check result
-   * @throws IOException
+   * @return true or false
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public boolean aliasExists(String alias) throws IOException {
     GetAliasesRequest request = new GetAliasesRequest(alias);
@@ -147,7 +149,7 @@ public class ElasticsearchIndexHelper {
    *
    * @param indexName index name to add alias for
    * @param aliasName alias to be added
-   * @throws IOException
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public void addAlias(String indexName, String aliasName) throws IOException {
     log.info("Adding alias: {} to elastic search index: {}.", aliasName, indexName);
@@ -167,8 +169,8 @@ public class ElasticsearchIndexHelper {
    *
    * @param indexName index name to delete alias from
    * @param aliasName alias to be deleted
-   * @throws IOException
-   * @throws ResourceNotFoundException
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
+   * @throws ResourceNotFoundException when the alias does not exist
    */
   public void deleteAlias(String indexName, String aliasName)
       throws IOException, ResourceNotFoundException {
@@ -183,7 +185,7 @@ public class ElasticsearchIndexHelper {
    *
    * @param indexName index name to search with
    * @return MappingMetadata for the specific index
-   * @throws IOException
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public MappingMetadata getMapping(String indexName) throws IOException {
     GetMappingsRequest request = new GetMappingsRequest();

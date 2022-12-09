@@ -59,7 +59,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
 
 @ExtendWith(MockitoExtension.class)
-public class ElasticsearchIndexServiceTest {
+class ElasticsearchIndexServiceTest {
 
   @Captor
   ArgumentCaptor<String> stringArgCaptor;
@@ -74,16 +74,16 @@ public class ElasticsearchIndexServiceTest {
   @Test
   void shouldDeleteBackupIndices() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices("backupAlias")).thenReturn(getIndexResponseMock);
-    Map<String, Settings> settingsMap = new HashMap<>();
     Settings settings1 = mock(Settings.class);
     Settings settings2 = mock(Settings.class);
     Settings settings3 = mock(Settings.class);
-    when(settings1.get(eq("index.creation_date"))).thenReturn("1669854215258");
-    when(settings2.get(eq("index.creation_date"))).thenReturn("1670455701379");
-    when(settings3.get(eq("index.creation_date"))).thenReturn("1670456912113");
+    when(settings1.get("index.creation_date")).thenReturn("1669854215258");
+    when(settings2.get("index.creation_date")).thenReturn("1670455701379");
+    when(settings3.get("index.creation_date")).thenReturn("1670456912113");
     final String backupIndex1 = "backup_1";
     final String backupIndex2 = "backup_2";
     final String backupIndex3 = "backup_3";
+    Map<String, Settings> settingsMap = new HashMap<>();
     settingsMap.put(backupIndex1, settings1);
     settingsMap.put(backupIndex2, settings2);
     settingsMap.put(backupIndex3, settings3);
@@ -102,16 +102,16 @@ public class ElasticsearchIndexServiceTest {
   @Test
   void shouldNotDeleteBackupIndicesWhenCreationTimesAreNull() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices("backupAlias")).thenReturn(getIndexResponseMock);
-    Map<String, Settings> settingsMap = new HashMap<>();
     Settings settings1 = mock(Settings.class);
     Settings settings2 = mock(Settings.class);
     Settings settings3 = mock(Settings.class);
-    when(settings1.get(eq("index.creation_date"))).thenReturn(null);
-    when(settings2.get(eq("index.creation_date"))).thenReturn(null);
-    when(settings3.get(eq("index.creation_date"))).thenReturn(null);
+    when(settings1.get("index.creation_date")).thenReturn(null);
+    when(settings2.get("index.creation_date")).thenReturn(null);
+    when(settings3.get("index.creation_date")).thenReturn(null);
     final String backupIndex1 = "backup_1";
     final String backupIndex2 = "backup_2";
     final String backupIndex3 = "backup_3";
+    Map<String, Settings> settingsMap = new HashMap<>();
     settingsMap.put(backupIndex1, settings1);
     settingsMap.put(backupIndex2, settings2);
     settingsMap.put(backupIndex3, settings3);
@@ -142,16 +142,16 @@ public class ElasticsearchIndexServiceTest {
   @Test
   void shouldNotDeleteBackupIndicesWhenOneHasCreationDateOthersNot() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices("backupAlias")).thenReturn(getIndexResponseMock);
-    Map<String, Settings> settingsMap = new HashMap<>();
     Settings settings1 = mock(Settings.class);
     Settings settings2 = mock(Settings.class);
     Settings settings3 = mock(Settings.class);
-    when(settings1.get(eq("index.creation_date"))).thenReturn("1669854215258");
-    when(settings2.get(eq("index.creation_date"))).thenReturn(null);
-    when(settings3.get(eq("index.creation_date"))).thenReturn(null);
+    when(settings1.get("index.creation_date")).thenReturn("1669854215258");
+    when(settings2.get("index.creation_date")).thenReturn(null);
+    when(settings3.get("index.creation_date")).thenReturn(null);
     final String backupIndex1 = "backup_1";
     final String backupIndex2 = "backup_2";
     final String backupIndex3 = "backup_3";
+    Map<String, Settings> settingsMap = new HashMap<>();
     settingsMap.put(backupIndex1, settings1);
     settingsMap.put(backupIndex2, settings2);
     settingsMap.put(backupIndex3, settings3);
@@ -169,7 +169,7 @@ public class ElasticsearchIndexServiceTest {
 
   @Test
   void shouldTransferOldIndexNameToAlias() throws Exception {
-    String alias = "alias";
+    final String alias = "alias";
     when(elasticsearchIndexHelperMock.getIndices(alias)).thenReturn(getIndexResponseMock);
     Map<String, MappingMetadata> mappingsMap = new HashMap<>();
     MappingMetadata mapping = mock(MappingMetadata.class);
@@ -181,12 +181,11 @@ public class ElasticsearchIndexServiceTest {
 
     verify(elasticsearchIndexHelperMock).createIndex(stringArgCaptor.capture(), eq(mapping));
     String oldIndexBackupName = stringArgCaptor.getValue();
-    verify(elasticsearchIndexHelperMock).reindex(eq(alias), eq(oldIndexBackupName));
-    verify(elasticsearchIndexHelperMock).addAlias(eq(oldIndexBackupName), eq(backupAlias));
-    verify(elasticsearchIndexHelperMock).deleteIndex(eq(alias));
-    verify(elasticsearchIndexHelperMock).addAlias(eq(oldIndexBackupName), eq(alias));
-
     assertEquals(oldIndexBackupName, returnedBackupName);
+    verify(elasticsearchIndexHelperMock).reindex(alias, oldIndexBackupName);
+    verify(elasticsearchIndexHelperMock).addAlias(oldIndexBackupName, backupAlias);
+    verify(elasticsearchIndexHelperMock).deleteIndex(alias);
+    verify(elasticsearchIndexHelperMock).addAlias(oldIndexBackupName, alias);
   }
 
   @Test
@@ -238,11 +237,11 @@ public class ElasticsearchIndexServiceTest {
 
   @Test
   void shouldReindexWhenAliasNotExists() throws Exception {
-    String sourceIndexName = "sourceIndex";
-    String targetAlias = "targetAlias";
+    final String sourceIndexName = "sourceIndex";
+    final String targetAlias = "targetAlias";
 
     when(elasticsearchIndexHelperMock.aliasExists(targetAlias)).thenReturn(false);
-    String oldIndexName = "oldIndexName";
+    final String oldIndexName = "oldIndexName";
     doReturn(oldIndexName).when(elasticsearchIndexService).transferOldIndexNameToAlias(targetAlias);
     MappingMetadata mappingMock = mock(MappingMetadata.class);
     when(elasticsearchIndexHelperMock.getMapping(oldIndexName)).thenReturn(mappingMock);
@@ -259,11 +258,11 @@ public class ElasticsearchIndexServiceTest {
 
   @Test
   void shouldReindexWhenAliasExists() throws Exception {
-    String sourceIndexName = "sourceIndex";
-    String targetAlias = "targetAlias";
+    final String sourceIndexName = "sourceIndex";
+    final String targetAlias = "targetAlias";
 
     when(elasticsearchIndexHelperMock.aliasExists(targetAlias)).thenReturn(true);
-    String oldIndexName = "oldIndexName";
+    final String oldIndexName = "oldIndexName";
     doReturn(oldIndexName).when(elasticsearchIndexService).markCurrentIndexAsBackup(targetAlias);
     MappingMetadata mappingMock = mock(MappingMetadata.class);
     when(elasticsearchIndexHelperMock.getMapping(oldIndexName)).thenReturn(mappingMock);
@@ -280,11 +279,11 @@ public class ElasticsearchIndexServiceTest {
 
   @Test
   void shouldThrowErrorWhenMappingNotFoundForOldIndexWhenReindex() throws Exception {
-    String sourceIndexName = "sourceIndex";
-    String targetAlias = "targetAlias";
+    final String sourceIndexName = "sourceIndex";
+    final String targetAlias = "targetAlias";
 
     when(elasticsearchIndexHelperMock.aliasExists(targetAlias)).thenReturn(true);
-    String oldIndexName = "oldIndexName";
+    final String oldIndexName = "oldIndexName";
     doReturn(oldIndexName).when(elasticsearchIndexService).markCurrentIndexAsBackup(targetAlias);
     when(elasticsearchIndexHelperMock.getMapping(oldIndexName)).thenReturn(null);
 
@@ -294,8 +293,8 @@ public class ElasticsearchIndexServiceTest {
 
   @Test
   void shouldIgnoreAlreadyExistsAndDeleteBackupExceptionsWhenReindex() throws Exception {
-    String sourceIndexName = "sourceIndex";
-    String targetAlias = "targetAlias";
+    final String sourceIndexName = "sourceIndex";
+    final String targetAlias = "targetAlias";
 
     when(elasticsearchIndexHelperMock.aliasExists(targetAlias)).thenReturn(true);
     String oldIndexName = "oldIndexName";
