@@ -177,12 +177,12 @@ class ElasticsearchIndexServiceTest {
     when(getIndexResponseMock.getMappings()).thenReturn(mappingsMap);
 
     String returnedBackupName = elasticsearchIndexService.transferOldIndexNameToAlias(alias);
-    String backupAlias = elasticsearchIndexService.getBackupAlias(alias);
 
     verify(elasticsearchIndexHelperMock).createIndex(stringArgCaptor.capture(), eq(mapping));
     String oldIndexBackupName = stringArgCaptor.getValue();
     assertEquals(oldIndexBackupName, returnedBackupName);
     verify(elasticsearchIndexHelperMock).reindex(alias, oldIndexBackupName);
+    String backupAlias = elasticsearchIndexService.getBackupAlias(alias);
     verify(elasticsearchIndexHelperMock).addAlias(oldIndexBackupName, backupAlias);
     verify(elasticsearchIndexHelperMock).deleteIndex(alias);
     verify(elasticsearchIndexHelperMock).addAlias(oldIndexBackupName, alias);

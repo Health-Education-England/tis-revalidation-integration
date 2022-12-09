@@ -69,9 +69,7 @@ public class ElasticsearchIndexHelper {
    */
   public GetIndexResponse getIndices(String indexName) throws IOException {
     GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
-    GetIndexResponse getIndexResponse = highLevelClient.indices()
-        .get(getIndexRequest, RequestOptions.DEFAULT);
-    return getIndexResponse;
+    return highLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
   }
 
   /**
@@ -181,7 +179,7 @@ public class ElasticsearchIndexHelper {
   }
 
   /**
-   * Get mapping information for an index
+   * Get mapping information for an index.
    *
    * @param indexName index name to search with
    * @return MappingMetadata for the specific index

@@ -120,8 +120,8 @@ class ElasticsearchIndexHelperTest {
   @Test
   void shouldThrowIoExceptionWhenCreateIndex() throws Exception {
     IOException expectedIoException = new IOException("expected");
-    ResourceAlreadyExistsException expectedResourceAlreadyExistsException = new ResourceAlreadyExistsException(
-        "expected");
+    ResourceAlreadyExistsException expectedResourceAlreadyExistsException =
+        new ResourceAlreadyExistsException("expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.create(any(CreateIndexRequest.class), any(RequestOptions.class)))
         .thenThrow(expectedIoException)
@@ -136,8 +136,8 @@ class ElasticsearchIndexHelperTest {
   @Test
   void shouldThrowResourceAlreadyExistsExceptionWhenDeleteIndex() throws Exception {
     IOException expectedIoException = new IOException("expected");
-    ResourceAlreadyExistsException expectedResourceAlreadyExistsException = new ResourceAlreadyExistsException(
-        "expected");
+    ResourceAlreadyExistsException expectedResourceAlreadyExistsException =
+        new ResourceAlreadyExistsException("expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     when(indicesClientMock.create(any(CreateIndexRequest.class), any(RequestOptions.class)))
         .thenThrow(expectedResourceAlreadyExistsException)

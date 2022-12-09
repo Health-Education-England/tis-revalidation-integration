@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.client.indices.GetIndexResponse;
@@ -90,9 +91,11 @@ public class ElasticsearchIndexService {
    * reindex the index to another name, and delete it, then set alias back to it.
    *
    * @param alias this is the existing index name as well as the alias we want to use.
-   * @throws Exception any exceptions
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
+   * @throws ElasticsearchException for any Elasticsearch exceptions
    */
-  protected String transferOldIndexNameToAlias(String alias) throws Exception {
+  protected String transferOldIndexNameToAlias(String alias) throws IOException,
+      ElasticsearchException {
     String oldIndexName = alias;
     GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(oldIndexName);
     MappingMetadata mapping = getIndexResponse.getMappings().get(oldIndexName);
