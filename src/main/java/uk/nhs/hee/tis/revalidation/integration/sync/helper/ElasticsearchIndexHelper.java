@@ -43,10 +43,12 @@ import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.reindex.ReindexRequest;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Scope("singleton")
 public class ElasticsearchIndexHelper {
 
   private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()
@@ -91,10 +93,8 @@ public class ElasticsearchIndexHelper {
     try {
       highLevelClient.reindex(request, options);
     } catch (SocketTimeoutException e) {
-      log.error(
-          "Reindexing from index: {} to index: {} needs more wait time."
-              + "Please consider increasing the SocketTimeout.", sourceIndex, targetIndex);
-      log.error(e.getMessage());
+      log.error(String.format("Reindexing from index: %s to index: %s needs more wait time."
+          + "Please consider increasing the SocketTimeout.", sourceIndex, targetIndex), e);
       throw e;
     }
   }

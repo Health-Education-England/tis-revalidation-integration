@@ -79,9 +79,11 @@ public class GmcDoctorMessageListener {
           .designatedBody(doctorsForDB.getDesignatedBodyCode())
           .gmcStatus(message.getPayload().getGmcOutcome())
           .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
-          .connectionStatus(getConnectionStatus(doctorsForDB)).admin(doctorsForDB.getAdmin())
+          .connectionStatus(getConnectionStatus(doctorsForDB))
+          .admin(doctorsForDB.getAdmin())
           .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
-          .underNotice(doctorsForDB.getUnderNotice()).existsInGmc(doctorsForDB.getExistsInGmc())
+          .underNotice(doctorsForDB.getUnderNotice())
+          .existsInGmc(doctorsForDB.getExistsInGmc())
           .build();
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;

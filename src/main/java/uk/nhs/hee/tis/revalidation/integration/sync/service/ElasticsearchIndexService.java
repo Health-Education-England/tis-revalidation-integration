@@ -43,8 +43,7 @@ public class ElasticsearchIndexService {
 
   ElasticsearchIndexHelper elasticsearchIndexHelper;
 
-  public ElasticsearchIndexService(
-      ElasticsearchIndexHelper elasticsearchIndexHelper) {
+  public ElasticsearchIndexService(ElasticsearchIndexHelper elasticsearchIndexHelper) {
     this.elasticsearchIndexHelper = elasticsearchIndexHelper;
   }
 
@@ -64,13 +63,13 @@ public class ElasticsearchIndexService {
     if (getIndexResponse.getIndices().length <= 1) {
       return;
     }
-    Long latest = null;
+    Long latest = Long.MIN_VALUE;
     String latestBackupIndex = null;
     for (var entry : getIndexResponse.getSettings().entrySet()) {
       String epochCreationTime = entry.getValue().get("index.creation_date");
       if (epochCreationTime != null) {
         Long epochLong = Long.valueOf(epochCreationTime);
-        if (latest == null || epochLong.compareTo(latest) > 0) {
+        if (epochLong.compareTo(latest) > 0) {
           latest = epochLong;
           latestBackupIndex = entry.getKey();
         }
@@ -148,11 +147,11 @@ public class ElasticsearchIndexService {
     boolean aliasExists = elasticsearchIndexHelper.aliasExists(targetAlias);
 
     String oldIndexName;
-    if (!aliasExists) {
+    if (aliasExists) {
+      oldIndexName = markCurrentIndexAsBackup(targetAlias);
+    } else {
       // and make the name of existing index available for being set as alias
       oldIndexName = transferOldIndexNameToAlias(targetAlias);
-    } else {
-      oldIndexName = markCurrentIndexAsBackup(targetAlias);
     }
 
     MappingMetadata mapping = elasticsearchIndexHelper.getMapping(oldIndexName);
@@ -166,8 +165,8 @@ public class ElasticsearchIndexService {
     try {
       elasticsearchIndexHelper.createIndex(newTargetIndexName, mapping);
     } catch (ResourceAlreadyExistsException e) {
-      log.warn("Creating an existing elastic search index: {}. Skipped. Exception: {}",
-          newTargetIndexName, e);
+      log.warn(String.format("Creating an existing elastic search index: %s. Skipped.",
+          newTargetIndexName), e);
     }
     elasticsearchIndexHelper.reindex(sourceIndexName, newTargetIndexName);
     elasticsearchIndexHelper.addAlias(newTargetIndexName, targetAlias);
@@ -176,10 +175,8 @@ public class ElasticsearchIndexService {
     try {
       deleteBackupIndicesExceptLatest(backupAlias);
     } catch (Exception e) {
-      log.warn(
-          "Deleting old backup indices for alias: {}. skipped."
-              + "Please delete unnecessary backups manually. Exception: {}",
-          backupAlias, e);
+      log.warn(String.format("Deleting old backup indices for alias: {}. skipped."
+          + "Please delete unnecessary backups manually.", backupAlias), e);
     }
     // Finally, remove the alias from the old index
     elasticsearchIndexHelper.deleteAlias(oldIndexName, targetAlias);
