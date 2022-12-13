@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +78,7 @@ public class ElasticsearchIndexService {
 
     // Log all the indices when their creation date is empty
     var settingsWithNullCreationDate = settingsMapSplit.get(false).stream().collect(
-        Collectors.mapping(entry -> entry.getKey(), Collectors.toList()));
+        Collectors.mapping(Entry::getKey, Collectors.toList()));
     if (!settingsWithNullCreationDate.isEmpty()) {
       log.warn("Indices do not have a valid creation date setting: {}.",
           settingsWithNullCreationDate);
@@ -87,7 +88,7 @@ public class ElasticsearchIndexService {
     var latestBackupIndex = settingsMapSplit.get(true).stream()
         .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(),
             Long.valueOf(e.getValue().get("index.creation_date"))))
-        .max(Comparator.comparing(e -> e.getValue()));
+        .max(Comparator.comparing(Entry::getValue));
 
     if (latestBackupIndex.isPresent()) {
       String latestBackupIndexName = latestBackupIndex.get().getKey();
