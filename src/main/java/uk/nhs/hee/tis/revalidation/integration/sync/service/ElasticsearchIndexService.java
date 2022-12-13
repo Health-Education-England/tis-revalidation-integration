@@ -24,8 +24,12 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
+import java.util.Comparator;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
@@ -60,25 +64,36 @@ public class ElasticsearchIndexService {
   protected void deleteBackupIndicesExceptLatest(String backupAlias) throws Exception {
     log.info("Start deleting old backup indices for alias: {}", backupAlias);
     GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(backupAlias);
-    if (getIndexResponse.getIndices().length <= 1) {
+    String[] indices = getIndexResponse.getIndices();
+    if (indices.length <= 1) {
       return;
     }
-    Long latest = Long.MIN_VALUE;
-    String latestBackupIndex = null;
-    for (var entry : getIndexResponse.getSettings().entrySet()) {
-      String epochCreationTime = entry.getValue().get("index.creation_date");
-      if (epochCreationTime != null) {
-        Long epochLong = Long.valueOf(epochCreationTime);
-        if (epochLong.compareTo(latest) > 0) {
-          latest = epochLong;
-          latestBackupIndex = entry.getKey();
-        }
-      }
+
+    // partition the settings map to 2 parts by checking if creation date is empty
+    var settingsMapSplit = getIndexResponse.getSettings().entrySet()
+        .stream().collect(
+            Collectors.partitioningBy(
+                e -> StringUtils.isNotEmpty(e.getValue().get("index.creation_date"))));
+
+    // Log all the indices when their creation date is empty
+    var settingsWithNullCreationDate = settingsMapSplit.get(false).stream().collect(
+        Collectors.mapping(entry -> entry.getKey(), Collectors.toList()));
+    if (!settingsWithNullCreationDate.isEmpty()) {
+      log.warn("Indices do not have a valid creation date setting: {}.",
+          settingsWithNullCreationDate);
     }
 
-    if (latestBackupIndex != null) {
-      for (String index : getIndexResponse.getIndices()) {
-        if (!index.equals(latestBackupIndex)) {
+    // Deal with deletion when their creation date is not empty
+    var latestBackupIndex = settingsMapSplit.get(true).stream()
+        .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(),
+            Long.valueOf(e.getValue().get("index.creation_date"))))
+        .max(Comparator.comparing(e -> e.getValue()));
+
+    if (latestBackupIndex.isPresent()) {
+      String latestBackupIndexName = latestBackupIndex.get().getKey();
+
+      for (String index : indices) {
+        if (!index.equals(latestBackupIndexName)) {
           elasticsearchIndexHelper.deleteIndex(index);
         }
       }

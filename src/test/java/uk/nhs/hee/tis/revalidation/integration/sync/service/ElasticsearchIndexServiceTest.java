@@ -105,9 +105,12 @@ class ElasticsearchIndexServiceTest {
     Settings settings1 = mock(Settings.class);
     Settings settings2 = mock(Settings.class);
     Settings settings3 = mock(Settings.class);
-    when(settings1.get("index.creation_date")).thenReturn(null);
-    when(settings2.get("index.creation_date")).thenReturn(null);
-    when(settings3.get("index.creation_date")).thenReturn(null);
+    String str1 = null;
+    String str2 = null;
+    String str3 = null;
+    when(settings1.get("index.creation_date")).thenReturn(str1);
+    when(settings2.get("index.creation_date")).thenReturn(str2);
+    when(settings3.get("index.creation_date")).thenReturn(str3);
     final String backupIndex1 = "backup_1";
     final String backupIndex2 = "backup_2";
     final String backupIndex3 = "backup_3";
