@@ -77,7 +77,6 @@ app:
     reval.routingKey.masterdoctorview.updated: ${REVAL_RABBIT_MASTERDOCTORVIEW_UPDATED_ROUTING_KEY:reval.masterdoctorview.updated}
     reval.routingKey.recommendation.syncstart: ${REVAL_RABBIT_RECOMMENDATION_SYNCSTART_ROUTING_KEY:reval.recommendation.syncstart}
     reval.routingKey.connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY:reval.connection.syncdata}
-    reval.routingKey.indexrebuildgetmastercommand.requested: ${REVAL_RABBIT_GETMASTER_ROUTING_KEY:reval.indexrebuildgetmastercommand.requested}
 
 logging:
   level:

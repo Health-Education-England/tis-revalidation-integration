@@ -45,9 +45,6 @@ public class GmcDoctorMessageListener {
   @Value("${app.rabbit.reval.exchange}")
   private String revalExchange;
 
-  @Value("${app.rabbit.reval.routingKey.indexrebuildgetmastercommand.requested}")
-  private String esGetMasterRoutingKey;
-
   @Autowired
   private RabbitTemplate rabbitTemplate;
 
