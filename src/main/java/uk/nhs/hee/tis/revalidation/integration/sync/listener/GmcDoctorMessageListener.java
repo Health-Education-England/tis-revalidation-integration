@@ -46,9 +46,6 @@ public class GmcDoctorMessageListener {
   @Value("${app.rabbit.reval.exchange}")
   private String revalExchange;
 
-  @Value("${app.rabbit.reval.routingKey.indexrebuildgetmastercommand.requested}")
-  private String esGetMasterRoutingKey;
-
   private long traineeCount;
 
   public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
