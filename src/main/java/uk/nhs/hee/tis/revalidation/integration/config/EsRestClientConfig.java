@@ -32,18 +32,15 @@ import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfig
 @Configuration
 public class EsRestClientConfig extends AbstractElasticsearchConfiguration {
 
-  @Value("${spring.elasticsearch.rest.host}")
-  private String esHost;
-
-  @Value("${spring.elasticsearch.rest.port}")
-  private String esPort;
+  @Value("${spring.elasticsearch.rest.uris}")
+  private String esUris;
 
   @Override
   @Bean
   public RestHighLevelClient elasticsearchClient() {
 
     final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-        .connectedTo(esHost + ":" + esPort)
+        .connectedTo(esUris)
         .build();
 
     return RestClients.create(clientConfiguration).rest();

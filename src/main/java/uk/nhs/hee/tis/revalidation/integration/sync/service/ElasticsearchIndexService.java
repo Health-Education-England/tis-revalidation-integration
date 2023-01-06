@@ -76,12 +76,17 @@ public class ElasticsearchIndexService {
             Collectors.partitioningBy(
                 e -> StringUtils.isNotEmpty(e.getValue().get("index.creation_date"))));
 
-    // Log all the indices when their creation date is empty
-    var settingsWithNullCreationDate = settingsMapSplit.get(false).stream().collect(
+    var indicesWithoutCreationDate = settingsMapSplit.get(false).stream().collect(
         Collectors.mapping(Entry::getKey, Collectors.toList()));
-    if (!settingsWithNullCreationDate.isEmpty()) {
-      log.warn("Indices do not have a valid creation date setting: {}.",
-          settingsWithNullCreationDate);
+
+    var indicesWithCreationDate = settingsMapSplit.get(true).stream().collect(
+        Collectors.mapping(Entry::getKey, Collectors.toList()));
+
+    // Log all the indices when their creation date is empty
+    if (!indicesWithoutCreationDate.isEmpty()) {
+      log.warn("Indices do not have a valid creation date setting: {}. "
+              + "Please consider deleting them manually.",
+          indicesWithoutCreationDate);
     }
 
     // Deal with deletion when their creation date is not empty
@@ -92,8 +97,8 @@ public class ElasticsearchIndexService {
 
     if (latestBackupIndex.isPresent()) {
       String latestBackupIndexName = latestBackupIndex.get().getKey();
-
-      for (String index : indices) {
+      // Only handle indices whose creation_date is not empty
+      for (String index : indicesWithCreationDate) {
         if (!index.equals(latestBackupIndexName)) {
           elasticsearchIndexHelper.deleteIndex(index);
         }

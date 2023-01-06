@@ -1,7 +1,7 @@
 spring:
   elasticsearch:
     rest:
-      uris: ${ES_URLS:http://localhost:9200}
+      uris: ${ES_URLS:localhost:9200}
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
