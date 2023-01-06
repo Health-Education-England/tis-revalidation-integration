@@ -48,7 +48,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Scope("singleton")
 public class ElasticsearchIndexHelper {
 
   private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()

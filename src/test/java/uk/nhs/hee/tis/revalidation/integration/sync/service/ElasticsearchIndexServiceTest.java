@@ -50,6 +50,8 @@ import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.settings.Settings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -80,11 +82,17 @@ class ElasticsearchIndexServiceTest {
   @InjectMocks
   private ElasticsearchIndexService elasticsearchIndexService;
   @Mock
-  private Settings settingsMock1, settingsMock2, settingsMock3;
+  private Settings settingsMock1;
+  @Mock
+  private Settings settingsMock2;
+  @Mock
+  private Settings settingsMock3;
   @Mock
   private MappingMetadata mappingMock;
   @Mock
-  private AliasMetadata aliasMetadataMock1, aliasMetadataMock2;
+  private AliasMetadata aliasMetadataMock1;
+  @Mock
+  private AliasMetadata aliasMetadataMock2;
 
   @Test
   void shouldDeleteBackupIndices() throws Exception {
@@ -219,27 +227,13 @@ class ElasticsearchIndexServiceTest {
     verify(elasticsearchIndexHelperMock).addAlias(eq(oldIndexName), anyString());
   }
 
-  @Test
-  void shouldReindexWhenAliasNotExists() throws Exception {
-    when(elasticsearchIndexHelperMock.aliasExists(TARGET_ALIAS)).thenReturn(false);
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void shouldReindexWhetherAliasExists(boolean aliasExists) throws Exception {
+    when(elasticsearchIndexHelperMock.aliasExists(TARGET_ALIAS)).thenReturn(aliasExists);
+    doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService).markCurrentIndexAsBackup(TARGET_ALIAS);
     doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService)
         .transferOldIndexNameToAlias(TARGET_ALIAS);
-    when(elasticsearchIndexHelperMock.getMapping(OLD_INDEX_NAME)).thenReturn(mappingMock);
-    doNothing().when(elasticsearchIndexService).deleteBackupIndicesExceptLatest(TARGET_ALIAS);
-
-    elasticsearchIndexService.resync(SOURCE_INDEX_NAME, TARGET_ALIAS);
-
-    verify(elasticsearchIndexHelperMock).createIndex(stringArgCaptor.capture(), eq(mappingMock));
-    String newTargetIndexName = stringArgCaptor.getValue();
-    verify(elasticsearchIndexHelperMock).reindex(SOURCE_INDEX_NAME, newTargetIndexName);
-    verify(elasticsearchIndexHelperMock).addAlias(newTargetIndexName, TARGET_ALIAS);
-    verify(elasticsearchIndexHelperMock).deleteAlias(OLD_INDEX_NAME, TARGET_ALIAS);
-  }
-
-  @Test
-  void shouldReindexWhetherAliasExists() throws Exception {
-    when(elasticsearchIndexHelperMock.aliasExists(TARGET_ALIAS)).thenReturn(true);
-    doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService).markCurrentIndexAsBackup(TARGET_ALIAS);
     when(elasticsearchIndexHelperMock.getMapping(OLD_INDEX_NAME)).thenReturn(mappingMock);
     doNothing().when(elasticsearchIndexService).deleteBackupIndicesExceptLatest(TARGET_ALIAS);
 
