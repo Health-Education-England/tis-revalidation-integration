@@ -41,7 +41,8 @@ public class EsRestClientConfig extends AbstractElasticsearchConfiguration {
   public RestHighLevelClient elasticsearchClient() {
 
     final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-        .connectedTo(esUris)
+        .connectedTo(esUris + ":" + 443)
+        .usingSsl()
         .build();
 
     return RestClients.create(clientConfiguration).rest();
