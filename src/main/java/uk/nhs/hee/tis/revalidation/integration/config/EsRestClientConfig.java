@@ -35,6 +35,7 @@ public class EsRestClientConfig extends AbstractElasticsearchConfiguration {
   @Value("${spring.elasticsearch.rest.uris}")
   private String esUris;
 
+  @SuppressWarnings("java:S2095")
   @Override
   @Bean
   public RestHighLevelClient elasticsearchClient() {
