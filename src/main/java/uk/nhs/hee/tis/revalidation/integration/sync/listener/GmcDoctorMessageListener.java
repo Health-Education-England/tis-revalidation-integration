@@ -23,14 +23,13 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
+import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
@@ -39,28 +38,32 @@ public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
+  private final ElasticsearchIndexService elasticsearchIndexService;
+
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
 
   @Value("${app.rabbit.reval.exchange}")
   private String revalExchange;
 
-  @Autowired
-  private RabbitTemplate rabbitTemplate;
-
   private long traineeCount;
 
-  public GmcDoctorMessageListener(
-      DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
+  public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
+      ElasticsearchIndexService elasticsearchIndexService) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
+    this.elasticsearchIndexService = elasticsearchIndexService;
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
   public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("GMC sync completed. {} trainees in total.",
+      log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
-      // TODO implement solution using reindex API TIS21-3416
+      try {
+        elasticsearchIndexService.resync("masterdoctorindex", "recommendationindex");
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+      }
       traineeCount = 0;
     } else {
       //prepare the MasterDoctorView and call the service method
