@@ -24,20 +24,10 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import com.amazonaws.services.sqs.model.ChangeMessageVisibilityResult;
-import io.awspring.cloud.messaging.listener.Visibility;
 import java.time.LocalDate;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,8 +48,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 class GmcDoctorMessageListenerTest {
 
   private IndexSyncMessage<RevalidationSummaryDto> message;
-  private RevalidationSummaryDto revalidationSummaryDto;
-  private DoctorsForDB doctorsForDB;
 
   @InjectMocks
   private GmcDoctorMessageListener gmcDoctorMessageListener;
@@ -68,12 +56,9 @@ class GmcDoctorMessageListenerTest {
   @Mock
   private ElasticsearchIndexService elasticsearchIndexServiceMock;
 
-  @Mock
-  private Visibility visibilityMock;
-
   @BeforeEach
   void setUp() {
-    doctorsForDB = DoctorsForDB.builder()
+    DoctorsForDB doctorsForDB = DoctorsForDB.builder()
         .gmcReferenceNumber("101")
         .doctorFirstName("AAA")
         .doctorLastName("BBB")
@@ -87,20 +72,17 @@ class GmcDoctorMessageListenerTest {
         .admin("Reval Admin")
         .existsInGmc(true).build();
 
-    revalidationSummaryDto = RevalidationSummaryDto.builder()
+    RevalidationSummaryDto revalidationSummaryDto = RevalidationSummaryDto.builder()
         .doctor(doctorsForDB)
         .gmcOutcome("Approved").build();
 
-    message = new IndexSyncMessage<RevalidationSummaryDto>();
+    message = new IndexSyncMessage<>();
     message.setPayload(revalidationSummaryDto);
   }
 
-  @Mock
-  private Future<ChangeMessageVisibilityResult> futureMock;
-
   @Test
-  void testMessagesAreReceivedFromSqsQueue() throws Exception {
-    gmcDoctorMessageListener.getMessage(message, visibilityMock);
+  void testMessagesAreReceivedFromSqsQueue() {
+    gmcDoctorMessageListener.getMessage(message);
 
     ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
         .forClass(MasterDoctorView.class);
@@ -120,36 +102,9 @@ class GmcDoctorMessageListenerTest {
   void shouldNotThrowErrorWhenRecommendationReindexHasException() throws Exception {
     message.setSyncEnd(true);
 
-    doReturn(futureMock).when(visibilityMock).extend(anyInt());
-
     doThrow(Exception.class).when(elasticsearchIndexServiceMock)
         .resync("masterdoctorindex", "recommendationindex");
 
-    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(message, visibilityMock));
-  }
-
-  @Test
-  void shouldNotResyncWhenExtendVisibilityThrowsExecutionException() throws Exception {
-    message.setSyncEnd(true);
-
-    doReturn(futureMock).when(visibilityMock).extend(anyInt());
-    doThrow(ExecutionException.class).when(futureMock).get();
-
-    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(message, visibilityMock));
-    verify(elasticsearchIndexServiceMock, never()).resync(anyString(), anyString());
-  }
-
-  @Test
-  void shouldNotResyncWhenExtendVisibilityThrowsInterruptedException() throws Exception {
-    message.setSyncEnd(true);
-    InterruptedException expectedException = new InterruptedException("expected");
-
-    doReturn(futureMock).when(visibilityMock).extend(anyInt());
-    doThrow(expectedException).when(futureMock).get();
-
-    var actual = assertThrows(InterruptedException.class,
-        () -> gmcDoctorMessageListener.getMessage(message, visibilityMock));
-    verify(elasticsearchIndexServiceMock, never()).resync(anyString(), anyString());
-    assertEquals(expectedException, actual);
+    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(message));
   }
 }
