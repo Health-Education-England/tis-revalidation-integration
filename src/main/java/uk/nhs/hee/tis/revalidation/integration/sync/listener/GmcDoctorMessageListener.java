@@ -21,9 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
-import io.awspring.cloud.messaging.listener.Visibility;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
-import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,24 +55,12 @@ public class GmcDoctorMessageListener {
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message, Visibility visibility)
-      throws InterruptedException {
+  public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
       try {
-        // Extend the visibility timeouts for this message in SQS,
-        // otherwise the message could be visible to multiple tasks.
-        visibility.extend(300).get();
         elasticsearchIndexService.resync("masterdoctorindex", "recommendationindex");
-      } catch (InterruptedException e) {
-        log.error("Current thread was interrupted while waiting for extending VisibilityTimeout."
-            + "Please trigger resync again or doing it manually when the thread resumes.", e);
-        throw e;
-      } catch (ExecutionException e) {
-        log.error(
-            "Could not extend VisibilityTimeout for Resync. "
-                + "please trigger it again or do it manually.", e);
       } catch (Exception e) {
         log.error(e.getMessage(), e);
       }
