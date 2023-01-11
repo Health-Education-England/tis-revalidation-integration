@@ -37,8 +37,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
@@ -48,8 +48,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 class GmcDoctorMessageListenerTest {
 
   private IndexSyncMessage<RevalidationSummaryDto> message;
-  private RevalidationSummaryDto revalidationSummaryDto;
-  private DoctorsForDB doctorsForDB;
 
   @InjectMocks
   private GmcDoctorMessageListener gmcDoctorMessageListener;
@@ -60,7 +58,7 @@ class GmcDoctorMessageListenerTest {
 
   @BeforeEach
   void setUp() {
-    doctorsForDB = DoctorsForDB.builder()
+    DoctorsForDB doctorsForDB = DoctorsForDB.builder()
         .gmcReferenceNumber("101")
         .doctorFirstName("AAA")
         .doctorLastName("BBB")
@@ -74,11 +72,11 @@ class GmcDoctorMessageListenerTest {
         .admin("Reval Admin")
         .existsInGmc(true).build();
 
-    revalidationSummaryDto = RevalidationSummaryDto.builder()
+    RevalidationSummaryDto revalidationSummaryDto = RevalidationSummaryDto.builder()
         .doctor(doctorsForDB)
         .gmcOutcome("Approved").build();
 
-    message = new IndexSyncMessage<RevalidationSummaryDto>();
+    message = new IndexSyncMessage<>();
     message.setPayload(revalidationSummaryDto);
   }
 
