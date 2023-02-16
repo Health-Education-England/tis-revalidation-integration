@@ -38,7 +38,7 @@ public class ConnectionTcsRecordDto {
   private String doctorLastName;
   private String designatedBody;
   private String tcsDesignatedBody;
-  private String connectionStatus;
+  private String tisConnectionStatus;
   private LocalDate programmeMembershipEndDate;
   private LocalDate programmeMembershipStartDate;
   private String programmeMembershipType;

@@ -74,12 +74,12 @@ public class ConnectionExceptionAggregationStrategy implements AggregationStrate
 
       conn.setTcsDesignatedBody(conn.getDesignatedBody());
       conn.setDesignatedBody(null);
-      conn.setConnectionStatus(getConnectionStatus(null));
+      conn.setTisConnectionStatus(getConnectionStatus(null));
       if (traineeInfoDto.isPresent()) {
         final var trainee = traineeInfoDto.get();
         conn.setSubmissionDate(trainee.getSubmissionDate());
         conn.setDesignatedBody(trainee.getDesignatedBody());
-        conn.setConnectionStatus(getConnectionStatus(trainee.getDesignatedBody()));
+        conn.setTisConnectionStatus(getConnectionStatus(trainee.getDesignatedBody()));
       }
       return conn;
     }).collect(toList());
@@ -97,7 +97,7 @@ public class ConnectionExceptionAggregationStrategy implements AggregationStrate
       // where it does not exist here
       conn.setTcsDesignatedBody(conn.getDesignatedBody());
       conn.setDesignatedBody(null);
-      conn.setConnectionStatus(getConnectionStatus(null));
+      conn.setTisConnectionStatus(getConnectionStatus(null));
       return conn;
     }).collect(toList());
 

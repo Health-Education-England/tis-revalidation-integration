@@ -58,7 +58,7 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
         conn.setDesignatedBody(trainee.getDesignatedBody());
       }
 
-      conn.setConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
+      conn.setTisConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
       return conn;
     }).collect(toList());
 
@@ -72,7 +72,7 @@ public class ConnectionHiddenAggregationStrategy implements AggregationStrategy 
     final var connections = connectionHiddenDto.getConnections();
     final var connectionHiddenRecordDtos = connections.stream().map(conn -> {
       conn.setTcsDesignatedBody(conn.getDesignatedBody());
-      conn.setConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
+      conn.setTisConnectionStatus(getConnectionStatus(conn.getDesignatedBody()));
       return conn;
     }).collect(toList());
 

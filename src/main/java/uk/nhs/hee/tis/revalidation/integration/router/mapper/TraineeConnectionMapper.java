@@ -30,7 +30,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 @Mapper(componentModel = "spring")
 public interface TraineeConnectionMapper {
 
-  @Mapping(target = "connectionStatus", source = "traineeInfoDto.connectionStatus")
+  @Mapping(target = "tisConnectionStatus", source = "traineeInfoDto.tisConnectionStatus")
   @Mapping(target = "designatedBody", source = "traineeInfoDto.designatedBody")
   @Mapping(target = "tcsDesignatedBody", source = "connectionRecordDto.designatedBodyCode")
   @Mapping(target = "tcsPersonId", ignore = true)

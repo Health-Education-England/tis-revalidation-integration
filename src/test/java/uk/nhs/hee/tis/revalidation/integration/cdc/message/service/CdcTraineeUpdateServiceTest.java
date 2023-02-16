@@ -66,7 +66,7 @@ class CdcTraineeUpdateServiceTest {
   private final String designatedBody = "designatedBody";
   private final String tcsDesignatedBody = "tcsDesignatedBody";
   private final String programmeOwner = "programmeOwner";
-  private final String connectionStatus = "connectionStatus";
+  private final String tisConnectionStatus = "tisConnectionStatus";
   private final LocalDate programmeMembershipStartDate = LocalDate.now();
   private final LocalDate programmeMembershipEndDate = LocalDate.now();
   private final LocalDate curriculumEndDate = LocalDate.now();
@@ -98,7 +98,7 @@ class CdcTraineeUpdateServiceTest {
             .designatedBody(designatedBody)
             .tcsDesignatedBody(tcsDesignatedBody)
             .programmeOwner(programmeOwner)
-            .connectionStatus(connectionStatus)
+            .tisConnectionStatus(tisConnectionStatus)
             .programmeMembershipStartDate(programmeMembershipStartDate)
             .programmeMembershipEndDate(programmeMembershipEndDate)
             .curriculumEndDate(curriculumEndDate)

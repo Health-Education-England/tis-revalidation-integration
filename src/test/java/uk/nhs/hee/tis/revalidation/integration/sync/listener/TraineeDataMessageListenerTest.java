@@ -66,7 +66,7 @@ class TraineeDataMessageListenerTest {
   private String designatedBody;
   private String tcsDesignatedBody;
   private String programmeOwner;
-  private String connectionStatus;
+  private String tisConnectionStatus;
   private LocalDate programmeMembershipStartDate;
   private LocalDate programmeMembershipEndDate;
   private LocalDate curriculumEndDate;
@@ -86,7 +86,7 @@ class TraineeDataMessageListenerTest {
     designatedBody = faker.lorem().characters(20);
     tcsDesignatedBody = faker.lorem().characters(20);
     programmeOwner = faker.lorem().characters(20);
-    connectionStatus = faker.lorem().characters(20);
+    tisConnectionStatus = faker.lorem().characters(20);
     programmeMembershipStartDate = LocalDate.now();
     programmeMembershipEndDate = LocalDate.now();
     curriculumEndDate = LocalDate.now();
@@ -117,7 +117,7 @@ class TraineeDataMessageListenerTest {
         .designatedBody(designatedBody)
         .tcsDesignatedBody(tcsDesignatedBody)
         .programmeOwner(programmeOwner)
-        .connectionStatus(connectionStatus)
+        .tisConnectionStatus(tisConnectionStatus)
         .membershipStartDate(programmeMembershipStartDate)
         .membershipEndDate(programmeMembershipEndDate)
         .curriculumEndDate(curriculumEndDate)

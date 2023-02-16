@@ -223,7 +223,7 @@ public class CdcTestDataGenerator {
         .programmeMembershipStartDate(LocalDate.now().minusMonths(2))
         .programmeMembershipEndDate(LocalDate.now().plusYears(3L).plusMonths(3))
         .curriculumEndDate(LocalDate.now().plusYears(3L))
-        .connectionStatus(C_I + CONNECTION_STATUS_VAL).dataSource(C_I + DATA_SOURCE_VAL)
+        .tisConnectionStatus(C_I + CONNECTION_STATUS_VAL).dataSource(C_I + DATA_SOURCE_VAL)
         .build();
   }
 }
