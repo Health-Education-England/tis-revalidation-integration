@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -118,14 +119,15 @@ class CdcTraineeUpdateServiceTest {
 
     //new fields
     final var savedEntity = masterDoctorViewCaptor.getValue();
-    assertThat(savedEntity.getDoctorFirstName(), is(doctorFirstName));
-    assertThat(savedEntity.getDoctorLastName(), is(doctorLastName));
     assertThat(savedEntity.getTcsPersonId(), is(tcsPersonId));
     //existing fields
     assertThat(savedEntity.getGmcReferenceNumber(), is(masterDoctorView.getGmcReferenceNumber()));
     assertThat(savedEntity.getTisStatus(), is(masterDoctorView.getTisStatus()));
     assertThat(savedEntity.getAdmin(), is(masterDoctorView.getAdmin()));
-
+    //GMC fields
+    assertThat(savedEntity.getDoctorFirstName(), is(not(doctorFirstName)));
+    assertThat(savedEntity.getDoctorLastName(), is(not(doctorFirstName)));
+    assertThat(savedEntity.getSubmissionDate(), is(not(submissionDate)));
   }
 
   @Test
@@ -139,8 +141,8 @@ class CdcTraineeUpdateServiceTest {
 
     //new fields
     final var savedEntity = masterDoctorViewCaptor.getValue();
-    assertThat(savedEntity.getDoctorFirstName(), is(doctorFirstName));
-    assertThat(savedEntity.getDoctorLastName(), is(doctorLastName));
+    assertThat(savedEntity.getDoctorFirstName(), is("old" + doctorFirstName));
+    assertThat(savedEntity.getDoctorLastName(), is("old" + doctorLastName));
     assertThat(savedEntity.getTcsPersonId(), is(tcsPersonId));
   }
 
@@ -168,8 +170,6 @@ class CdcTraineeUpdateServiceTest {
 
     //new fields
     final var savedMasterDoctorView = masterDoctorViewCaptor.getValue();
-    assertThat(savedMasterDoctorView.getDoctorFirstName(), is(doctorFirstName));
-    assertThat(savedMasterDoctorView.getDoctorLastName(), is(doctorLastName));
     assertThat(savedMasterDoctorView.getTcsPersonId(), is(tcsPersonId));
   }
 

@@ -170,7 +170,6 @@ class MasterDoctorViewMapperTest {
 
     assertThat(result, notNullValue());
     assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
-    assertThat(result.getGmcReferenceNumber(), nullValue());
     assertThat(result.getDoctorFirstName(), nullValue());
     assertThat(result.getDoctorLastName(), nullValue());
     assertThat(result.getTcsPersonId(), is(source.getTcsPersonId()));
