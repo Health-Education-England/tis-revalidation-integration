@@ -57,6 +57,9 @@ public interface MasterDoctorViewMapper {
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "programmeMembershipEndDate", target = "membershipEndDate",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+  @Mapping(target = "doctorFirstName", ignore = true)
+  @Mapping(target = "doctorLastName", ignore = true)
+  @Mapping(target = "submissionDate", ignore = true)
   MasterDoctorView updateMasterDoctorView(ConnectionInfoDto source,
       @MappingTarget MasterDoctorView target);
 }
