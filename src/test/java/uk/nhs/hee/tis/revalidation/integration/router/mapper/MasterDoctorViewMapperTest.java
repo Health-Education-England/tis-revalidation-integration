@@ -191,5 +191,6 @@ class MasterDoctorViewMapperTest {
     assertThat(result.getMembershipStartDate(), nullValue());
     assertThat(result.getMembershipStartDate(), nullValue());
     assertThat(result.getMembershipEndDate(), nullValue());
+    assertThat(result.getTcsDesignatedBody(), nullValue());
   }
 }
