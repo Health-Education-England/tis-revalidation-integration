@@ -162,13 +162,11 @@ class MasterDoctorViewMapperTest {
   @Test
   void shouldUpdateNonNullFields() {
     ConnectionInfoDto source = CdcTestDataGenerator.getConnectionInfo();
-    source.setConnectionStatus(null);
 
     MasterDoctorView result = masterDoctorViewMapper
         .updateMasterDoctorView(source, currentDoctorView);
 
     assertThat(result, notNullValue());
-    assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
     assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
     assertThat(result.getTcsPersonId(), is(source.getTcsPersonId()));
   }
@@ -181,7 +179,6 @@ class MasterDoctorViewMapperTest {
     MasterDoctorView result = masterDoctorViewMapper
         .updateMasterDoctorView(source, currentDoctorView);
 
-    assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
     assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
     assertThat(result.getTcsPersonId(), is(TIS_ID));
     assertThat(result.getProgrammeName(), nullValue());
