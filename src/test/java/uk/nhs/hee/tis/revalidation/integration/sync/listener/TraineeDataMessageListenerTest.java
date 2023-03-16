@@ -117,7 +117,6 @@ class TraineeDataMessageListenerTest {
         .designatedBody(designatedBody)
         .tcsDesignatedBody(tcsDesignatedBody)
         .programmeOwner(programmeOwner)
-        .connectionStatus(connectionStatus)
         .membershipStartDate(programmeMembershipStartDate)
         .membershipEndDate(programmeMembershipEndDate)
         .curriculumEndDate(curriculumEndDate)

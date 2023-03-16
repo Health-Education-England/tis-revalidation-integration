@@ -27,9 +27,7 @@ import static uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatu
 import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
 
 import com.mongodb.client.model.changestream.OperationType;
-import java.time.Instant;
 import java.time.LocalDate;
-import org.bson.BsonDateTime;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
@@ -47,23 +45,15 @@ public class CdcTestDataGenerator {
   public static final String GMC_REFERENCE_NUMBER_VAL = "111";
   public static final String DOCTOR_FIRST_NAME_VAL = "firstName";
   public static final String DOCTOR_LAST_NAME_VAL = "lastName";
-  public static final BsonDateTime SUBMISSION_DATE_VAL =
-      new BsonDateTime(Instant.now().getEpochSecond());
-  public static final BsonDateTime DATE_ADDED_VAL =
-      new BsonDateTime(Instant.now().getEpochSecond());
   public static final UnderNotice UNDER_NOTICE_VAL = YES;
   public static final String SANCTION_VAL = "sanction";
   public static final RecommendationStatus DOCTOR_STATUS_VAL = SUBMITTED_TO_GMC;
-  public static final BsonDateTime LAST_UPDATED_DATE_VAL =
-      new BsonDateTime(Instant.now().getEpochSecond());
   public static final String DESIGNATED_BODY_CODE_VAL = "designatedBodyCode";
   public static final String ADMIN_VAL = "admin";
   public static final Boolean EXISTS_IN_GMC_VAL = true;
   public static final String PROGRAMME_NAME_VAL = "Dev 4 pain";
   public static final String PROGRAMME_TYPE_VAL = "prog-type";
   public static final String PROGRAMME_OWNER_VAL = "squad";
-  public static final String CONNECTION_STATUS_VAL = "inappropriate";
-  public static final String DATA_SOURCE_VAL = "Lundan";
   public static final String C_I = "ci";
 
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
@@ -223,7 +213,6 @@ public class CdcTestDataGenerator {
         .programmeMembershipStartDate(LocalDate.now().minusMonths(2))
         .programmeMembershipEndDate(LocalDate.now().plusYears(3L).plusMonths(3))
         .curriculumEndDate(LocalDate.now().plusYears(3L))
-        .connectionStatus(C_I + CONNECTION_STATUS_VAL).dataSource(C_I + DATA_SOURCE_VAL)
         .build();
   }
 }

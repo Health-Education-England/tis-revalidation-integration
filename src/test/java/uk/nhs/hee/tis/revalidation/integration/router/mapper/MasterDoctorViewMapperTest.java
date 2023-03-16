@@ -71,7 +71,6 @@ class MasterDoctorViewMapperTest {
         .designatedBody(DESIGNATED_BODY)
         .tcsDesignatedBody(TCS_DESIGNATED_BODY)
         .programmeOwner(PROGRAMME_OWNER)
-        .connectionStatus(CONNECTION_YES)
         .build();
   }
 
