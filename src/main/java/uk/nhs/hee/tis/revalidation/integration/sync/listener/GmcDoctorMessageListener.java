@@ -85,8 +85,4 @@ public class GmcDoctorMessageListener {
       traineeCount++;
     }
   }
-
-  private String getConnectionStatus(DoctorsForDB doctorsForDB) {
-    return (doctorsForDB.getDesignatedBodyCode() != null) ? "Yes" : "No";
-  }
 }
