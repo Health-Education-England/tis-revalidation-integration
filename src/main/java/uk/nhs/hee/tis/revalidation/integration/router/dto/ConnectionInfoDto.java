@@ -53,7 +53,6 @@ public class ConnectionInfoDto {
   String designatedBody;
   String tcsDesignatedBody;
   String programmeOwner;
-  String connectionStatus;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate programmeMembershipStartDate;
