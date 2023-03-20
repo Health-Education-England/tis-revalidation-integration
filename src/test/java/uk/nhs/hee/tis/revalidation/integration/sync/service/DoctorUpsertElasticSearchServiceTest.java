@@ -28,6 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,12 +44,14 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class DoctorUpsertElasticSearchServiceTest {
-
+  private static final String ES_INDEX = "masterdoctorindex";
+  private static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
   @Mock
   ElasticsearchOperations elasticsearchOperations;
@@ -58,6 +61,8 @@ class DoctorUpsertElasticSearchServiceTest {
   private MasterDoctorViewMapper mapper;
   @Mock
   private IndexOperations indexOperations;
+  @Mock
+  private ElasticsearchIndexHelper elasticsearchIndexHelper;
   @Captor
   private ArgumentCaptor<IndexCoordinates> indexCaptor;
   private DoctorUpsertElasticSearchService service;
@@ -67,7 +72,7 @@ class DoctorUpsertElasticSearchServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new DoctorUpsertElasticSearchService(repository, mapper, elasticsearchOperations);
+    service = new DoctorUpsertElasticSearchService(repository, mapper, elasticsearchOperations, elasticsearchIndexHelper);
     currentDoctorView = MasterDoctorView.builder()
         .id("1a2b3c")
         .tcsPersonId(1001L)
@@ -178,5 +183,11 @@ class DoctorUpsertElasticSearchServiceTest {
 
     // should save index with dataToSave
     verify(repository).save(dataToSave);
+  }
+
+  @Test
+  void shouldAddCurrentConnectionsAliasToMasterDoctorIndex() throws IOException {
+    service.clearMasterDoctorIndex();
+    verify(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
   }
 }
