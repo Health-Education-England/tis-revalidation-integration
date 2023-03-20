@@ -192,6 +192,7 @@ class DoctorUpsertElasticSearchServiceTest {
 
   @Test
   void shouldThrowIOExceptionWhenFailingToAddAliasToMasterDoctorIndex() throws IOException {
+    when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     IOException expectedException = new IOException("expected");
     doThrow(expectedException).when(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
     assertThrows(IOException.class, () -> service.clearMasterDoctorIndex());
