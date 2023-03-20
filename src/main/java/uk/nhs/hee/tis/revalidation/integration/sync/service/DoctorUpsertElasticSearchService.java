@@ -46,7 +46,9 @@ public class DoctorUpsertElasticSearchService {
   private final ElasticsearchIndexHelper elasticsearchIndexHelper;
 
   public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
-                                          MasterDoctorViewMapper mapper, ElasticsearchOperations elasticSearchOperations, ElasticsearchIndexHelper elasticsearchIndexHelper) {
+                                          MasterDoctorViewMapper mapper,
+                                          ElasticsearchOperations elasticSearchOperations,
+                                          ElasticsearchIndexHelper elasticsearchIndexHelper) {
     this.repository = repository;
     this.mapper = mapper;
     this.elasticSearchOperations = elasticSearchOperations;
@@ -124,7 +126,9 @@ public class DoctorUpsertElasticSearchService {
           dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
     }
   }
-
+  /**
+   * Clear all records in masterdoctorindex by deleting and recreating the index
+   */
   public void clearMasterDoctorIndex() {
     deleteMasterDoctorIndex();
     createMasterDoctorIndex();

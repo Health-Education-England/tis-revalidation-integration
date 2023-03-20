@@ -72,7 +72,8 @@ class DoctorUpsertElasticSearchServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new DoctorUpsertElasticSearchService(repository, mapper, elasticsearchOperations, elasticsearchIndexHelper);
+    service = new DoctorUpsertElasticSearchService(
+        repository, mapper, elasticsearchOperations, elasticsearchIndexHelper);
     currentDoctorView = MasterDoctorView.builder()
         .id("1a2b3c")
         .tcsPersonId(1001L)
@@ -187,8 +188,18 @@ class DoctorUpsertElasticSearchServiceTest {
 
   @Test
   void shouldAddCurrentConnectionsAliasToMasterDoctorIndex() throws IOException {
-    when(elasticsearchOperations.indexOps(indexCaptor.capture())).thenReturn(indexOperations);
+    when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
     verify(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
+  }
+
+  @Test
+  void shouldThrowIOExceptionWhenFailingToAddAliasToMasterDoctorIndex() {
+    IOException expectedException = new IOException("expected");
+    when(elasticsearchOperations.indexOps((IndexCoordinates) any()))
+        .thenReturn(indexOperations)
+        .thenThrow(expectedException);
+
+    assertThrows(IOException.class, () -> service.clearMasterDoctorIndex());
   }
 }
