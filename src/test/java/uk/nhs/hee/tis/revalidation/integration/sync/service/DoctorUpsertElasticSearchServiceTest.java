@@ -199,6 +199,7 @@ class DoctorUpsertElasticSearchServiceTest {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any()))
         .thenReturn(indexOperations)
         .thenThrow(expectedException);
+    service.clearMasterDoctorIndex();
 
     assertThrows(IOException.class, () -> service.clearMasterDoctorIndex());
   }
