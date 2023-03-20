@@ -135,13 +135,6 @@ public class DoctorUpsertElasticSearchService {
     addAliasToMasterDoctorIndex();
   }
 
-  private void addAliasToMasterDoctorIndex() {
-    try {
-      elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
-    } catch (IOException e) {
-      log.error("Could not add alias to masterDoctorIndex after create: ", e);
-    }
-  }
 
   private void deleteMasterDoctorIndex() {
     log.info("deleting masterdoctorindex elastic search index");
@@ -157,6 +150,14 @@ public class DoctorUpsertElasticSearchService {
     elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).create();
     elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX))
         .putMapping(MasterDoctorView.class);
+  }
+
+  private void addAliasToMasterDoctorIndex() {
+    try {
+      elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
+    } catch (IOException e) {
+      log.error("Could not add alias to masterDoctorIndex after create: ", e);
+    }
   }
 
 }

@@ -23,10 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -194,13 +191,9 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldThrowIOExceptionWhenFailingToAddAliasToMasterDoctorIndex() {
+  void shouldThrowIOExceptionWhenFailingToAddAliasToMasterDoctorIndex() throws IOException {
     IOException expectedException = new IOException("expected");
-    when(elasticsearchOperations.indexOps((IndexCoordinates) any()))
-        .thenReturn(indexOperations)
-        .thenThrow(expectedException);
-    service.clearMasterDoctorIndex();
-
+    doThrow(expectedException).when(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
     assertThrows(IOException.class, () -> service.clearMasterDoctorIndex());
   }
 }
