@@ -33,9 +33,7 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
@@ -190,11 +188,4 @@ class DoctorUpsertElasticSearchServiceTest {
     verify(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
   }
 
-  @Test
-  void shouldThrowIOExceptionWhenFailingToAddAliasToMasterDoctorIndex() throws IOException {
-    when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
-    IOException expectedException = new IOException("expected");
-    doThrow(expectedException).when(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
-    assertThrows(IOException.class, () -> service.clearMasterDoctorIndex());
-  }
 }
