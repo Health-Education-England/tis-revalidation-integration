@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.sync.helper;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
@@ -149,6 +150,10 @@ public class ElasticsearchIndexHelper {
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public void addAlias(String indexName, String aliasName) throws IOException {
+    addAlias(indexName, aliasName, null);
+  }
+
+  public void addAlias(String indexName, String aliasName, String filter) throws IOException {
     log.info("Adding alias: {} to elastic search index: {}.", aliasName, indexName);
 
     IndicesAliasesRequest request = new IndicesAliasesRequest();
@@ -156,6 +161,9 @@ public class ElasticsearchIndexHelper {
         new AliasActions(AliasActions.Type.ADD)
             .index(indexName)
             .alias(aliasName);
+    if (StringUtils.isNotEmpty(filter)) {
+      aliasAction.filter(filter);
+    }
     request.addAliasAction(aliasAction);
 
     highLevelClient.indices().updateAliases(request, RequestOptions.DEFAULT);

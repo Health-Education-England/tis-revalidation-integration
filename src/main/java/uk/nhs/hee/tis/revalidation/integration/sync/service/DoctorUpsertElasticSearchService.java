@@ -37,7 +37,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 @Service
 public class DoctorUpsertElasticSearchService {
-
+  private static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
   private static final String ES_INDEX = "masterdoctorindex";
   private static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final MasterDoctorElasticSearchRepository repository;
@@ -126,6 +126,7 @@ public class DoctorUpsertElasticSearchService {
           dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
     }
   }
+
   /**
    * Clear all records in masterdoctorindex by deleting and recreating the index
    */
@@ -134,7 +135,6 @@ public class DoctorUpsertElasticSearchService {
     createMasterDoctorIndex();
     addAliasToMasterDoctorIndex();
   }
-
 
   private void deleteMasterDoctorIndex() {
     log.info("deleting masterdoctorindex elastic search index");
@@ -154,10 +154,11 @@ public class DoctorUpsertElasticSearchService {
 
   private void addAliasToMasterDoctorIndex() {
     try {
-      elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
+      elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS,
+          ES_CURRENT_CONNECIONS_FILTER);
     } catch (IOException e) {
-      log.error("Could not add alias to masterDoctorIndex after create: ", e);
+      log.error("Could not add alias to masterDoctorIndex after create, please do it manually.",
+          e);
     }
   }
-
 }
