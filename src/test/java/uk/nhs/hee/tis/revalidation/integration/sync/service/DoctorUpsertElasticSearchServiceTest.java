@@ -45,8 +45,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class DoctorUpsertElasticSearchServiceTest {
-  private static final String ES_INDEX = "masterdoctorindex";
-  private static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
   @Mock
   ElasticsearchOperations elasticsearchOperations;
@@ -185,7 +183,7 @@ class DoctorUpsertElasticSearchServiceTest {
   void shouldAddCurrentConnectionsAliasToMasterDoctorIndex() throws IOException {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
-    verify(elasticsearchIndexHelper).addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS);
+    verify(elasticsearchIndexHelper).addAlias(service.ES_INDEX, service.CURRENT_CONNECTIONS_ALIAS,
+        service.ES_CURRENT_CONNECIONS_FILTER);
   }
-
 }

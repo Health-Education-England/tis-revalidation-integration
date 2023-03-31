@@ -37,9 +37,9 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 @Service
 public class DoctorUpsertElasticSearchService {
-  private static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
-  private static final String ES_INDEX = "masterdoctorindex";
-  private static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
+  protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
+  protected static final String ES_INDEX = "masterdoctorindex";
+  protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final MasterDoctorElasticSearchRepository repository;
   private final MasterDoctorViewMapper mapper;
   private final ElasticsearchOperations elasticSearchOperations;
