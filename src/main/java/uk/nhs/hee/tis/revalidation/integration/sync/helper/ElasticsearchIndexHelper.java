@@ -26,7 +26,6 @@ import java.net.SocketTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -44,17 +43,13 @@ import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.reindex.ReindexRequest;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class ElasticsearchIndexHelper {
 
-  private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()
-      .setConnectTimeout(5000)
-      .setSocketTimeout(120000)
-      .build();
+
 
   RestHighLevelClient highLevelClient;
 
@@ -153,6 +148,14 @@ public class ElasticsearchIndexHelper {
     addAlias(indexName, aliasName, null);
   }
 
+  /**
+   * Add alias to an index.
+   *
+   * @param indexName index name to add alias for
+   * @param aliasName alias to be added
+   * @param filter filter expression that applies to this alias
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
+   */
   public void addAlias(String indexName, String aliasName, String filter) throws IOException {
     log.info("Adding alias: {} to elastic search index: {}.", aliasName, indexName);
 

@@ -128,7 +128,7 @@ public class DoctorUpsertElasticSearchService {
   }
 
   /**
-   * Clear all records in masterdoctorindex by deleting and recreating the index
+   * Clear all records in masterdoctorindex by deleting and recreating the index.
    */
   public void clearMasterDoctorIndex() {
     deleteMasterDoctorIndex();
