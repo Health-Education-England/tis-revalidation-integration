@@ -24,13 +24,16 @@ package uk.nhs.hee.tis.revalidation.integration.sync.helper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.http.client.config.RequestConfig;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
@@ -41,10 +44,7 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.client.IndicesClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.DeleteAliasRequest;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.client.indices.GetMappingsRequest;
+import org.elasticsearch.client.indices.*;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.index.reindex.ReindexRequest;
 import org.junit.jupiter.api.Test;
@@ -52,6 +52,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.TestObject;
+import uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants;
 
 @ExtendWith(MockitoExtension.class)
 class ElasticsearchIndexHelperTest {
@@ -74,8 +76,10 @@ class ElasticsearchIndexHelperTest {
 
   @Test
   void shouldMakeRequestToGetIndices() throws IOException {
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.getIndices("index");
-    verify(highLevelClientMock).indices().get(any(GetIndexRequest.class), RequestOptions.DEFAULT);
+
+    verify(indicesClientMock).get(any(GetIndexRequest.class), eq(RequestOptions.DEFAULT));
   }
 
   @Test
@@ -98,7 +102,7 @@ class ElasticsearchIndexHelperTest {
 
     helper.reindex(source, target);
 
-    verify(highLevelClientMock).reindex(any(ReindexRequest.class), options);
+    verify(highLevelClientMock).reindex(any(ReindexRequest.class), eq(options));
   }
 
   @Test
@@ -114,9 +118,10 @@ class ElasticsearchIndexHelperTest {
 
   @Test
   void shouldMakeRequestToDeleteIndex() throws IOException {
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.deleteIndex("index");
 
-    verify(highLevelClientMock).delete(any(DeleteRequest.class), RequestOptions.DEFAULT);
+    verify(indicesClientMock).delete(any(DeleteIndexRequest.class), eq(RequestOptions.DEFAULT));
   }
 
   @Test
@@ -188,9 +193,10 @@ class ElasticsearchIndexHelperTest {
     Map<String, Object> mapping = Collections.emptyMap();
 
     MappingMetadata testMetaData = new MappingMetadata("type", mapping);
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.createIndex("index", testMetaData);
 
-    verify(highLevelClientMock).delete(any(DeleteRequest.class), RequestOptions.DEFAULT);
+    verify(indicesClientMock).create(any(CreateIndexRequest.class), eq(RequestOptions.DEFAULT));
   }
 
   @Test
@@ -251,14 +257,6 @@ class ElasticsearchIndexHelperTest {
   }
 
   @Test
-  void shouldMakeRequestToGetMapping() throws IOException {
-    helper.getMapping("index");
-
-    verify(highLevelClientMock).indices()
-        .getMapping(any(GetMappingsRequest.class), RequestOptions.DEFAULT);
-  }
-
-  @Test
   void shouldThrowExceptionWhenGetMapping() throws Exception {
     IOException expectedIoException = new IOException("expected");
     when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
@@ -272,33 +270,37 @@ class ElasticsearchIndexHelperTest {
 
   @Test
   void shouldMakeRequestToCheckAliasExists() throws IOException {
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.aliasExists("index");
 
-    verify(highLevelClientMock).indices()
-        .existsAlias(any(GetAliasesRequest.class), RequestOptions.DEFAULT);
+    verify(indicesClientMock)
+        .existsAlias(any(GetAliasesRequest.class), eq(RequestOptions.DEFAULT));
   }
 
   @Test
   void shouldMakeRequestToAddAlias() throws IOException {
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.addAlias("index", "alias");
 
-    verify(highLevelClientMock).indices()
-        .updateAliases(any(IndicesAliasesRequest.class), RequestOptions.DEFAULT);
+    verify(indicesClientMock)
+        .updateAliases(any(IndicesAliasesRequest.class), eq(RequestOptions.DEFAULT));
   }
 
   @Test
   void shouldMakeRequestToAddAliasWithFilter() throws IOException {
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.addAlias("index", "alias", "filter");
 
-    verify(highLevelClientMock).indices()
-        .updateAliases(any(IndicesAliasesRequest.class), RequestOptions.DEFAULT);
+    verify(indicesClientMock)
+        .updateAliases(any(IndicesAliasesRequest.class), eq(RequestOptions.DEFAULT));
   }
 
   @Test
   void shouldMakeRequestToDeleteAlias() throws IOException {
+    when(highLevelClientMock.indices()).thenReturn(indicesClientMock);
     helper.deleteAlias("index", "alias");
 
-    verify(highLevelClientMock).indices()
-        .deleteAlias(any(DeleteAliasRequest.class), RequestOptions.DEFAULT);
+    verify(indicesClientMock)
+        .deleteAlias(any(DeleteAliasRequest.class), eq(RequestOptions.DEFAULT));
   }
 }
