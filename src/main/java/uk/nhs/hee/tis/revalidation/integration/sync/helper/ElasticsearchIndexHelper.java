@@ -49,7 +49,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ElasticsearchIndexHelper {
 
-
+  private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()
+      .setConnectTimeout(5000)
+      .setSocketTimeout(120000)
+      .build();
 
   RestHighLevelClient highLevelClient;
 
