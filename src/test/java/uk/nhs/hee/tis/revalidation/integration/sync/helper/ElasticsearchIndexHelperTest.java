@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.client.config.RequestConfig;
 import org.elasticsearch.ResourceAlreadyExistsException;
@@ -39,7 +38,6 @@ import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.client.IndicesClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -54,8 +52,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.TestObject;
-import uk.nhs.hee.tis.revalidation.integration.cdc.DoctorConstants;
 
 @ExtendWith(MockitoExtension.class)
 class ElasticsearchIndexHelperTest {
