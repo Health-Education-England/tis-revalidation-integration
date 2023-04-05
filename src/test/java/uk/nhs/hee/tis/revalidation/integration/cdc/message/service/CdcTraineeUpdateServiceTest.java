@@ -98,7 +98,6 @@ class CdcTraineeUpdateServiceTest {
             .designatedBody(designatedBody)
             .tcsDesignatedBody(tcsDesignatedBody)
             .programmeOwner(programmeOwner)
-            .connectionStatus(connectionStatus)
             .programmeMembershipStartDate(programmeMembershipStartDate)
             .programmeMembershipEndDate(programmeMembershipEndDate)
             .curriculumEndDate(curriculumEndDate)

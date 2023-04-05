@@ -76,7 +76,6 @@ public class GmcDoctorMessageListener {
           .designatedBody(doctorsForDB.getDesignatedBodyCode())
           .gmcStatus(message.getPayload().getGmcOutcome())
           .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
-          .connectionStatus(getConnectionStatus(doctorsForDB))
           .admin(doctorsForDB.getAdmin())
           .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
           .underNotice(doctorsForDB.getUnderNotice())
@@ -85,9 +84,5 @@ public class GmcDoctorMessageListener {
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;
     }
-  }
-
-  private String getConnectionStatus(DoctorsForDB doctorsForDB) {
-    return (doctorsForDB.getDesignatedBodyCode() != null) ? "Yes" : "No";
   }
 }

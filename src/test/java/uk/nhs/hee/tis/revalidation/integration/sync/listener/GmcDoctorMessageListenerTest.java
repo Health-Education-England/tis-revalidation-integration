@@ -94,7 +94,6 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getDoctorLastName(), is("BBB"));
     assertThat(masterDoctorView.getSubmissionDate(), is(LocalDate.now()));
     assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
-    assertThat(masterDoctorView.getConnectionStatus(), is("Yes"));
     assertThat(masterDoctorView.getExistsInGmc(), is(true));
   }
 

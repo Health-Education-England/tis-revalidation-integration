@@ -71,7 +71,6 @@ class MasterDoctorViewMapperTest {
         .designatedBody(DESIGNATED_BODY)
         .tcsDesignatedBody(TCS_DESIGNATED_BODY)
         .programmeOwner(PROGRAMME_OWNER)
-        .connectionStatus(CONNECTION_YES)
         .build();
   }
 
@@ -163,13 +162,11 @@ class MasterDoctorViewMapperTest {
   @Test
   void shouldUpdateNonNullFields() {
     ConnectionInfoDto source = CdcTestDataGenerator.getConnectionInfo();
-    source.setConnectionStatus(null);
 
     MasterDoctorView result = masterDoctorViewMapper
         .updateMasterDoctorView(source, currentDoctorView);
 
     assertThat(result, notNullValue());
-    assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
     assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
     assertThat(result.getTcsPersonId(), is(source.getTcsPersonId()));
   }
@@ -182,7 +179,6 @@ class MasterDoctorViewMapperTest {
     MasterDoctorView result = masterDoctorViewMapper
         .updateMasterDoctorView(source, currentDoctorView);
 
-    assertThat(result.getConnectionStatus(), is(CONNECTION_YES));
     assertThat(result.getGmcReferenceNumber(), is(source.getGmcReferenceNumber()));
     assertThat(result.getTcsPersonId(), is(TIS_ID));
     assertThat(result.getProgrammeName(), nullValue());
