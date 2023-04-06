@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
@@ -29,23 +30,29 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 @Service
 public class DoctorUpsertElasticSearchService {
-
-  private static final String ES_INDEX = "masterdoctorindex";
+  protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
+  protected static final String ES_INDEX = "masterdoctorindex";
+  protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final MasterDoctorElasticSearchRepository repository;
   private final MasterDoctorViewMapper mapper;
   private final ElasticsearchOperations elasticSearchOperations;
+  private final ElasticsearchIndexHelper elasticsearchIndexHelper;
 
   public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
-      MasterDoctorViewMapper mapper, ElasticsearchOperations elasticSearchOperations) {
+                                          MasterDoctorViewMapper mapper,
+                                          ElasticsearchOperations elasticSearchOperations,
+                                          ElasticsearchIndexHelper elasticsearchIndexHelper) {
     this.repository = repository;
     this.mapper = mapper;
     this.elasticSearchOperations = elasticSearchOperations;
+    this.elasticsearchIndexHelper = elasticsearchIndexHelper;
   }
 
   public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) {
@@ -120,9 +127,13 @@ public class DoctorUpsertElasticSearchService {
     }
   }
 
+  /**
+   * Clear all records in masterdoctorindex by deleting and recreating the index.
+   */
   public void clearMasterDoctorIndex() {
     deleteMasterDoctorIndex();
     createMasterDoctorIndex();
+    addAliasToMasterDoctorIndex();
   }
 
   private void deleteMasterDoctorIndex() {
@@ -141,4 +152,13 @@ public class DoctorUpsertElasticSearchService {
         .putMapping(MasterDoctorView.class);
   }
 
+  private void addAliasToMasterDoctorIndex() {
+    try {
+      elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS,
+          ES_CURRENT_CONNECIONS_FILTER);
+    } catch (IOException e) {
+      log.error("Could not add alias to masterDoctorIndex after create, please do it manually.",
+          e);
+    }
+  }
 }

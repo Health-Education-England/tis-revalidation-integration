@@ -24,8 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.helper;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -43,7 +43,6 @@ import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.reindex.ReindexRequest;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -149,6 +148,18 @@ public class ElasticsearchIndexHelper {
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public void addAlias(String indexName, String aliasName) throws IOException {
+    addAlias(indexName, aliasName, null);
+  }
+
+  /**
+   * Add alias to an index.
+   *
+   * @param indexName index name to add alias for
+   * @param aliasName alias to be added
+   * @param filter filter expression that applies to this alias
+   * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
+   */
+  public void addAlias(String indexName, String aliasName, String filter) throws IOException {
     log.info("Adding alias: {} to elastic search index: {}.", aliasName, indexName);
 
     IndicesAliasesRequest request = new IndicesAliasesRequest();
@@ -156,6 +167,9 @@ public class ElasticsearchIndexHelper {
         new AliasActions(AliasActions.Type.ADD)
             .index(indexName)
             .alias(aliasName);
+    if (StringUtils.isNotEmpty(filter)) {
+      aliasAction.filter(filter);
+    }
     request.addAliasAction(aliasAction);
 
     highLevelClient.indices().updateAliases(request, RequestOptions.DEFAULT);
