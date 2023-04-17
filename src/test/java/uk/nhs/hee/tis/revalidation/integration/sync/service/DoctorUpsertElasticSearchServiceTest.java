@@ -191,4 +191,12 @@ class DoctorUpsertElasticSearchServiceTest {
     verify(elasticsearchIndexHelper).addAlias(service.ES_INDEX, service.CURRENT_CONNECTIONS_ALIAS,
         service.ES_CURRENT_CONNECIONS_FILTER);
   }
+
+  @Test
+  void shouldAddDiscrepanciesAliasToMasterDoctorIndex() throws IOException {
+    when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
+    service.clearMasterDoctorIndex();
+    verify(elasticsearchIndexHelper).addAlias(service.ES_INDEX, service.DISCREPANCIES_ALIAS,
+        service.ES_DISCREPANCIES_FILTER);
+  }
 }
