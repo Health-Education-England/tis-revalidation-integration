@@ -59,7 +59,7 @@ public class CdcTestDataGenerator {
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
       .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
-      .doctorFirstName(DOCTOR_LAST_NAME_VAL)
+      .doctorLastName(DOCTOR_LAST_NAME_VAL)
       .submissionDate(LocalDate.now())
       .dateAdded(LocalDate.now())
       .underNotice(UNDER_NOTICE_VAL)

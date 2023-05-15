@@ -21,6 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -34,12 +36,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -55,8 +59,8 @@ class CdcDoctorServiceTest {
   @Mock
   CdcMessagePublisher publisher;
 
-  @Mock
-  MasterDoctorViewMapper mapper;
+  @Spy
+  MasterDoctorViewMapper mapper = (MasterDoctorViewMapper) new MasterDoctorViewMapperImpl();
 
   @Captor
   ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
@@ -83,8 +87,17 @@ class CdcDoctorServiceTest {
         .getFullDocument();
     cdcDoctorService.upsertEntity(newDoctor);
 
-    verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
-    verify(repository).save(any());
+    verify(mapper).updateMasterDoctorView(mapper.doctorToMasterView(newDoctor), existingDoctor);
+    verify(repository).save(masterDoctorViewCaptor.capture());
+    final var savedView = masterDoctorViewCaptor.getValue();
+    assertThat(savedView.getGmcReferenceNumber(), is(newDoctor.getGmcReferenceNumber()));
+    assertThat(savedView.getDoctorFirstName(), is(newDoctor.getDoctorFirstName()));
+    assertThat(savedView.getDoctorLastName(), is(newDoctor.getDoctorLastName()));
+    assertThat(savedView.getDesignatedBody(), is(newDoctor.getDesignatedBodyCode()));
+    assertThat(savedView.getTisStatus(), is(newDoctor.getDoctorStatus()));
+    assertThat(savedView.getSubmissionDate(), is(newDoctor.getSubmissionDate()));
+    //retain existing TIS fields
+    assertThat(savedView.getTcsPersonId(), is(existingDoctor.getTcsPersonId()));
   }
 
   @Test
@@ -96,7 +109,7 @@ class CdcDoctorServiceTest {
         .getFullDocument();
     cdcDoctorService.upsertEntity(newDoctor);
 
-    verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
+    verify(mapper).updateMasterDoctorView(mapper.doctorToMasterView(newDoctor), existingDoctor);
     verify(repository).save(masterDoctorViewCaptor.capture());
     assertNull(masterDoctorViewCaptor.getValue().getDesignatedBody());
   }
