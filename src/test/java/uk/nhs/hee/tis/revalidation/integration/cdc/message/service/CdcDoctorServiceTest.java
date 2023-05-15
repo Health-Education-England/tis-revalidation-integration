@@ -21,9 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -100,7 +99,7 @@ class CdcDoctorServiceTest {
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
     verify(repository).save(masterDoctorViewCaptor.capture());
 
-    assertThat(masterDoctorViewCaptor.getValue().getDesignatedBody(), isNull());
+    assertNull(masterDoctorViewCaptor.getValue().getDesignatedBody());
   }
 
   @Test
