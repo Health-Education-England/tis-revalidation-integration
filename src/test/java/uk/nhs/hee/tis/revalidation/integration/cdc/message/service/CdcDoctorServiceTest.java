@@ -59,7 +59,7 @@ class CdcDoctorServiceTest {
   MasterDoctorViewMapper mapper;
 
   @Captor
-  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = new ArgumentCaptor<MasterDoctorView>();
+  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
   private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
@@ -98,7 +98,6 @@ class CdcDoctorServiceTest {
 
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
     verify(repository).save(masterDoctorViewCaptor.capture());
-
     assertNull(masterDoctorViewCaptor.getValue().getDesignatedBody());
   }
 
