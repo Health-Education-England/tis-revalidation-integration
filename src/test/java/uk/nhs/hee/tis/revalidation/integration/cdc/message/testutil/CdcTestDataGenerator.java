@@ -71,6 +71,20 @@ public class CdcTestDataGenerator {
       .existsInGmc(EXISTS_IN_GMC_VAL)
       .build();
 
+  private static DoctorsForDB doctorsForDBNullDbc = DoctorsForDB.builder()
+      .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+      .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
+      .doctorFirstName(DOCTOR_LAST_NAME_VAL)
+      .submissionDate(LocalDate.now())
+      .dateAdded(LocalDate.now())
+      .underNotice(UNDER_NOTICE_VAL)
+      .sanction(SANCTION_VAL)
+      .doctorStatus(DOCTOR_STATUS_VAL)
+      .lastUpdatedDate(LocalDate.now())
+      .admin(ADMIN_VAL)
+      .existsInGmc(EXISTS_IN_GMC_VAL)
+      .build();
+
   private static Recommendation recommendation = Recommendation.builder()
       .id("1")
       .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -109,6 +123,16 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorInsertCdcDocumentDto() {
     return new CdcDocumentDto<DoctorsForDB>(OperationType.INSERT.getValue(), doctorsForDB);
   }
+
+  /**
+   * Get a test instance of an insert DoctorsForDb CdcDocumentDto with a null designated body code.
+   *
+   * @return CdcDocumentDto CdcDoctor test instance
+   */
+  public static CdcDocumentDto<DoctorsForDB> getCdcDoctorNullDbcInsertCdcDocumentDto() {
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.INSERT.getValue(), doctorsForDBNullDbc);
+  }
+
 
   /**
    * Get a test instance of an replace DoctorsForDb CdcDocumentDto.

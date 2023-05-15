@@ -21,7 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,8 @@ import java.util.Collections;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -55,6 +59,9 @@ class CdcDoctorServiceTest {
   @Mock
   MasterDoctorViewMapper mapper;
 
+  @Captor
+  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
+
   private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
   @Test
@@ -79,6 +86,21 @@ class CdcDoctorServiceTest {
 
     verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
     verify(repository).save(any());
+  }
+
+  @Test
+  void shouldSetDesignatedBodyCodeToNull() {
+    var existingDoctor = CdcTestDataGenerator.getTestMasterDoctorView();
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(existingDoctor));
+
+    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctorNullDbcInsertCdcDocumentDto()
+        .getFullDocument();
+    cdcDoctorService.upsertEntity(newDoctor);
+
+    verify(mapper).updateMasterDoctorView(existingDoctor, mapper.doctorToMasterView(newDoctor));
+    verify(repository).save(masterDoctorViewCaptor.capture());
+
+    assertThat(masterDoctorViewCaptor.getValue().getDesignatedBody(), isNull());
   }
 
   @Test

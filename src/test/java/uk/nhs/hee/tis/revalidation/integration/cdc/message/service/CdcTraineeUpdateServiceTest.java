@@ -124,7 +124,7 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedEntity.getGmcReferenceNumber(), is(masterDoctorView.getGmcReferenceNumber()));
     assertThat(savedEntity.getTisStatus(), is(masterDoctorView.getTisStatus()));
     assertThat(savedEntity.getAdmin(), is(masterDoctorView.getAdmin()));
-
+    assertThat(savedEntity.getDesignatedBody(), is(masterDoctorView.getDesignatedBody()));
   }
 
   @Test
