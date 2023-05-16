@@ -233,7 +233,7 @@ public class CdcTestDataGenerator {
   /**
    * Get a test instance of an insert DoctorsForDb.
    *
-   * @return CdcDocumentDto CdcDoctor test instance
+   * @return DoctorsForDB test instance
    */
   public static DoctorsForDB getCdcDoctor() {
     return doctorsForDB;
@@ -242,7 +242,7 @@ public class CdcTestDataGenerator {
   /**
    * Get a test instance of a DoctorsForDb Object with a null designated body code.
    *
-   * @return DoctorsForDB doctorsForDBNullDbc test instance
+   * @return DoctorsForDB null DBC test instance
    */
   public static DoctorsForDB getCdcDoctorNullDbc() {
     return doctorsForDBNullDbc;
