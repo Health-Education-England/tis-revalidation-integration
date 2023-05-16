@@ -133,8 +133,6 @@ public class CdcTestDataGenerator {
     return new CdcDocumentDto<DoctorsForDB>(OperationType.REPLACE.getValue(), doctorsForDB);
   }
 
-
-
   /**
    * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
    *

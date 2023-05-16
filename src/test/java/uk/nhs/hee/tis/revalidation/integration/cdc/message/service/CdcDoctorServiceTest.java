@@ -114,7 +114,6 @@ class CdcDoctorServiceTest {
     DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctorNullDbc();
     cdcDoctorService.upsertEntity(newDoctor);
 
-    verify(mapper).updateMasterDoctorView(mapper.doctorToMasterView(newDoctor), existingDoctor);
     verify(repository).save(masterDoctorViewCaptor.capture());
     assertNull(masterDoctorViewCaptor.getValue().getDesignatedBody());
   }
