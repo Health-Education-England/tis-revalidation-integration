@@ -125,16 +125,6 @@ public class CdcTestDataGenerator {
   }
 
   /**
-   * Get a test instance of an insert DoctorsForDb CdcDocumentDto with a null designated body code.
-   *
-   * @return CdcDocumentDto CdcDoctor test instance
-   */
-  public static CdcDocumentDto<DoctorsForDB> getCdcDoctorNullDbcInsertCdcDocumentDto() {
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.INSERT.getValue(), doctorsForDBNullDbc);
-  }
-
-
-  /**
    * Get a test instance of an replace DoctorsForDb CdcDocumentDto.
    *
    * @return CdcDocumentDto CdcDoctor test instance
@@ -142,6 +132,8 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorReplaceCdcDocumentDto() {
     return new CdcDocumentDto<DoctorsForDB>(OperationType.REPLACE.getValue(), doctorsForDB);
   }
+
+
 
   /**
    * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
@@ -238,5 +230,23 @@ public class CdcTestDataGenerator {
         .programmeMembershipEndDate(LocalDate.now().plusYears(3L).plusMonths(3))
         .curriculumEndDate(LocalDate.now().plusYears(3L))
         .build();
+  }
+
+  /**
+   * Get a test instance of an insert DoctorsForDb.
+   *
+   * @return CdcDocumentDto CdcDoctor test instance
+   */
+  public static DoctorsForDB getCdcDoctor() {
+    return doctorsForDB;
+  }
+
+  /**
+   * Get a test instance of a DoctorsForDb Object with a null designated body code.
+   *
+   * @return DoctorsForDB doctorsForDBNullDbc test instance
+   */
+  public static DoctorsForDB getCdcDoctorNullDbc() {
+    return doctorsForDBNullDbc;
   }
 }
