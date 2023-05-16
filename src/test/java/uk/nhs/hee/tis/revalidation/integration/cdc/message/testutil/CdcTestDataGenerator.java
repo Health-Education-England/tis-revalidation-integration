@@ -59,7 +59,7 @@ public class CdcTestDataGenerator {
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
       .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
-      .doctorFirstName(DOCTOR_LAST_NAME_VAL)
+      .doctorLastName(DOCTOR_LAST_NAME_VAL)
       .submissionDate(LocalDate.now())
       .dateAdded(LocalDate.now())
       .underNotice(UNDER_NOTICE_VAL)
@@ -67,6 +67,20 @@ public class CdcTestDataGenerator {
       .doctorStatus(DOCTOR_STATUS_VAL)
       .lastUpdatedDate(LocalDate.now())
       .designatedBodyCode(DESIGNATED_BODY_CODE_VAL)
+      .admin(ADMIN_VAL)
+      .existsInGmc(EXISTS_IN_GMC_VAL)
+      .build();
+
+  private static DoctorsForDB doctorsForDBNullDbc = DoctorsForDB.builder()
+      .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+      .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
+      .doctorLastName(DOCTOR_LAST_NAME_VAL)
+      .submissionDate(LocalDate.now())
+      .dateAdded(LocalDate.now())
+      .underNotice(UNDER_NOTICE_VAL)
+      .sanction(SANCTION_VAL)
+      .doctorStatus(DOCTOR_STATUS_VAL)
+      .lastUpdatedDate(LocalDate.now())
       .admin(ADMIN_VAL)
       .existsInGmc(EXISTS_IN_GMC_VAL)
       .build();
@@ -214,5 +228,23 @@ public class CdcTestDataGenerator {
         .programmeMembershipEndDate(LocalDate.now().plusYears(3L).plusMonths(3))
         .curriculumEndDate(LocalDate.now().plusYears(3L))
         .build();
+  }
+
+  /**
+   * Get a test instance of an insert DoctorsForDb.
+   *
+   * @return DoctorsForDB test instance
+   */
+  public static DoctorsForDB getCdcDoctor() {
+    return doctorsForDB;
+  }
+
+  /**
+   * Get a test instance of a DoctorsForDb Object with a null designated body code.
+   *
+   * @return DoctorsForDB null DBC test instance
+   */
+  public static DoctorsForDB getCdcDoctorNullDbc() {
+    return doctorsForDBNullDbc;
   }
 }

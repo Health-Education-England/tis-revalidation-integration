@@ -60,6 +60,7 @@ public class MasterDoctorView {
   private LocalDate submissionDate;
   private String programmeName;
   private String membershipType;
+  @Nullable
   private String designatedBody;
   private String gmcStatus;
   private RecommendationStatus tisStatus;
@@ -69,6 +70,7 @@ public class MasterDoctorView {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate lastUpdatedDate;
   private UnderNotice underNotice;
+  @Nullable
   private String tcsDesignatedBody;
   private String programmeOwner;
   @Nullable
