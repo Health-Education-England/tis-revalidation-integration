@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.sync.repository;
+package uk.nhs.hee.tis.revalidation.integration.repository;
 
 import java.util.List;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;

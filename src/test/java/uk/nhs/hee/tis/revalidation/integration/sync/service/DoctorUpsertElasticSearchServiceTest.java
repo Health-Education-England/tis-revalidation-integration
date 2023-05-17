@@ -44,8 +44,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +54,7 @@ class DoctorUpsertElasticSearchServiceTest {
   @Mock
   ElasticsearchOperations elasticsearchOperations;
   @Mock
-  private MasterDoctorElasticSearchRepository repository;
+  private MasterDoctorElasticsearchService masterDoctorElasticsearchService;
   @Mock
   private MasterDoctorViewMapper mapper;
   @Mock
@@ -71,7 +71,7 @@ class DoctorUpsertElasticSearchServiceTest {
   @BeforeEach
   void setUp() {
     service = new DoctorUpsertElasticSearchService(
-        repository, mapper, elasticsearchOperations, elasticsearchIndexHelper);
+        masterDoctorElasticsearchService, mapper, elasticsearchOperations, elasticsearchIndexHelper);
     currentDoctorView = MasterDoctorView.builder()
         .id("1a2b3c")
         .tcsPersonId(1001L)
@@ -128,14 +128,14 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setGmcReferenceNumber("56789");
 
     // find es index by GmcReferenceNumber and TcsPersonId will return and existing record
-    when(repository.findByGmcReferenceNumberAndTcsPersonId(dataToSave.getGmcReferenceNumber(),
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumberAndTcsPersonId(dataToSave.getGmcReferenceNumber(),
         dataToSave.getTcsPersonId())).thenReturn(recordsAlreadyInEs);
     when(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)).thenReturn(mappedView);
 
     service.populateMasterIndex(dataToSave);
 
     // should update index with mappedView
-    verify(repository).save(mappedView);
+    verify(masterDoctorElasticsearchService).save(mappedView);
   }
 
   @Test
@@ -144,14 +144,14 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setGmcReferenceNumber("56789");
 
     // find es index by GmcReferenceNumber will return and existing record
-    when(repository.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
         .thenReturn(recordsAlreadyInEs);
     when(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)).thenReturn(mappedView);
 
     service.populateMasterIndex(dataToSave);
 
     // should update index with mappedView
-    verify(repository).save(mappedView);
+    verify(masterDoctorElasticsearchService).save(mappedView);
   }
 
   @Test
@@ -160,13 +160,13 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setTcsPersonId(1001L);
 
     // find es index by TcsPersonId will return and existing record
-    when(repository.findByTcsPersonId(dataToSave.getTcsPersonId())).thenReturn(recordsAlreadyInEs);
+    when(masterDoctorElasticsearchService.findByTisPersonId(dataToSave.getTcsPersonId())).thenReturn(recordsAlreadyInEs);
     when(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)).thenReturn(mappedView);
 
     service.populateMasterIndex(dataToSave);
 
     // should update index with mappedView
-    verify(repository).save(mappedView);
+    verify(masterDoctorElasticsearchService).save(mappedView);
   }
 
   @Test
@@ -175,13 +175,13 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setGmcReferenceNumber("12345");
 
     // find es index by GmcReferenceNumber don't return any existing record
-    when(repository.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
         .thenReturn(Collections.emptyList());
 
     service.populateMasterIndex(dataToSave);
 
     // should save index with dataToSave
-    verify(repository).save(dataToSave);
+    verify(masterDoctorElasticsearchService).save(dataToSave);
   }
 
   @Test

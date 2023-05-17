@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
@@ -43,9 +43,9 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   /**
    * Service responsible for updating the Trainee composite fields used for searching.
    */
-  protected CdcTraineeUpdateService(MasterDoctorElasticSearchRepository repository,
+  protected CdcTraineeUpdateService(MasterDoctorElasticsearchService service,
       CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
-    super(repository, cdcMessagePublisher);
+    super(service, cdcMessagePublisher);
     this.mapper = mapper;
   }
 
@@ -56,16 +56,16 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    */
   @Override
   public void upsertEntity(ConnectionInfoDto receivedDto) {
-    final var repository = getRepository();
+    final var service = getService();
     final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
     log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
     final var existingView =
         (isUnreliableGmcNumber.test(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
-            : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
-            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
+            : service.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
+            .orElse(service.findByTisPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
                 .orElse(new MasterDoctorView()));
 
-    final var updatedView = repository
+    final var updatedView = service
         .save(mapper.updateMasterDoctorView(receivedDto, existingView));
     publishUpdate(updatedView);
   }

@@ -49,7 +49,7 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataG
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +74,7 @@ class CdcTraineeUpdateServiceTest {
   @InjectMocks
   private CdcTraineeUpdateService cdcTraineeUpdateService;
   @Mock
-  private MasterDoctorElasticSearchRepository repository;
+  private MasterDoctorElasticsearchService masterDoctorElasticsearchService;
   @Mock
   private CdcMessagePublisher publisher;
   @Spy
@@ -107,13 +107,13 @@ class CdcTraineeUpdateServiceTest {
 
   @Test
   void shouldUpsertNewFields() {
-    when(repository.findByGmcReferenceNumber(gmcRefereneNumber))
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(gmcRefereneNumber))
         .thenReturn(List.of(masterDoctorView));
     traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
 
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
-    verify(repository).save(masterDoctorViewCaptor.capture());
+    verify(masterDoctorElasticsearchService).save(masterDoctorViewCaptor.capture());
 
     //new fields
     final var savedEntity = masterDoctorViewCaptor.getValue();
@@ -131,10 +131,11 @@ class CdcTraineeUpdateServiceTest {
   void shouldUpsertTraineeInfoIfGmcNumberNull() {
     final var masterDoctorViewNullGmc = CdcTestDataGenerator.getTestMasterDoctorView();
     masterDoctorViewNullGmc.setGmcReferenceNumber(null);
-    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorViewNullGmc));
+    when(masterDoctorElasticsearchService.findByTisPersonId(tcsPersonId))
+        .thenReturn(List.of(masterDoctorViewNullGmc));
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
-    verify(repository).save(masterDoctorViewCaptor.capture());
+    verify(masterDoctorElasticsearchService).save(masterDoctorViewCaptor.capture());
 
     //new fields
     final var savedEntity = masterDoctorViewCaptor.getValue();
@@ -148,22 +149,24 @@ class CdcTraineeUpdateServiceTest {
   @ValueSource(strings = {"Unknown", "UNKNOWN", "unknown", " "})
   void shouldFindExistingByTisIdIfUnknownGmc(String unknown) {
     traineeUpdate.setGmcReferenceNumber(unknown);
-    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView));
+    when(masterDoctorElasticsearchService.findByTisPersonId(tcsPersonId))
+        .thenReturn(List.of(masterDoctorView));
 
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
-    verify(repository, never()).findByGmcReferenceNumber(any());
+    verify(masterDoctorElasticsearchService, never()).findByGmcReferenceNumber(any());
   }
 
   @Test
   void shouldInsertTraineeInfoIfNoMatch() {
     final var masterDoctorViewNullGmc = CdcTestDataGenerator.getTestMasterDoctorView();
     masterDoctorViewNullGmc.setGmcReferenceNumber(null);
-    when(repository.findByTcsPersonId(any())).thenReturn(Collections.emptyList());
+    when(masterDoctorElasticsearchService.findByTisPersonId(any()))
+        .thenReturn(Collections.emptyList());
 
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
-    verify(repository).save(masterDoctorViewCaptor.capture());
+    verify(masterDoctorElasticsearchService).save(masterDoctorViewCaptor.capture());
 
     //new fields
     final var savedMasterDoctorView = masterDoctorViewCaptor.getValue();
@@ -176,10 +179,10 @@ class CdcTraineeUpdateServiceTest {
   void shouldPublishUpdateForGmcNumber() {
     MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
     traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
-    when(repository.findByGmcReferenceNumber(gmcRefereneNumber))
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(gmcRefereneNumber))
         .thenReturn(List.of(masterDoctorView, view2));
     MasterDoctorView updatedView = new MasterDoctorView();
-    when(repository.save(any())).thenReturn(updatedView);
+    when(masterDoctorElasticsearchService.save(any())).thenReturn(updatedView);
 
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
@@ -189,9 +192,10 @@ class CdcTraineeUpdateServiceTest {
   @Test
   void shouldPublishUpdateForTcsId() {
     MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView, view2));
+    when(masterDoctorElasticsearchService.findByTisPersonId(tcsPersonId))
+        .thenReturn(List.of(masterDoctorView, view2));
     MasterDoctorView updatedView = new MasterDoctorView();
-    when(repository.save(any())).thenReturn(updatedView);
+    when(masterDoctorElasticsearchService.save(any())).thenReturn(updatedView);
 
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 

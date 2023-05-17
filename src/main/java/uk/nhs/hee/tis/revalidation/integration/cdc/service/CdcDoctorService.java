@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 
 /**
  * Service responsible for updating the repository of composite Doctor records used for searching.
@@ -40,12 +40,12 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
   /**
    * Create a service.
    *
-   * @param repository The ElasticSearch repository with the index managed by the service
+   * @param service    The ElasticSearch service used to access the index
    * @param mapper     A mapper for converting to/from the persisted composite view
    */
-  public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
+  public CdcDoctorService(MasterDoctorElasticsearchService service,
       CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
-    super(repository, cdcMessagePublisher);
+    super(service, cdcMessagePublisher);
     this.mapper = mapper;
   }
 
@@ -57,20 +57,16 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
   @Override
   public void upsertEntity(DoctorsForDB entity) {
 
-    final var repository = getRepository();
-    final var existingDoctors = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
+    final var service = getService();
+    final var existingDoctors = service.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     try {
       if (existingDoctors.isEmpty()) {
-        var newView = repository.save(mapper.doctorToMasterView(entity));
+        var newView = service.save(mapper.doctorToMasterView(entity));
         publishUpdate(newView);
       } else {
-        if (existingDoctors.size() > 1) {
-          log.error("Multiple doctors assigned to the same GMC number: {}",
-              entity.getGmcReferenceNumber());
-        }
         var updatedDoctor = mapper
             .updateMasterDoctorView(mapper.doctorToMasterView(entity), existingDoctors.get(0));
-        var updatedView = repository.save(updatedDoctor);
+        var updatedView = service.save(updatedDoctor);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {

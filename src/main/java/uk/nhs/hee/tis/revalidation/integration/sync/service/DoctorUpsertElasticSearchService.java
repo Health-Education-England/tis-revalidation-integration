@@ -30,8 +30,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
@@ -40,16 +40,16 @@ public class DoctorUpsertElasticSearchService {
   protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
   protected static final String ES_INDEX = "masterdoctorindex";
   protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
-  private final MasterDoctorElasticSearchRepository repository;
+  private final MasterDoctorElasticsearchService service;
   private final MasterDoctorViewMapper mapper;
   private final ElasticsearchOperations elasticSearchOperations;
   private final ElasticsearchIndexHelper elasticsearchIndexHelper;
 
-  public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
+  public DoctorUpsertElasticSearchService(MasterDoctorElasticsearchService service,
                                           MasterDoctorViewMapper mapper,
                                           ElasticsearchOperations elasticSearchOperations,
                                           ElasticsearchIndexHelper elasticsearchIndexHelper) {
-    this.repository = repository;
+    this.service = service;
     this.mapper = mapper;
     this.elasticSearchOperations = elasticSearchOperations;
     this.elasticsearchIndexHelper = elasticsearchIndexHelper;
@@ -76,7 +76,7 @@ public class DoctorUpsertElasticSearchService {
 
     if (dataToSave.getGmcReferenceNumber() != null && dataToSave.getTcsPersonId() != null) {
       try {
-        result = repository.findByGmcReferenceNumberAndTcsPersonId(
+        result = service.findByGmcReferenceNumberAndTcsPersonId(
             dataToSave.getGmcReferenceNumber(),
             dataToSave.getTcsPersonId());
       } catch (Exception ex) {
@@ -87,7 +87,7 @@ public class DoctorUpsertElasticSearchService {
     } else if (dataToSave.getGmcReferenceNumber() != null
         && dataToSave.getTcsPersonId() == null) {
       try {
-        result = repository.findByGmcReferenceNumber(
+        result = service.findByGmcReferenceNumber(
             dataToSave.getGmcReferenceNumber());
       } catch (Exception ex) {
         log.info("Exception in `findByGmcReferenceNumber` (GmcId: {}): {}",
@@ -96,7 +96,7 @@ public class DoctorUpsertElasticSearchService {
     } else if (dataToSave.getGmcReferenceNumber() == null
         && dataToSave.getTcsPersonId() != null) {
       try {
-        result = repository.findByTcsPersonId(
+        result = service.findByTisPersonId(
             dataToSave.getTcsPersonId());
       } catch (Exception ex) {
         log.info("Exception in `findByTcsPersonId` (PersonId: {}): {}",
@@ -110,7 +110,7 @@ public class DoctorUpsertElasticSearchService {
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
     try {
-      existingRecords.forEach(currentDoctorView -> repository
+      existingRecords.forEach(currentDoctorView -> service
           .save(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)));
     } catch (Exception ex) {
       log.info("Exception in `updateMasterDoctorViews` (GmcId: {}; PersonId: {}): {}",
@@ -120,7 +120,7 @@ public class DoctorUpsertElasticSearchService {
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
     try {
-      repository.save(dataToSave);
+      service.save(dataToSave);
     } catch (Exception ex) {
       log.info("Exception in `addMasterDoctorViews` (GmcId: {}; PersonId: {}): {}",
           dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);

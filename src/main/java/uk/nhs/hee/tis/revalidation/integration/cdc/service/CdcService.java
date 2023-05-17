@@ -23,26 +23,26 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
 public abstract class CdcService<T> {
 
-  private MasterDoctorElasticSearchRepository repository;
+  private MasterDoctorElasticsearchService service;
 
   private CdcMessagePublisher cdcMessagePublisher;
 
   protected CdcService(
-      MasterDoctorElasticSearchRepository repository,
+      MasterDoctorElasticsearchService service,
       CdcMessagePublisher cdcMessagePublisher
   ) {
-    this.repository = repository;
+    this.service = service;
     this.cdcMessagePublisher = cdcMessagePublisher;
   }
 
-  protected MasterDoctorElasticSearchRepository getRepository() {
-    return this.repository;
+  protected MasterDoctorElasticsearchService getService() {
+    return this.service;
   }
 
   public abstract void upsertEntity(T entity);

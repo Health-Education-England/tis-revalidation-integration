@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.service.MasterDoctorElasticsearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Slf4j
@@ -37,10 +37,10 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    * Service responsible for updating the Recommendation composite fields used for searching.
    */
   public CdcRecommendationService(
-      MasterDoctorElasticSearchRepository repository,
+      MasterDoctorElasticsearchService service,
       CdcMessagePublisher cdcMessagePublisher
   ) {
-    super(repository, cdcMessagePublisher);
+    super(service, cdcMessagePublisher);
   }
 
   /**
@@ -51,9 +51,9 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
   @Override
   public void upsertEntity(Recommendation entity) {
     String gmcId = entity.getGmcNumber();
-    final var repository = getRepository();
+    final var service = getService();
     try {
-      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+      List<MasterDoctorView> masterDoctorViewList = service.findByGmcReferenceNumber(gmcId);
       if (!masterDoctorViewList.isEmpty()) {
         if (masterDoctorViewList.size() > 1) {
           log.error("Multiple doctors assigned to the same GMC number!");
@@ -63,7 +63,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         if (entity.getOutcome() != null) {
           masterDoctorView.setGmcStatus(entity.getOutcome().getOutcome());
         }
-        final var updatedView = repository.save(masterDoctorView);
+        final var updatedView = service.save(masterDoctorView);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
