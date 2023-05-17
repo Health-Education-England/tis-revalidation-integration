@@ -26,7 +26,7 @@ public class MasterDoctorElasticsearchService {
             : repository.findByGmcReferenceNumber(gmcReferenceNumber);
     if(result.size() > 1) {
       log.error("Multiple doctors assigned to the same GMC number: {}",
-          gmcReferenceNumber); status
+          gmcReferenceNumber);
     }
     return result;
   }
