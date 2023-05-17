@@ -50,6 +50,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class DoctorUpsertElasticSearchServiceTest {
+
   private final List<MasterDoctorView> recordsAlreadyInEs = new ArrayList<>();
   @Mock
   ElasticsearchOperations elasticsearchOperations;
@@ -71,7 +72,8 @@ class DoctorUpsertElasticSearchServiceTest {
   @BeforeEach
   void setUp() {
     service = new DoctorUpsertElasticSearchService(
-        masterDoctorElasticsearchService, mapper, elasticsearchOperations, elasticsearchIndexHelper);
+        masterDoctorElasticsearchService, mapper, elasticsearchOperations,
+        elasticsearchIndexHelper);
     currentDoctorView = MasterDoctorView.builder()
         .id("1a2b3c")
         .tcsPersonId(1001L)
@@ -108,7 +110,8 @@ class DoctorUpsertElasticSearchServiceTest {
     var actual = assertThrows(IndexNotFoundException.class, () -> service.clearMasterDoctorIndex());
 
     assertEquals(expectedException, actual);
-    verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());
+    verify(elasticsearchOperations, times(3))
+        .indexOps((IndexCoordinates) any());
     verify(indexOperations).create();
   }
 
@@ -117,8 +120,10 @@ class DoctorUpsertElasticSearchServiceTest {
     when(elasticsearchOperations.indexOps(indexCaptor.capture())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
 
-    verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());
-    indexCaptor.getAllValues().forEach(i -> assertEquals("masterdoctorindex", i.getIndexName()));
+    verify(elasticsearchOperations, times(3))
+        .indexOps((IndexCoordinates) any());
+    indexCaptor.getAllValues()
+        .forEach(i -> assertEquals("masterdoctorindex", i.getIndexName()));
   }
 
   @Test
@@ -128,7 +133,8 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setGmcReferenceNumber("56789");
 
     // find es index by GmcReferenceNumber and TcsPersonId will return and existing record
-    when(masterDoctorElasticsearchService.findByGmcReferenceNumberAndTcsPersonId(dataToSave.getGmcReferenceNumber(),
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumberAndTcsPersonId(
+        dataToSave.getGmcReferenceNumber(),
         dataToSave.getTcsPersonId())).thenReturn(recordsAlreadyInEs);
     when(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)).thenReturn(mappedView);
 
@@ -144,7 +150,8 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setGmcReferenceNumber("56789");
 
     // find es index by GmcReferenceNumber will return and existing record
-    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(
+        dataToSave.getGmcReferenceNumber()))
         .thenReturn(recordsAlreadyInEs);
     when(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)).thenReturn(mappedView);
 
@@ -160,7 +167,9 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setTcsPersonId(1001L);
 
     // find es index by TcsPersonId will return and existing record
-    when(masterDoctorElasticsearchService.findByTisPersonId(dataToSave.getTcsPersonId())).thenReturn(recordsAlreadyInEs);
+    when(
+        masterDoctorElasticsearchService.findByTisPersonId(dataToSave.getTcsPersonId())).thenReturn(
+        recordsAlreadyInEs);
     when(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)).thenReturn(mappedView);
 
     service.populateMasterIndex(dataToSave);
@@ -175,7 +184,8 @@ class DoctorUpsertElasticSearchServiceTest {
     dataToSave.setGmcReferenceNumber("12345");
 
     // find es index by GmcReferenceNumber don't return any existing record
-    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
+    when(masterDoctorElasticsearchService.findByGmcReferenceNumber(
+        dataToSave.getGmcReferenceNumber()))
         .thenReturn(Collections.emptyList());
 
     service.populateMasterIndex(dataToSave);
