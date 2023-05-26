@@ -43,7 +43,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 @AllArgsConstructor
 @Builder
 @Data
-@Document(indexName = "masterdoctorindex")
+@Document(indexName = "masterdoctorindex.json")
 public class MasterDoctorView {
 
   @Id
@@ -52,6 +52,8 @@ public class MasterDoctorView {
   private String id;
   private Long tcsPersonId;
   private String gmcReferenceNumber;
+
+  private String tisGmcReferenceNumber;
   private String doctorFirstName;
   private String doctorLastName;
   @Nullable

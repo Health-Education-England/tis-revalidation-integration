@@ -60,7 +60,7 @@ public class GmcDoctorMessageListener {
       log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
       try {
-        elasticsearchIndexService.resync("masterdoctorindex", "recommendationindex");
+        elasticsearchIndexService.resync("masterdoctorindex.json", "recommendationindex");
       } catch (Exception e) {
         log.error(e.getMessage(), e);
       }

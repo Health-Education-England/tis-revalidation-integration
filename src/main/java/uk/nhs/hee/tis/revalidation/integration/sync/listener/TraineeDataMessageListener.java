@@ -72,7 +72,9 @@ public class TraineeDataMessageListener {
   private MasterDoctorView getMasterDoctorView(ConnectionInfoDto connectionInfo) {
     return MasterDoctorView.builder()
         .tcsPersonId(connectionInfo.getTcsPersonId())
+        //Note, this number will be used by GmcDoctorMessageListener to overwrite GMC data
         .gmcReferenceNumber(connectionInfo.getGmcReferenceNumber())
+        .tisGmcReferenceNumber(connectionInfo.getGmcReferenceNumber())
         .doctorFirstName(connectionInfo.getDoctorFirstName())
         .doctorLastName(connectionInfo.getDoctorLastName())
         .programmeName(connectionInfo.getProgrammeName())

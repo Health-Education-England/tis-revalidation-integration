@@ -118,7 +118,7 @@ class DoctorUpsertElasticSearchServiceTest {
     service.clearMasterDoctorIndex();
 
     verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());
-    indexCaptor.getAllValues().forEach(i -> assertEquals("masterdoctorindex", i.getIndexName()));
+    indexCaptor.getAllValues().forEach(i -> assertEquals("masterdoctorindex.json", i.getIndexName()));
   }
 
   @Test

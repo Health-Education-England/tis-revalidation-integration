@@ -102,7 +102,7 @@ class GmcDoctorMessageListenerTest {
     message.setSyncEnd(true);
 
     doThrow(Exception.class).when(elasticsearchIndexServiceMock)
-        .resync("masterdoctorindex", "recommendationindex");
+        .resync("masterdoctorindex.json", "recommendationindex");
 
     assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(message));
   }

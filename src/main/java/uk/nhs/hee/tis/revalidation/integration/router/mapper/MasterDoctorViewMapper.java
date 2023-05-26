@@ -62,6 +62,8 @@ public interface MasterDoctorViewMapper {
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   @Mapping(source = "tcsDesignatedBody", target = "tcsDesignatedBody",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+  @Mapping(source = "gmcReferenceNumber", target = "tisGmcReferenceNumber",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   MasterDoctorView updateMasterDoctorView(ConnectionInfoDto source,
       @MappingTarget MasterDoctorView target);
 }
