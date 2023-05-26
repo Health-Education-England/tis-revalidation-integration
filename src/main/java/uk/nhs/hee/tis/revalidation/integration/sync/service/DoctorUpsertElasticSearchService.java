@@ -24,6 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.util.iterable.Iterables;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -130,9 +132,10 @@ public class DoctorUpsertElasticSearchService {
   /**
    * Clear all records in masterdoctorindex by deleting and recreating the index.
    */
-  public void clearMasterDoctorIndex() {
+  public void clearMasterDoctorIndex() throws IOException {
+    MappingMetadata mapping = elasticsearchIndexHelper.getMapping(ES_INDEX);
     deleteMasterDoctorIndex();
-    createMasterDoctorIndex();
+    createMasterDoctorIndex(mapping);
     addAliasToMasterDoctorIndex();
   }
 
@@ -145,11 +148,9 @@ public class DoctorUpsertElasticSearchService {
     }
   }
 
-  private void createMasterDoctorIndex() {
+  private void createMasterDoctorIndex(MappingMetadata mapping) throws IOException {
     log.info("creating and updating mappings");
-    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).create();
-    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX))
-        .putMapping(MasterDoctorView.class);
+    elasticsearchIndexHelper.createIndex(ES_INDEX, mapping);
   }
 
   private void addAliasToMasterDoctorIndex() {
