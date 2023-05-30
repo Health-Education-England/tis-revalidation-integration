@@ -50,14 +50,19 @@ public class MasterDoctorView {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private String id;
+  @Field(type= FieldType.Text, fielddata = true)
   private Long tcsPersonId;
+  @Field(type= FieldType.Text, fielddata = true)
   private String gmcReferenceNumber;
+  @Field(type= FieldType.Text, fielddata = true)
   private String doctorFirstName;
+  @Field(type= FieldType.Text, fielddata = true)
   private String doctorLastName;
   @Nullable
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate submissionDate;
+  @Field(type= FieldType.Text, fielddata = true)
   private String programmeName;
   private String membershipType;
   @Nullable
