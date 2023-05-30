@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.message;
 
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Handler;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -46,7 +47,7 @@ public class SyncStartHandler {
   DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
   @Handler
-  public void startTraineeSync() {
+  public void startTraineeSync() throws IOException {
     log.info("Elastic Search update sync start.");
     doctorUpsertElasticSearchService.clearMasterDoctorIndex();
     rabbitTemplate.convertAndSend(revalExchange, revalSyncStartRoutingKey, "syncStart");
