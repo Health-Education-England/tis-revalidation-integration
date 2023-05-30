@@ -101,7 +101,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldIgnoreNotFoundOnDelete(){
+  void shouldIgnoreNotFoundOnDelete() {
     IndexNotFoundException expectedException = new IndexNotFoundException("expected");
     when(elasticsearchOperations.indexOps((IndexCoordinates) any()))
         .thenThrow(new IndexNotFoundException("Index"))
