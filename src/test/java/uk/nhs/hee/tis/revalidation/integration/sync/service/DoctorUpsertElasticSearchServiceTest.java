@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,7 +32,9 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,26 +101,26 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldIgnoreNotFoundOnDeleteButThrowIndexNotFoundAfterCreate() {
+  void shouldIgnoreNotFoundOnDelete(){
     IndexNotFoundException expectedException = new IndexNotFoundException("expected");
     when(elasticsearchOperations.indexOps((IndexCoordinates) any()))
         .thenThrow(new IndexNotFoundException("Index"))
         .thenReturn(indexOperations)
         .thenThrow(expectedException);
 
-    var actual = assertThrows(IndexNotFoundException.class, () -> service.clearMasterDoctorIndex());
+    assertDoesNotThrow(() -> service.clearMasterDoctorIndex());
 
-    assertEquals(expectedException, actual);
-    verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());
-    verify(indexOperations).create();
+    verify(elasticsearchOperations, times(1)).indexOps((IndexCoordinates) any());
   }
 
   @Test
   void shouldDeleteAndAddIndexWithMappings() throws IOException {
     when(elasticsearchOperations.indexOps(indexCaptor.capture())).thenReturn(indexOperations);
+    when(elasticsearchIndexHelper.getMapping("masterdoctorindex"))
+        .thenReturn(new MappingMetadata("mappings", new HashMap<>()));
     service.clearMasterDoctorIndex();
 
-    verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());
+    verify(elasticsearchOperations, times(1)).indexOps((IndexCoordinates) any());
     indexCaptor.getAllValues().forEach(i -> assertEquals("masterdoctorindex", i.getIndexName()));
   }
 
