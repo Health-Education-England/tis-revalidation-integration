@@ -113,7 +113,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldDeleteAndAddIndexWithMappings() {
+  void shouldDeleteAndAddIndexWithMappings() throws IOException {
     when(elasticsearchOperations.indexOps(indexCaptor.capture())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
 
