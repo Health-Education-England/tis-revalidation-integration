@@ -50,7 +50,6 @@ public class MasterDoctorView {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private String id;
-  @Field(type = FieldType.Text, fielddata = true)
   private Long tcsPersonId;
   @Field(type = FieldType.Text, fielddata = true)
   private String gmcReferenceNumber;
