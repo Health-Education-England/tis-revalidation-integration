@@ -24,14 +24,18 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.TraineeNotesAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.TraineeTcsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeDetailsDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
@@ -58,7 +62,13 @@ public class TraineeServiceRouter extends RouteBuilder {
   private GmcIdProcessorBean gmcIdProcessorBean;
 
   @Autowired
+  private ObjectMapper mapper;
+
+  @Autowired
   private TraineeNotesAggregationStrategy traineeNotesAggregationStrategy;
+
+  @Autowired
+  private TraineeTcsAggregationStrategy traineeTcsAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String serviceUrl;
@@ -75,28 +85,31 @@ public class TraineeServiceRouter extends RouteBuilder {
     from("direct:trainee")
         // I'm thinking of sending a request to Recommendation to check if the gmc exists in DoctorsForDB first
         // below 2 lines doesn't work, think I need to find a way to check if the countTotal in the body equals to 0
-//        .to("direct:reval-trainee-details")
-//        .choice().when(simple("${body.getCountTotal} == 0")).endChoice();
-        .to("direct:trainee-details")
-        .setHeader("gmcId").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
-        .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy);
+        .to("direct:reval-trainee-details")
+        .choice().when(exchange -> mapper.convertValue(exchange.getIn().getBody(), TraineeSummaryDto.class).getCountTotal() == 0).endChoice()
+            .when(exchange -> mapper.convertValue(exchange.getIn().getBody(), TraineeSummaryDto.class).getCountTotal() == 1)
+            .enrich("direct:trainee-details", traineeTcsAggregationStrategy)
+            .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy)
+            .endChoice();
 
     // new route for getting doctor from Reval DoctorsForDB
     from("direct:reval-trainee-details")
         .setHeader("gmcIds").simple("${header.gmcId}")
         .toD(recommendationServiceUrl + API_REVAL_TRAINEE)
-        .unmarshal().json(JsonLibrary.Jackson).log("${body}");
+        .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(serviceUrl + API_TRAINEE + "&throwExceptionOnFailure=false")
-        .choice()
-          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(200))
-            .unmarshal().json(JsonLibrary.Jackson)
-          .endChoice()
-          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(404))
-              .setBody(exchange -> TraineeDetailsDto.builder())
-          .endChoice();
+        .unmarshal().json(JsonLibrary.Jackson);
+//        .choice()
+//          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.OK))
+////            .unmarshal().json(JsonLibrary.Jackson)
+//          .endChoice()
+//          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.NOT_FOUND))
+//              .setBody(exchange -> TraineeDetailsDto.builder())
+////          .unmarshal().json(JsonLibrary.Jackson)
+//          .endChoice();
 
     from("direct:traineenotes-get")
         .toD(coreServiceUrl + API_TRAINEENOTES)
