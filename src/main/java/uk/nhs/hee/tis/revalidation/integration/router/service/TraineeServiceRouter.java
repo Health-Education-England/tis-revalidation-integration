@@ -24,12 +24,14 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.TraineeNotesAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeDetailsDto;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
@@ -46,6 +48,8 @@ public class TraineeServiceRouter extends RouteBuilder {
       "/api/trainee/notes/add?bridgeEndpoint=true";
   private static final String API_TRAINEEENOTES_EDIT =
       "/api/trainee/notes/edit?bridgeEndpoint=true";
+  private static final String API_REVAL_TRAINEE =
+      "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
 
   @Autowired
   private KeycloakBean keycloakBean;
@@ -62,17 +66,38 @@ public class TraineeServiceRouter extends RouteBuilder {
   @Value("${service.core.url}")
   private String coreServiceUrl;
 
+  @Value("${service.recommendation.url}")
+  private String recommendationServiceUrl;
+
   @Override
   public void configure() {
 
     from("direct:trainee")
+        // I'm thinking of sending a request to Recommendation to check if the gmc exists in DoctorsForDB first
+        // below 2 lines doesn't work, think I need to find a way to check if the countTotal in the body equals to 0
+//        .to("direct:reval-trainee-details")
+//        .choice().when(simple("${body.getCountTotal} == 0")).endChoice();
         .to("direct:trainee-details")
         .setHeader("gmcId").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
         .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy);
+
+    // new route for getting doctor from Reval DoctorsForDB
+    from("direct:reval-trainee-details")
+        .setHeader("gmcIds").simple("${header.gmcId}")
+        .toD(recommendationServiceUrl + API_REVAL_TRAINEE)
+        .unmarshal().json(JsonLibrary.Jackson).log("${body}");
+
     from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrl + API_TRAINEE)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + API_TRAINEE + "&throwExceptionOnFailure=false")
+        .choice()
+          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(200))
+            .unmarshal().json(JsonLibrary.Jackson)
+          .endChoice()
+          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(404))
+              .setBody(exchange -> TraineeDetailsDto.builder())
+          .endChoice();
+
     from("direct:traineenotes-get")
         .toD(coreServiceUrl + API_TRAINEENOTES)
         .unmarshal().json(JsonLibrary.Jackson);
