@@ -27,6 +27,7 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OI
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.http.common.HttpOperationFailedException;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,11 +87,16 @@ public class TraineeServiceRouter extends RouteBuilder {
         // I'm thinking of sending a request to Recommendation to check if the gmc exists in DoctorsForDB first
         // below 2 lines doesn't work, think I need to find a way to check if the countTotal in the body equals to 0
         .to("direct:reval-trainee-details")
-        .choice().when(exchange -> mapper.convertValue(exchange.getIn().getBody(), TraineeSummaryDto.class).getCountTotal() == 0).endChoice()
-            .when(exchange -> mapper.convertValue(exchange.getIn().getBody(), TraineeSummaryDto.class).getCountTotal() == 1)
-            .enrich("direct:trainee-details", traineeTcsAggregationStrategy)
-            .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy)
-            .endChoice();
+        .choice().when(exchange ->
+//            exchange -> exchange.getIn().getBody(TraineeSummaryDto.class) // type converter doesn't work
+            mapper.convertValue(exchange.getIn().getBody(), TraineeSummaryDto.class).getCountTotal()
+                == 0).process(exchange -> exchange.getIn().setBody(null)).endChoice()
+        .when(exchange ->
+            mapper.convertValue(exchange.getIn().getBody(), TraineeSummaryDto.class).getCountTotal()
+                == 1)
+        .enrich("direct:trainee-details", traineeTcsAggregationStrategy)
+        .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy)
+        .endChoice();
 
     // new route for getting doctor from Reval DoctorsForDB
     from("direct:reval-trainee-details")
@@ -100,20 +106,22 @@ public class TraineeServiceRouter extends RouteBuilder {
 
     from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .doTry()
         .toD(serviceUrl + API_TRAINEE + "&throwExceptionOnFailure=false")
-        .unmarshal().json(JsonLibrary.Jackson);
-//        .choice()
-//          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.OK))
-////            .unmarshal().json(JsonLibrary.Jackson)
-//          .endChoice()
-//          .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.NOT_FOUND))
-//              .setBody(exchange -> TraineeDetailsDto.builder())
-////          .unmarshal().json(JsonLibrary.Jackson)
-//          .endChoice();
+//        .unmarshal().json(JsonLibrary.Jackson) // unmarshal only works here
+        .doCatch(HttpOperationFailedException.class)
+        .choice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.OK))
+//        .unmarshal().json(JsonLibrary.Jackson) // unmarshal doesn't work in the choice
+        .endChoice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.NOT_FOUND))
+        .process(exchange -> exchange.getIn().setBody(TraineeDetailsDto.builder().build()))
+        .endChoice();
 
     from("direct:traineenotes-get")
         .toD(coreServiceUrl + API_TRAINEENOTES)
         .unmarshal().json(JsonLibrary.Jackson);
+
     from("direct:traineenotes-add")
         .to(coreServiceUrl + API_TRAINEEENOTES_ADD);
     from("direct:traineenotes-edit")

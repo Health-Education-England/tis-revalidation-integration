@@ -53,6 +53,7 @@ public class TraineeTcsAggregationStrategy implements AggregationStrategy {
         .convertValue(oldMessageBody, TraineeSummaryDto.class);
     final TraineeInfoDto traineeInfoDto = traineeSummeryDto.getTraineeInfo().get(0);
 
+
     final var newMessageBody = newExchange.getIn().getBody();
     final TraineeDetailsDto traineeDetailsDto = mapper.convertValue(newMessageBody, TraineeDetailsDto.class);
 
@@ -63,8 +64,8 @@ public class TraineeTcsAggregationStrategy implements AggregationStrategy {
       returnDto.setForenames(traineeInfoDto.getDoctorFirstName());
       returnDto.setSurname(traineeInfoDto.getDoctorLastName());
     }
-
-    result.getMessage().setBody(traineeSummeryDto);
+    result.getMessage().setHeaders(newExchange.getMessage().getHeaders());
+    result.getMessage().setBody(returnDto);
     return result;
   }
 }
