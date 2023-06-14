@@ -10,10 +10,9 @@ spring:
     ssl.enabled: ${RABBITMQ_USE_SSL:false}
 
 camel:
-  component:
-    servlet:
-      mapping:
-        context-path: /api/*
+  servlet:
+    mapping:
+      context-path: /api/*
 
 server:
   port: 8088
