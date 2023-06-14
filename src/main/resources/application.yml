@@ -13,6 +13,11 @@ camel:
   servlet:
     mapping:
       context-path: /api/*
+  dataformat:
+    jackson:
+      # added when upgrade Camel to 3.20.5, otherwise the object mapper can not be found.
+      # setting it to true with multiple object mappers can lead to unpredictable behaviors.
+      auto-discover-object-mapper: true
 
 server:
   port: 8088

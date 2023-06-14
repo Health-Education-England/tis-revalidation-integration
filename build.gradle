@@ -63,7 +63,6 @@ dependencies {
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
 
   //RabbitMQ
   implementation "org.springframework.boot:spring-boot-starter-amqp"
