@@ -40,12 +40,12 @@ dependencies {
     exclude group: "org.junit.vintage", module: "junit-vintage-engine"
   }
 
-  // Apache Camel starters
-  ext.camelVersion = "3.6.0"
-  implementation "org.apache.camel.springboot:camel-spring-boot-starter:$camelVersion"
-  implementation "org.apache.camel.springboot:camel-http-starter:$camelVersion"
-  implementation "org.apache.camel.springboot:camel-servlet-starter:$camelVersion"
-  implementation "org.apache.camel.springboot:camel-jackson-starter:$camelVersion"
+  // Apache Camel
+  implementation platform('org.apache.camel.springboot:camel-spring-boot-bom:3.20.5')
+  implementation "org.apache.camel.springboot:camel-spring-boot-starter"
+  implementation "org.apache.camel.springboot:camel-http-starter"
+  implementation "org.apache.camel.springboot:camel-servlet-starter"
+  implementation "org.apache.camel.springboot:camel-jackson-starter"
 
   // Lombok
   compileOnly "org.projectlombok:lombok"
