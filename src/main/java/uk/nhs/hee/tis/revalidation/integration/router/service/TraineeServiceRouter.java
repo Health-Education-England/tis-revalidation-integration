@@ -49,6 +49,8 @@ public class TraineeServiceRouter extends RouteBuilder {
       "/api/trainee/notes/add?bridgeEndpoint=true";
   private static final String API_TRAINEEENOTES_EDIT =
       "/api/trainee/notes/edit?bridgeEndpoint=true";
+  private static final String GET_DOCTORS_BY_GMC_IDS =
+      "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
   @Autowired
@@ -66,6 +68,9 @@ public class TraineeServiceRouter extends RouteBuilder {
   @Value("${service.core.url}")
   private String coreServiceUrl;
 
+  @Value("${service.recommendation.url}")
+  private String recommendationServiceUrl;
+
   @Override
   public void configure() {
 
@@ -74,17 +79,19 @@ public class TraineeServiceRouter extends RouteBuilder {
         .parallelProcessing()
         .to("direct:trainee-details")
         .to("direct:traineenotes-get")
-        .to(// gmc doctor endpoint)
+        .to("direct:gmc-doctors-by-ids");
     from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
+        .setHeader("gmcId").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
         .setHeader(AggregationKey.HEADER).constant("programme")
         .toD(serviceUrl + API_TRAINEE);
     from("direct:traineenotes-get")
         .setHeader(AggregationKey.HEADER).constant("notes")
         .toD(coreServiceUrl + API_TRAINEENOTES);
-    from(/*"direct:gmcdoctorendpoint"*/)
+    from("direct:gmc-doctors-by-ids")
         .setHeader(AggregationKey.HEADER).constant("doctor")
-        .toD(coreServiceUrl /*gmcDoctorEndpoint*/);
+        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
+        .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS);
 
     from("direct:traineenotes-add")
         .to(coreServiceUrl + API_TRAINEEENOTES_ADD);
