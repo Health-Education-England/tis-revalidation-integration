@@ -24,11 +24,14 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
+import org.apache.camel.AggregationStrategy;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.TraineeNotesAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
@@ -46,6 +49,7 @@ public class TraineeServiceRouter extends RouteBuilder {
       "/api/trainee/notes/add?bridgeEndpoint=true";
   private static final String API_TRAINEEENOTES_EDIT =
       "/api/trainee/notes/edit?bridgeEndpoint=true";
+  private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
   @Autowired
   private KeycloakBean keycloakBean;
@@ -66,16 +70,22 @@ public class TraineeServiceRouter extends RouteBuilder {
   public void configure() {
 
     from("direct:trainee")
+        .multicast(AGGREGATOR)
+        .parallelProcessing()
         .to("direct:trainee-details")
-        .setHeader("gmcId").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
-        .enrich("direct:traineenotes-get", traineeNotesAggregationStrategy);
+        .to("direct:traineenotes-get")
+        .to(// gmc doctor endpoint)
     from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(serviceUrl + API_TRAINEE)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .setHeader(AggregationKey.HEADER).constant("programme")
+        .toD(serviceUrl + API_TRAINEE);
     from("direct:traineenotes-get")
-        .toD(coreServiceUrl + API_TRAINEENOTES)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .setHeader(AggregationKey.HEADER).constant("notes")
+        .toD(coreServiceUrl + API_TRAINEENOTES);
+    from(/*"direct:gmcdoctorendpoint"*/)
+        .setHeader(AggregationKey.HEADER).constant("doctor")
+        .toD(coreServiceUrl /*gmcDoctorEndpoint*/);
+
     from("direct:traineenotes-add")
         .to(coreServiceUrl + API_TRAINEEENOTES_ADD);
     from("direct:traineenotes-edit")
