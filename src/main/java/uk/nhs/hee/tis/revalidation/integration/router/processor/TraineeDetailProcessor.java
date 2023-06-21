@@ -27,16 +27,21 @@ public class TraineeDetailProcessor implements Processor {
         TraineeDetailsDto.class);
     TraineeNotesDto traineeNotesDto = mapper.convertValue(map.get("notes"), TraineeNotesDto.class);
 
-    TraineeDetailsDto traineeDetailsDtoResult = null;
+    TraineeDetailsDto traineeDetailsDtoResult = TraineeDetailsDto.builder().build();
+
     if (traineeSummaryDto != null & traineeSummaryDto.getCountTotal() == 1) {
+      TraineeInfoDto traineeInfoDto = traineeSummaryDto.getTraineeInfo().get(0);
+      traineeDetailsDtoResult.setGmcNumber(traineeInfoDto.getGmcReferenceNumber());
+      traineeDetailsDtoResult.setSurname(traineeInfoDto.getDoctorLastName());
+      traineeDetailsDtoResult.setForenames(traineeInfoDto.getDoctorFirstName());
+
       if (traineeDetailsDto != null & traineeDetailsDto.getGmcNumber() != null) {
-        traineeDetailsDtoResult = traineeDetailsDto;
-      } else {
-        TraineeInfoDto traineeInfoDto = traineeSummaryDto.getTraineeInfo().get(0);
-        traineeDetailsDtoResult = TraineeDetailsDto.builder()
-            .gmcNumber(traineeInfoDto.getGmcReferenceNumber())
-            .forenames(traineeInfoDto.getDoctorFirstName())
-            .surname(traineeInfoDto.getDoctorLastName()).build();
+        traineeDetailsDtoResult.setCurrentGrade(traineeDetailsDto.getCurrentGrade());
+        traineeDetailsDtoResult.setProgrammeMembershipType(
+            traineeDetailsDto.getProgrammeMembershipType());
+        traineeDetailsDtoResult.setProgrammeName(traineeDetailsDto.getProgrammeName());
+        traineeDetailsDtoResult.setTisPersonId(traineeDetailsDto.getTisPersonId());
+        traineeDetailsDtoResult.setCurriculumEndDate(traineeDetailsDto.getCurriculumEndDate());
       }
       traineeDetailsDtoResult.setNotes(traineeNotesDto.getNotes());
     }
