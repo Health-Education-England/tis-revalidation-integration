@@ -27,6 +27,7 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OI
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.http.base.HttpOperationFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -34,11 +35,10 @@ import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.TraineeNotesAggregationStrategy;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeDetailsDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandlerProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.TraineeDetailProcessor;
 
 @Component
 public class TraineeServiceRouter extends RouteBuilder {
@@ -75,6 +75,12 @@ public class TraineeServiceRouter extends RouteBuilder {
   @Value("${service.recommendation.url}")
   private String recommendationServiceUrl;
 
+  @Autowired
+  private TraineeDetailProcessor traineeProcessor;
+
+  @Autowired
+  private ExceptionHandlerProcessor exceptionHandlerProcessor;
+
   @Override
   public void configure() {
 
@@ -83,28 +89,35 @@ public class TraineeServiceRouter extends RouteBuilder {
         .parallelProcessing()
         .to("direct:trainee-details")
         .to("direct:traineenotes-get")
-        .to("direct:gmc-doctors-by-ids");
+        .to("direct:gmc-doctors-by-ids")
+        .end()
+        .process(traineeProcessor);
+
     from("direct:trainee-details")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .setHeader("gmcId").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
         .setHeader(AggregationKey.HEADER).constant("programme")
+        .doTry()
         .toD(serviceUrl + API_TRAINEE)
-        .choice()
-        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.NOT_FOUND))
-        .process(exchange -> exchange.getIn().setBody(TraineeDetailsDto.builder().build()));
+        .doCatch(HttpOperationFailedException.class)
+        .process(exchange -> {
+          var e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT,
+              HttpOperationFailedException.class);
+          int statusCode = e.getHttpResponseCode();
+          if (HttpStatus.NOT_FOUND.value() == statusCode) {
+            exchange.getIn().setBody("{}");
+          } else {
+            throw e;
+          }
+        });
+
     from("direct:traineenotes-get")
         .setHeader(AggregationKey.HEADER).constant("notes")
-        .toD(coreServiceUrl + API_TRAINEENOTES)
-        .choice()
-        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.NOT_FOUND))
-        .process(exchange -> exchange.getIn().setBody(TraineeNotesDto.builder().build()));
+        .toD(coreServiceUrl + API_TRAINEENOTES);
+
     from("direct:gmc-doctors-by-ids")
         .setHeader(AggregationKey.HEADER).constant("doctor")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
-        .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
-        .choice()
-        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(HttpStatus.NOT_FOUND))
-        .process(exchange -> exchange.getIn().setBody(TraineeSummaryDto.builder().build()));
+        .setHeader("gmcIds").simple("${header.gmcId}")
+        .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS);
 
     from("direct:traineenotes-add")
         .to(coreServiceUrl + API_TRAINEEENOTES_ADD);
