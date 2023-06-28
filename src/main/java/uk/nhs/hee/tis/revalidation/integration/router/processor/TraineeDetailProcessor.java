@@ -56,11 +56,11 @@ public class TraineeDetailProcessor implements Processor {
         TraineeNotesDto.class);
 
     TraineeDetailsDto traineeDetailsDtoResult = null;
-    if (traineeDetailsDto != null & traineeDetailsDto.getGmcNumber() != null) {
+    if (traineeDetailsDto != null && traineeDetailsDto.getGmcNumber() != null) {
       traineeDetailsDtoResult = traineeDetailsDto;
     }
 
-    if (traineeSummaryDto != null & traineeSummaryDto.getCountTotal() == 1) {
+    if (traineeSummaryDto != null && traineeSummaryDto.getCountTotal() == 1) {
       if (traineeDetailsDtoResult == null) {
         traineeDetailsDtoResult = TraineeDetailsDto.builder().build();
       }
