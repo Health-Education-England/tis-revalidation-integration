@@ -27,8 +27,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
+import org.apache.camel.converter.stream.InputStreamCache;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationDto;
@@ -48,10 +50,15 @@ public class DoctorRecommendationAggregationStrategy implements AggregationStrat
   public Exchange aggregate(final Exchange oldExchange, final Exchange newExchange) {
     final var result = new DefaultExchange(new DefaultCamelContext());
 
-    final var messageBody = oldExchange.getIn().getBody();
-    final var traineeRecommendationDto = mapper
-        .convertValue(messageBody, TraineeRecommendationDto.class);
+    final InputStreamCache messageBody = (InputStreamCache) oldExchange.getIn().getBody();
+    if (messageBody.length() == 0) {
+      result.getIn().setBody(null);
+      result.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.NOT_FOUND.value());
+      return result;
+    }
 
+    final var traineeRecommendationDto = mapper.readValue(messageBody,
+        TraineeRecommendationDto.class);
     final var traineeCoreDto = getTcsCoreRecord(newExchange,
         traineeRecommendationDto.getGmcNumber());
     if (traineeCoreDto != null) {
