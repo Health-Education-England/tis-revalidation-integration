@@ -89,12 +89,11 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     from("direct:recommendation-gmc-id")
         .to("direct:recommendation-trainee-by-gmc-id")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "getGmcIdOfRecommendationTrainee")
+        .setHeader("gmcIds").simple("${header.gmcId}")
         .enrich("direct:tcs-trainees", doctorRecommendationAggregationStrategy);
 
     from("direct:recommendation-trainee-by-gmc-id")
-        .toD(serviceUrl + "/api/recommendation/${header.gmcId}?bridgeEndpoint=true")
-        .unmarshal().json(JsonLibrary.Jackson);
+        .toD(serviceUrl + "/api/recommendation/${header.gmcId}?bridgeEndpoint=true");
 
     from("direct:recommendation-submit")
         .to("direct:reval-officer")

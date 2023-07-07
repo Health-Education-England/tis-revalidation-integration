@@ -21,22 +21,27 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.converter.stream.InputStreamCache;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.support.DefaultMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeCoreDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeRecommendationDto;
 
@@ -49,16 +54,12 @@ class DoctorRecommendationAggregationStrategyTest {
   private static final LocalDate GMC_SUBMISSION_DATE = LocalDate.EPOCH;
   private static final String PROGRAMME_NAME = "programme2";
   private static final String UNDER_NOTICE = "underNotice1";
-
   private static final LocalDate OLD_CURRICULUM_END_DATE = LocalDate.MIN;
   private static final String OLD_PROGRAMME_MEMBERSHIP_TYPE = "type1";
   private static final String OLD_GRADE = "grade1";
-
   private static final LocalDate NEW_CURRICULUM_END_DATE = LocalDate.MAX;
   private static final String NEW_PROGRAMME_MEMBERSHIP_TYPE = "type2";
   private static final String NEW_GRADE = "grade2";
-
-
   private DoctorRecommendationAggregationStrategy aggregationStrategy;
   private ObjectMapper objectMapper;
 
@@ -70,7 +71,25 @@ class DoctorRecommendationAggregationStrategyTest {
   }
 
   @Test
-  void shouldAggregateRecommendationWhenCoreFound() {
+  void shouldReturn404WhenDoctorNotFound() {
+    final var camelContext = new DefaultCamelContext();
+
+    final var oldMessage = new DefaultMessage(camelContext);
+    oldMessage.setBody(new InputStreamCache(new byte[]{}));
+
+    final var oldExchange = new DefaultExchange(camelContext);
+    oldExchange.setIn(oldMessage);
+
+    final var newExchange = new DefaultExchange(camelContext);
+
+    final Exchange aggregatedExchange = aggregationStrategy.aggregate(oldExchange, newExchange);
+    assertThat(aggregatedExchange.getIn().getBody(), nullValue());
+    assertThat(aggregatedExchange.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE),
+        equalTo(HttpStatus.NOT_FOUND.value()));
+  }
+
+  @Test
+  void shouldAggregateRecommendationWhenCoreFound() throws IOException {
     final var camelContext = new DefaultCamelContext();
 
     final var traineeRecommendation = new TraineeRecommendationDto();
@@ -84,7 +103,8 @@ class DoctorRecommendationAggregationStrategyTest {
     traineeRecommendation.setUnderNotice(UNDER_NOTICE);
 
     final var oldMessage = new DefaultMessage(camelContext);
-    oldMessage.setBody(traineeRecommendation);
+    oldMessage.setBody(new InputStreamCache(objectMapper.writeValueAsBytes(traineeRecommendation)));
+
     final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
@@ -122,7 +142,7 @@ class DoctorRecommendationAggregationStrategyTest {
   }
 
   @Test
-  void shouldReturnUnchangedRecommendationWhenNoCoreFound() {
+  void shouldReturnUnchangedRecommendationWhenNoCoreFound() throws IOException {
     final var camelContext = new DefaultCamelContext();
 
     final var traineeRecommendation = new TraineeRecommendationDto();
@@ -136,7 +156,7 @@ class DoctorRecommendationAggregationStrategyTest {
     traineeRecommendation.setUnderNotice(UNDER_NOTICE);
 
     final var oldMessage = new DefaultMessage(camelContext);
-    oldMessage.setBody(traineeRecommendation);
+    oldMessage.setBody(new InputStreamCache(objectMapper.writeValueAsBytes(traineeRecommendation)));
     final var oldExchange = new DefaultExchange(camelContext);
     oldExchange.setIn(oldMessage);
 
