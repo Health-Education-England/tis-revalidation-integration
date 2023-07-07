@@ -183,7 +183,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
           } else {
             throw e;
           }
-        });;
+        });
     from("direct:doctor-designated-body")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
         .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
