@@ -171,8 +171,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:connection-gmc-id")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.PROGRAMME)
-        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID)
         .doTry()
+        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID)
         .doCatch(HttpOperationFailedException.class)
         .process(exchange -> {
           var e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT,
