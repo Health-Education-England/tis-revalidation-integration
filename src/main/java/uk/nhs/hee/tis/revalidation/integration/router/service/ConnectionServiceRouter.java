@@ -47,8 +47,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   private static final String API_CONNECTION =
       "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
-  private static final String API_CONNECTION_GMC_ID =
-      "/api/revalidation/connection/detail/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
