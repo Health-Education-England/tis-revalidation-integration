@@ -28,12 +28,10 @@ import java.util.Map;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.http.base.HttpOperationFailedException;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
@@ -165,25 +163,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:connection-gmc-id-aggregation")
         .multicast(AGGREGATOR)
         .parallelProcessing()
-        .to("direct:connection-gmc-id")
         .to("direct:doctor-designated-body")
         .to("direct:connection-history");
-    from("direct:connection-gmc-id")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .setHeader(AggregationKey.HEADER).constant(AggregationKey.PROGRAMME)
-        .doTry()
-        .toD(tcsServiceUrl + API_CONNECTION_GMC_ID)
-        .doCatch(HttpOperationFailedException.class)
-        .process(exchange -> {
-          var e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT,
-              HttpOperationFailedException.class);
-          int statusCode = e.getHttpResponseCode();
-          if (HttpStatus.NOT_FOUND.value() == statusCode) {
-            exchange.getIn().setBody("{}");
-          } else {
-            throw e;
-          }
-        });
     from("direct:doctor-designated-body")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
         .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
