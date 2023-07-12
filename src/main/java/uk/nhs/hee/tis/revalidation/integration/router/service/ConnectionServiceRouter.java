@@ -179,7 +179,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
               HttpOperationFailedException.class);
           int statusCode = e.getHttpResponseCode();
           if (HttpStatus.NOT_FOUND.value() == statusCode) {
-            exchange.getIn().setBody("{}");
+            exchange.getIn().setBody("{gmcNumber: ${header.gmcId}}");
           } else {
             throw e;
           }
