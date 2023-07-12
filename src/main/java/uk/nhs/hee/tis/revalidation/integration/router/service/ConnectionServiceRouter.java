@@ -165,9 +165,15 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:connection-gmc-id-aggregation")
         .multicast(AGGREGATOR)
         .parallelProcessing()
+        .to("direct:requested-gmc-id")
         .to("direct:connection-gmc-id")
         .to("direct:doctor-designated-body")
         .to("direct:connection-history");
+    from("direct:requested-gmc-id")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.GMC_NUMBER)
+        .process(exchange -> {
+          exchange.getIn().setBody("${header.gmcId}");
+        });
     from("direct:connection-gmc-id")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.PROGRAMME)
