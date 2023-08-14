@@ -83,6 +83,7 @@ public class TraineeDataMessageListener {
         .membershipStartDate(connectionInfo.getProgrammeMembershipStartDate())
         .membershipEndDate(connectionInfo.getProgrammeMembershipEndDate())
         .curriculumEndDate(connectionInfo.getCurriculumEndDate())
+        .placementGrade(connectionInfo.getPlacementGrade())
         .build();
   }
 
