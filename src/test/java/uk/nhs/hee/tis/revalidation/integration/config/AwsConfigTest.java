@@ -21,25 +21,43 @@
 
 package uk.nhs.hee.tis.revalidation.integration.config;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.amazonaws.services.sqs.AmazonSQSAsync;
-import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.apache.camel.component.aws.xray.EIPTracingStrategy;
+import org.apache.camel.component.aws.xray.XRayTracer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@Configuration
-public class AwsSqsQueueConfig {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {AwsConfig.class})
+class AwsConfigTest {
+  @Autowired
+  ApplicationContext ctx;
 
-  @Bean
-  public QueueMessagingTemplate queueMessagingTemplate() {
-    return new QueueMessagingTemplate(amazonSQSAsync());
+  @Test
+  void testAmazonSqsAsync() {
+    assertThat(ctx.getBean(AmazonSQSAsync.class), notNullValue());
   }
 
-  @Primary
-  @Bean
-  public AmazonSQSAsync amazonSQSAsync() {
-    return AmazonSQSAsyncClientBuilder.defaultClient();
+  @Test
+  void testQueueMessagingTemplate() {
+    assertThat(ctx.getBean(QueueMessagingTemplate.class), notNullValue());
+  }
+
+  @Test
+  void testXrayTracerCreated() {
+    XRayTracer actual = ctx.getBean(XRayTracer.class);
+    assertThat(actual, notNullValue());
+    assertTrue(actual.getTracingStrategy() instanceof EIPTracingStrategy);
   }
 
 }
+
