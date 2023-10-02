@@ -37,7 +37,9 @@ public class CdcRabbitMessageListener {
 
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.update}")
   public void getTraineeUpdateMessage(ConnectionInfoDto message) {
+    if (message.getTcsPersonId() == null) {
+      throw new IllegalArgumentException("Received update message from TIS with null tis personId");
+    }
     this.cdcTraineeUpdateHandler.handleMessage(message);
   }
-
 }

@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import java.util.Optional;
 import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
@@ -36,7 +37,8 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
   private final Predicate<String> isUnreliableGmcNumber =
-      s -> s == null || s.isBlank() || "UNKNOWN".equalsIgnoreCase(s);
+      s -> s.isBlank() || "UNKNOWN".equalsIgnoreCase(s)
+          || "N/A".equalsIgnoreCase(s) || "NA".equalsIgnoreCase(s);
 
   private final MasterDoctorViewMapper mapper;
 
@@ -50,23 +52,72 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   }
 
   /**
+   * When tcs personId exists && is filtered out in tcs traineeInfoForConnection.sql, tcs exports a
+   * dto only with tisPersonId to Reval. After Reval receives it, try using the tisPersonId to find
+   * the ES record: if the ES record is found and if gmc DBC is null (doctor is not connected),
+   * remove the record; if the ES record is found and if gmc DBS is not null, remove TIS info.
+   *
+   * @param receivedDto received dto from TIS full sync
+   * @return true when received gmc number is null (traineeInfoForConnection.sql filtered out a
+   * doctor record which exists in TIS)
+   * @return false when received gmc number is not null
+   */
+  public boolean removeTisInfo(ConnectionInfoDto receivedDto) {
+    final var repository = getRepository();
+    final Long receivedTcsId = receivedDto.getTcsPersonId();
+    final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
+
+    if (receivedGmcReferenceNumber == null) {
+      final var optionalViewToRemove = repository.findByTcsPersonId(receivedDto.getTcsPersonId())
+          .stream().findFirst();
+
+      if (optionalViewToRemove.isPresent()) {
+        MasterDoctorView viewToRemove = optionalViewToRemove.get();
+        // if gmc dbc is empty, delete the ES record, otherwise remove TIS info
+        if (StringUtils.isEmpty(viewToRemove.getDesignatedBody())) {
+          repository.deleteById(viewToRemove.getId());
+        } else {
+          viewToRemove.setTcsPersonId(null);
+          viewToRemove.setTcsDesignatedBody(null);
+          viewToRemove.setMembershipStartDate(null);
+          viewToRemove.setMembershipEndDate(null);
+          viewToRemove.setProgrammeName(null);
+          viewToRemove.setCurriculumEndDate(null);
+          viewToRemove.setMembershipType(null);
+          viewToRemove.setProgrammeOwner(null);
+          viewToRemove.setPlacementGrade(null);
+          repository.save(viewToRemove);
+        }
+        publishUpdate(MasterDoctorView.builder().tcsPersonId(receivedTcsId).build());
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Add new trainee details to index (this is an aggregation, updating an existing record).
    *
    * @param receivedDto trainee info to add to index
    */
   @Override
   public void upsertEntity(ConnectionInfoDto receivedDto) {
-    final var repository = getRepository();
-    final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
-    log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
-    final var existingView =
-        (isUnreliableGmcNumber.test(receivedGmcReferenceNumber) ? Optional.<MasterDoctorView>empty()
-            : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream().findFirst())
-            .orElse(repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
-                .orElse(new MasterDoctorView()));
+    if (!removeTisInfo(receivedDto)) {
+      final var repository = getRepository();
+      final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
+      log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
+      final var existingView =
+          (isUnreliableGmcNumber.test(receivedGmcReferenceNumber)
+              ? Optional.<MasterDoctorView>empty()
+              : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream()
+                  .findFirst())
+              .orElse(
+                  repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
+                      .orElse(new MasterDoctorView()));
 
-    final var updatedView = repository
-        .save(mapper.updateMasterDoctorView(receivedDto, existingView));
-    publishUpdate(updatedView);
+      final var updatedView = repository
+          .save(mapper.updateMasterDoctorView(receivedDto, existingView));
+      publishUpdate(updatedView);
+    }
   }
 }
