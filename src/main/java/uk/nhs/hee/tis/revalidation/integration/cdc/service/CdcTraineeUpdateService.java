@@ -59,8 +59,8 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    *
    * @param receivedDto received dto from TIS full sync
    * @return true when received gmc number is null (traineeInfoForConnection.sql filtered out a
-   * doctor record which exists in TIS)
-   * @return false when received gmc number is not null
+   *     doctor record which exists in TIS)
+   *         false when received gmc number is not null
    */
   public boolean removeTisInfo(ConnectionInfoDto receivedDto) {
     final var repository = getRepository();
