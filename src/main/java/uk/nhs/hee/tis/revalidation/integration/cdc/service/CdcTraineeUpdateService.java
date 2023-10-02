@@ -53,58 +53,59 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
   /**
    * When tcs personId exists && is filtered out in tcs traineeInfoForConnection.sql, tcs exports a
-   * dto only with tisPersonId to Reval. After Reval receives it, try using the tisPersonId to find
-   * the ES record: if the ES record is found and if gmc DBC is null (doctor is not connected),
+   * dto only with tisPersonId to Reval. After Reval receives it, it tries using the tisPersonId to
+   * find the ES record: if the ES record is found and if gmc DBC is null (doctor is not connected),
    * remove the record; if the ES record is found and if gmc DBS is not null, remove TIS info.
    *
-   * @param receivedDto received dto from TIS full sync
-   * @return true when received gmc number is null (traineeInfoForConnection.sql filtered out a
-   *     doctor record which exists in TIS)
-   *         false when received gmc number is not null
+   * @param receivedTcsId received TIS person id
    */
-  public boolean removeTisInfo(ConnectionInfoDto receivedDto) {
+  public void removeTisInfo(Long receivedTcsId) {
     final var repository = getRepository();
-    final Long receivedTcsId = receivedDto.getTcsPersonId();
-    final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
 
-    if (receivedGmcReferenceNumber == null) {
-      final var optionalViewToRemove = repository.findByTcsPersonId(receivedDto.getTcsPersonId())
-          .stream().findFirst();
+    final var optionalViewToRemove = repository.findByTcsPersonId(receivedTcsId)
+        .stream().findFirst();
 
-      if (optionalViewToRemove.isPresent()) {
-        MasterDoctorView viewToRemove = optionalViewToRemove.get();
-        // if gmc dbc is empty, delete the ES record, otherwise remove TIS info
-        if (StringUtils.isEmpty(viewToRemove.getDesignatedBody())) {
-          repository.deleteById(viewToRemove.getId());
-        } else {
-          viewToRemove.setTcsPersonId(null);
-          viewToRemove.setTcsDesignatedBody(null);
-          viewToRemove.setMembershipStartDate(null);
-          viewToRemove.setMembershipEndDate(null);
-          viewToRemove.setProgrammeName(null);
-          viewToRemove.setCurriculumEndDate(null);
-          viewToRemove.setMembershipType(null);
-          viewToRemove.setProgrammeOwner(null);
-          viewToRemove.setPlacementGrade(null);
-          repository.save(viewToRemove);
-        }
-        publishUpdate(MasterDoctorView.builder().tcsPersonId(receivedTcsId).build());
+    // If the ES document is not present, ignore the change
+    if (optionalViewToRemove.isPresent()) {
+      MasterDoctorView viewToRemove = optionalViewToRemove.get();
+      // if gmc dbc is empty, delete the ES record, otherwise remove TIS info
+      if (StringUtils.isEmpty(viewToRemove.getDesignatedBody())) {
+        log.debug("Attempting to remove document for tcs person id: [{}]", receivedTcsId);
+        repository.deleteById(viewToRemove.getId());
+      } else {
+        log.debug("Attempting to remove document for tcs person id: [{}]", receivedTcsId);
+        viewToRemove.setTcsPersonId(null);
+        viewToRemove.setTcsDesignatedBody(null);
+        viewToRemove.setMembershipStartDate(null);
+        viewToRemove.setMembershipEndDate(null);
+        viewToRemove.setProgrammeName(null);
+        viewToRemove.setCurriculumEndDate(null);
+        viewToRemove.setMembershipType(null);
+        viewToRemove.setProgrammeOwner(null);
+        viewToRemove.setPlacementGrade(null);
+        repository.save(viewToRemove);
       }
-      return true;
+      // propagate this update to recommendation index
+      publishUpdate(MasterDoctorView.builder().tcsPersonId(receivedTcsId).build());
     }
-    return false;
   }
 
   /**
-   * Add new trainee details to index (this is an aggregation, updating an existing record).
+   * Add new trainee details to index (this is an aggregation, updating an existing record or
+   * removing TIS info).
    *
    * @param receivedDto trainee info to add to index
    */
   @Override
   public void upsertEntity(ConnectionInfoDto receivedDto) {
-    if (!removeTisInfo(receivedDto)) {
+
+    Long receivedTcsId = receivedDto.getTcsPersonId();
+    String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
+
+    if (receivedGmcReferenceNumber == null) {
+      removeTisInfo(receivedTcsId);
+    } else {
       final var repository = getRepository();
-      final String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
       log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
       final var existingView =
           (isUnreliableGmcNumber.test(receivedGmcReferenceNumber)
