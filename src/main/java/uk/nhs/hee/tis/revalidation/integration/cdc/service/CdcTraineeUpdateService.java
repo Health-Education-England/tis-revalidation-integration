@@ -21,8 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import java.util.Optional;
-import java.util.function.Predicate;
+import com.google.common.collect.Lists;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -36,11 +36,9 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
-  private final Predicate<String> isUnreliableGmcNumber =
-      s -> s.isBlank() || "UNKNOWN".equalsIgnoreCase(s)
-          || "N/A".equalsIgnoreCase(s) || "NA".equalsIgnoreCase(s);
-
   private final MasterDoctorViewMapper mapper;
+
+  private final MasterDoctorElasticSearchRepository repository;
 
   /**
    * Service responsible for updating the Trainee composite fields used for searching.
@@ -49,45 +47,79 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
     this.mapper = mapper;
+    this.repository = getRepository();
   }
 
   /**
    * When tcs personId exists && is filtered out in tcs traineeInfoForConnection.sql, tcs exports a
    * dto only with tisPersonId to Reval. After Reval receives it, it tries using the tisPersonId to
-   * find the ES record: if the ES record is found and if gmc DBC is null (doctor is not connected),
-   * remove the record; if the ES record is found and if gmc DBS is not null, remove TIS info.
+   * find the ES record: if there are ES records found, remove or detach TIS info for them and
+   * propagate these updates to Recommendation index.
    *
    * @param receivedTcsId received TIS person id
    */
-  public void removeTisInfo(Long receivedTcsId) {
-    final var repository = getRepository();
-
-    final var optionalViewToRemove = repository.findByTcsPersonId(receivedTcsId)
-        .stream().findFirst();
-
+  protected void removeTisInfoForFilteredOutRecords(Long receivedTcsId) {
+    List<MasterDoctorView> viewsToRemove = repository.findByTcsPersonId(receivedTcsId);
     // If the ES document is not present, ignore the change
-    if (optionalViewToRemove.isPresent()) {
-      MasterDoctorView viewToRemove = optionalViewToRemove.get();
-      // if gmc dbc is empty, delete the ES record, otherwise remove TIS info
-      if (StringUtils.isEmpty(viewToRemove.getDesignatedBody())) {
-        log.debug("Attempting to remove document for tcs person id: [{}]", receivedTcsId);
-        repository.deleteById(viewToRemove.getId());
-      } else {
-        log.debug("Attempting to remove document for tcs person id: [{}]", receivedTcsId);
-        viewToRemove.setTcsPersonId(null);
-        viewToRemove.setTcsDesignatedBody(null);
-        viewToRemove.setMembershipStartDate(null);
-        viewToRemove.setMembershipEndDate(null);
-        viewToRemove.setProgrammeName(null);
-        viewToRemove.setCurriculumEndDate(null);
-        viewToRemove.setMembershipType(null);
-        viewToRemove.setProgrammeOwner(null);
-        viewToRemove.setPlacementGrade(null);
-        repository.save(viewToRemove);
-      }
-      // propagate this update to recommendation index
-      publishUpdate(MasterDoctorView.builder().tcsPersonId(receivedTcsId).build());
+    if (!viewsToRemove.isEmpty()) {
+      viewsToRemove.forEach(viewToRemove -> {
+        MasterDoctorView returnedView = removeTisInfo(viewToRemove);
+        // propagate this update to recommendation index
+        publishUpdate(returnedView);
+      });
     }
+  }
+
+  /**
+   * If gmc DBC is null (doctor is not connected with GMC), remove the record; if gmc DBC is not
+   * null, detach TIS info.
+   *
+   * @param viewToRemove view to remove TIS info
+   * @return MasterDoctorView if the record is updated; if the record if deleted, returned View will
+   * only contain the doc id
+   */
+  protected MasterDoctorView removeTisInfo(MasterDoctorView viewToRemove) {
+    Long tcsPersonId = viewToRemove.getTcsPersonId();
+    String gmcNumber = viewToRemove.getGmcReferenceNumber();
+    // if gmc dbc is empty, delete the ES record, otherwise remove TIS info
+    if (StringUtils.isEmpty(viewToRemove.getDesignatedBody())) {
+      log.debug("Attempting to remove ES document for tcs person id: [{}]", tcsPersonId);
+      String docId = viewToRemove.getId();
+      repository.deleteById(docId);
+      return MasterDoctorView.builder().id(viewToRemove.getId()).build();
+    } else {
+      log.debug("Attempting to detach TIS info for tcs gmc number: [{}]", gmcNumber);
+      viewToRemove.setTcsPersonId(null);
+      viewToRemove.setTcsDesignatedBody(null);
+      viewToRemove.setMembershipStartDate(null);
+      viewToRemove.setMembershipEndDate(null);
+      viewToRemove.setProgrammeName(null);
+      viewToRemove.setCurriculumEndDate(null);
+      viewToRemove.setMembershipType(null);
+      viewToRemove.setProgrammeOwner(null);
+      viewToRemove.setPlacementGrade(null);
+      return repository.save(viewToRemove);
+    }
+  }
+
+  /**
+   * If there are ES docs whose tcsPersonId matches but gmcNumber doesn't match the received record,
+   * it means the ES docs is not linked with ths TIS records. Note: gmc number won't be null in ES
+   * indices.
+   *
+   * @param receivedDto received dto from TIS
+   */
+  protected void removeTisInfoIfGmcNumberNotMatch(ConnectionInfoDto receivedDto) {
+    Long receivedTcsId = receivedDto.getTcsPersonId();
+    String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
+
+    List<MasterDoctorView> viewsToRemoveTisInfo =
+        repository.findByTcsPersonIdAndGmcReferenceNumberNot(receivedTcsId,
+            receivedGmcReferenceNumber);
+    viewsToRemoveTisInfo.forEach(view -> {
+      MasterDoctorView viewTisInfoRemoved = removeTisInfo(view);
+      publishUpdate(viewTisInfoRemoved);
+    });
   }
 
   /**
@@ -102,23 +134,38 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     Long receivedTcsId = receivedDto.getTcsPersonId();
     String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
 
+    // When doctor record is filtered out by TIS sql, TIS sends null gmcNumber to Reval.
     if (receivedGmcReferenceNumber == null) {
-      removeTisInfo(receivedTcsId);
+      removeTisInfoForFilteredOutRecords(receivedTcsId);
     } else {
-      final var repository = getRepository();
       log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
-      final var existingView =
-          (isUnreliableGmcNumber.test(receivedGmcReferenceNumber)
-              ? Optional.<MasterDoctorView>empty()
-              : repository.findByGmcReferenceNumber(receivedGmcReferenceNumber).stream()
-                  .findFirst())
-              .orElse(
-                  repository.findByTcsPersonId(receivedDto.getTcsPersonId()).stream().findFirst()
-                      .orElse(new MasterDoctorView()));
 
-      final var updatedView = repository
-          .save(mapper.updateMasterDoctorView(receivedDto, existingView));
-      publishUpdate(updatedView);
+      // Use both gmcNumber and tcsPersonId to get view, if not found, try only gmcNumber.
+      List<MasterDoctorView> existingViews =
+          repository.findByGmcReferenceNumberAndTcsPersonId(receivedGmcReferenceNumber,
+              receivedTcsId);
+
+      if (existingViews.isEmpty()) {
+        List<MasterDoctorView> viewsFromGmcNumber = repository.findByGmcReferenceNumber(
+            receivedGmcReferenceNumber);
+        existingViews.addAll(
+            viewsFromGmcNumber.isEmpty() ? Lists.newArrayList(new MasterDoctorView())
+                : viewsFromGmcNumber);
+      }
+
+      // upsert entity
+      if (existingViews.size() > 1) {
+        log.warn("Multiple doctor records found in masterdoctorindex for the same GMC number: {}",
+            receivedGmcReferenceNumber);
+      }
+
+      existingViews.forEach(view -> {
+        final var updatedView = repository
+            .save(mapper.updateMasterDoctorView(receivedDto, view));
+        publishUpdate(updatedView);
+      });
+
+      removeTisInfoIfGmcNumberNotMatch(receivedDto);
     }
   }
 }

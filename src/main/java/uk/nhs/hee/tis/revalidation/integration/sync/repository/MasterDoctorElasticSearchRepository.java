@@ -36,4 +36,7 @@ public interface MasterDoctorElasticSearchRepository extends
   List<MasterDoctorView> findByGmcReferenceNumber(String gmcReferenceNumber);
 
   List<MasterDoctorView> findByTcsPersonId(Long tcsPersonId);
+
+  List<MasterDoctorView> findByTcsPersonIdAndGmcReferenceNumberNot(
+      Long tcsPersonId, String gmcReferenceNumber);
 }
