@@ -39,6 +39,10 @@ public interface MasterDoctorViewMapper {
 
   @Mapping(source = "designatedBody", target = "designatedBody",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+  @Mapping(source = "submissionDate", target = "submissionDate",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
+  @Mapping(source = "underNotice", target = "underNotice",
+      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   MasterDoctorView updateMasterDoctorView(MasterDoctorView source,
       @MappingTarget MasterDoctorView target);
 
