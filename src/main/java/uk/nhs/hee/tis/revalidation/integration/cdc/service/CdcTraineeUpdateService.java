@@ -76,7 +76,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    *
    * @param viewToRemove view to remove TIS info
    * @return MasterDoctorView if the record is updated; if the record if deleted, returned View will
-   * only contain the doc id
+   *    only contain the doc id
    */
   protected MasterDoctorView removeTisInfo(MasterDoctorView viewToRemove) {
     Long tcsPersonId = viewToRemove.getTcsPersonId();
