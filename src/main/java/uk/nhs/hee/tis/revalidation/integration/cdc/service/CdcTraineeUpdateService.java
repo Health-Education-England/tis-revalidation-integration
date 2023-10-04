@@ -73,10 +73,11 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   /**
    * If gmc DBC is null (doctor is not connected with GMC), remove the record; if gmc DBC is not
    * null, detach TIS info.
+   * If the ES doc is deleted, publish a MasterDoctorView with only doc id;
+   * otherwise, publish the updated view.
    *
    * @param viewToRemove view to remove TIS info
-   * @return MasterDoctorView if the record is updated; if the record if deleted, returned View will
-   *    only contain the doc id
+   * @return MasterDoctorView saved or deleted view
    */
   protected MasterDoctorView removeTisInfo(MasterDoctorView viewToRemove) {
     Long tcsPersonId = viewToRemove.getTcsPersonId();
