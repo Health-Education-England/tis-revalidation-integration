@@ -211,8 +211,18 @@ class CdcTraineeUpdateServiceTest {
         .thenReturn(List.of(masterDoctorView));
     traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
 
-    cdcTraineeUpdateService.removeTisInfoIfGmcNumberNotMatch(traineeUpdate);
-    verify(repository).deleteById(masterDoctorView.getId());
+    cdcTraineeUpdateService.detachTisInfoIfGmcNumberNotMatch(traineeUpdate);
+    verify(repository).save(masterDoctorViewCaptor.capture());
+    final var savedEntity = masterDoctorViewCaptor.getValue();
+    assertThat(savedEntity.getTcsPersonId(), nullValue());
+    assertThat(savedEntity.getTcsDesignatedBody(), nullValue());
+    assertThat(savedEntity.getMembershipStartDate(), nullValue());
+    assertThat(savedEntity.getMembershipEndDate(), nullValue());
+    assertThat(savedEntity.getProgrammeName(), nullValue());
+    assertThat(savedEntity.getProgrammeOwner(), nullValue());
+    assertThat(savedEntity.getCurriculumEndDate(), nullValue());
+    assertThat(savedEntity.getMembershipType(), nullValue());
+    assertThat(savedEntity.getPlacementGrade(), nullValue());
   }
 
   @Test
@@ -231,7 +241,7 @@ class CdcTraineeUpdateServiceTest {
 
   @Test
   void shouldDetachTisInfoIfGmcDbcPresent() {
-    cdcTraineeUpdateService.removeTisInfo(masterDoctorView);
+    cdcTraineeUpdateService.detachTisInfo(masterDoctorView);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 

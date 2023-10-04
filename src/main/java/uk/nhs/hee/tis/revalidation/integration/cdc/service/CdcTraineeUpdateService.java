@@ -24,7 +24,6 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 import com.google.common.collect.Lists;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
@@ -58,12 +57,12 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    *
    * @param receivedTcsId received TIS person id
    */
-  protected void removeTisInfoForFilteredOutRecords(Long receivedTcsId) {
+  protected void detachTisInfoForFilteredOutRecords(Long receivedTcsId) {
     List<MasterDoctorView> viewsToRemove = repository.findByTcsPersonId(receivedTcsId);
     // If the ES document is not present, ignore the change
     if (!viewsToRemove.isEmpty()) {
       viewsToRemove.forEach(viewToRemove -> {
-        MasterDoctorView returnedView = removeTisInfo(viewToRemove);
+        MasterDoctorView returnedView = detachTisInfo(viewToRemove);
         // propagate this update to recommendation index
         publishUpdate(returnedView);
       });
@@ -79,28 +78,19 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * @param viewToRemove view to remove TIS info
    * @return MasterDoctorView saved or deleted view
    */
-  protected MasterDoctorView removeTisInfo(MasterDoctorView viewToRemove) {
-    Long tcsPersonId = viewToRemove.getTcsPersonId();
+  protected MasterDoctorView detachTisInfo(MasterDoctorView viewToRemove) {
     String gmcNumber = viewToRemove.getGmcReferenceNumber();
-    // if gmc dbc is empty, delete the ES record, otherwise remove TIS info
-    if (StringUtils.isEmpty(viewToRemove.getDesignatedBody())) {
-      log.debug("Attempting to remove ES document for tcs person id: [{}]", tcsPersonId);
-      String docId = viewToRemove.getId();
-      repository.deleteById(docId);
-      return MasterDoctorView.builder().id(viewToRemove.getId()).build();
-    } else {
-      log.debug("Attempting to detach TIS info for tcs gmc number: [{}]", gmcNumber);
-      viewToRemove.setTcsPersonId(null);
-      viewToRemove.setTcsDesignatedBody(null);
-      viewToRemove.setMembershipStartDate(null);
-      viewToRemove.setMembershipEndDate(null);
-      viewToRemove.setProgrammeName(null);
-      viewToRemove.setCurriculumEndDate(null);
-      viewToRemove.setMembershipType(null);
-      viewToRemove.setProgrammeOwner(null);
-      viewToRemove.setPlacementGrade(null);
-      return repository.save(viewToRemove);
-    }
+    log.debug("Attempting to detach TIS info for tcs gmc number: [{}]", gmcNumber);
+    viewToRemove.setTcsPersonId(null);
+    viewToRemove.setTcsDesignatedBody(null);
+    viewToRemove.setMembershipStartDate(null);
+    viewToRemove.setMembershipEndDate(null);
+    viewToRemove.setProgrammeName(null);
+    viewToRemove.setCurriculumEndDate(null);
+    viewToRemove.setMembershipType(null);
+    viewToRemove.setProgrammeOwner(null);
+    viewToRemove.setPlacementGrade(null);
+    return repository.save(viewToRemove);
   }
 
   /**
@@ -110,7 +100,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    *
    * @param receivedDto received dto from TIS
    */
-  protected void removeTisInfoIfGmcNumberNotMatch(ConnectionInfoDto receivedDto) {
+  protected void detachTisInfoIfGmcNumberNotMatch(ConnectionInfoDto receivedDto) {
     Long receivedTcsId = receivedDto.getTcsPersonId();
     String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
 
@@ -118,7 +108,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
         repository.findByTcsPersonIdAndGmcReferenceNumberNot(receivedTcsId,
             receivedGmcReferenceNumber);
     viewsToRemoveTisInfo.forEach(view -> {
-      MasterDoctorView viewTisInfoRemoved = removeTisInfo(view);
+      MasterDoctorView viewTisInfoRemoved = detachTisInfo(view);
       publishUpdate(viewTisInfoRemoved);
     });
   }
@@ -137,7 +127,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
     // When doctor record is filtered out by TIS sql, TIS sends null gmcNumber to Reval.
     if (receivedGmcReferenceNumber == null) {
-      removeTisInfoForFilteredOutRecords(receivedTcsId);
+      detachTisInfoForFilteredOutRecords(receivedTcsId);
     } else {
       log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
 
@@ -166,7 +156,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
         publishUpdate(updatedView);
       });
 
-      removeTisInfoIfGmcNumberNotMatch(receivedDto);
+      detachTisInfoIfGmcNumberNotMatch(receivedDto);
     }
   }
 }
