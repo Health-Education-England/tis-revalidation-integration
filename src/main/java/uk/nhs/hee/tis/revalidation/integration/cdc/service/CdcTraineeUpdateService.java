@@ -21,7 +21,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,8 +36,6 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
   private final MasterDoctorViewMapper mapper;
 
-  private final MasterDoctorElasticSearchRepository repository;
-
   /**
    * Service responsible for updating the Trainee composite fields used for searching.
    */
@@ -46,7 +43,6 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
     this.mapper = mapper;
-    this.repository = getRepository();
   }
 
   /**
@@ -58,6 +54,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * @param receivedTcsId received TIS person id
    */
   protected void detachTisInfoForFilteredOutRecords(Long receivedTcsId) {
+    final var repository = getRepository();
     List<MasterDoctorView> viewsToRemove = repository.findByTcsPersonId(receivedTcsId);
     // If the ES document is not present, ignore the change
     if (!viewsToRemove.isEmpty()) {
@@ -79,6 +76,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * @return MasterDoctorView saved or deleted view
    */
   protected MasterDoctorView detachTisInfo(MasterDoctorView viewToRemove) {
+    final var repository = getRepository();
     String gmcNumber = viewToRemove.getGmcReferenceNumber();
     log.debug("Attempting to detach TIS info for tcs gmc number: [{}]", gmcNumber);
     viewToRemove.setTcsPersonId(null);
@@ -101,6 +99,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * @param receivedDto received dto from TIS
    */
   protected void detachTisInfoIfGmcNumberNotMatch(ConnectionInfoDto receivedDto) {
+    final var repository = getRepository();
     Long receivedTcsId = receivedDto.getTcsPersonId();
     String receivedGmcReferenceNumber = receivedDto.getGmcReferenceNumber();
 
@@ -132,6 +131,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       log.debug("Attempting to upsert document for GMC Ref: [{}]", receivedGmcReferenceNumber);
 
       // Use both gmcNumber and tcsPersonId to get view, if not found, try only gmcNumber.
+      final var repository = getRepository();
       List<MasterDoctorView> existingViews =
           repository.findByGmcReferenceNumberAndTcsPersonId(receivedGmcReferenceNumber,
               receivedTcsId);
@@ -140,7 +140,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
         List<MasterDoctorView> viewsFromGmcNumber = repository.findByGmcReferenceNumber(
             receivedGmcReferenceNumber);
         existingViews.addAll(
-            viewsFromGmcNumber.isEmpty() ? Lists.newArrayList(new MasterDoctorView())
+            viewsFromGmcNumber.isEmpty() ? List.of(new MasterDoctorView())
                 : viewsFromGmcNumber);
       }
 
