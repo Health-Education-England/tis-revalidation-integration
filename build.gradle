@@ -73,6 +73,8 @@ dependencies {
   implementation "io.awspring.cloud:spring-cloud-starter-aws:$cloudVersion"
   implementation "io.awspring.cloud:spring-cloud-starter-aws-messaging:$cloudVersion"
 
+  implementation "com.amazonaws:aws-xray-recorder-sdk-spring:2.13.0"
+
   // Elastic Search
   implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch"
 

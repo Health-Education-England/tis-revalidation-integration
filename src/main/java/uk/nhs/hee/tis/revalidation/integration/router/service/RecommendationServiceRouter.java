@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -39,6 +40,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandler
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
+@XRayEnabled
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
 

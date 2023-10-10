@@ -21,10 +21,12 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.api;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
+@XRayEnabled
 @Component
 public class ConnectionApiRouter extends RouteBuilder {
 
@@ -34,10 +36,14 @@ public class ConnectionApiRouter extends RouteBuilder {
 
     rest("/connection")
         .get().bindingMode(RestBindingMode.auto).to("direct:connection-summary")
-        .get("/exception").bindingMode(RestBindingMode.auto).to("direct:connection-exception-summary")
-        .get("/connected").bindingMode(RestBindingMode.auto).to("direct:connection-connected-summary")
-        .get("/disconnected").bindingMode(RestBindingMode.auto).to("direct:connection-disconnected-summary")
-        .get("/{gmcId}").bindingMode(RestBindingMode.auto).to("direct:connection-gmc-id-aggregation")
+        .get("/exception").bindingMode(RestBindingMode.auto)
+        .to("direct:connection-exception-summary")
+        .get("/connected").bindingMode(RestBindingMode.auto)
+        .to("direct:connection-connected-summary")
+        .get("/disconnected").bindingMode(RestBindingMode.auto)
+        .to("direct:connection-disconnected-summary")
+        .get("/{gmcId}").bindingMode(RestBindingMode.auto)
+        .to("direct:connection-gmc-id-aggregation")
         .get("/hidden").bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")

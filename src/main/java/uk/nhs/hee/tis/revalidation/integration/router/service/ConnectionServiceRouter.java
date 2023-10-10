@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.router.service;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import java.util.Map;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
@@ -42,6 +43,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggr
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
+@XRayEnabled
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
 
@@ -71,6 +73,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/${header.gmcId}?bridgeEndpoint=true";
 
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
+  public static final String GMC_IDS_HEADER = "gmcIds";
 
   @Autowired
   private KeycloakBean keycloakBean;
@@ -105,9 +108,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
     // Connection summary page - All, Connected, Disconnected tab
     from("direct:connection-summary")
         .to("direct:connection-hidden-manually")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
+        .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "getHiddenGmcIds")
         .to("direct:v1-doctors-all-unhidden")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "process")
+        .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "process")
         .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
     from("direct:connection-hidden-manually")
         .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
@@ -138,7 +141,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
     // Connection summary page - Hidden tab
     from("direct:connection-hidden")
         .to("direct:connection-hidden-gmcIds")
-        .setHeader("gmcIds").method(gmcIdProcessorBean, "getHiddenGmcIds")
+        .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "getHiddenGmcIds")
         .to("direct:v1-doctors-by-ids")
         .enrich("direct:connection-tcs-hidden", connectionHiddenAggregationStrategy);
     from("direct:connection-hidden-gmcIds")

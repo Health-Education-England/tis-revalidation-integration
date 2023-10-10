@@ -21,10 +21,12 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.api;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
+@XRayEnabled
 @Component
 public class TraineeApiRouter extends RouteBuilder {
 
