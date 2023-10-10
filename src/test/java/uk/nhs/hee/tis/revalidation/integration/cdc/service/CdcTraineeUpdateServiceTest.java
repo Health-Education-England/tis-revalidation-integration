@@ -257,4 +257,3 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedEntity.getPlacementGrade(), nullValue());
   }
 }
-
