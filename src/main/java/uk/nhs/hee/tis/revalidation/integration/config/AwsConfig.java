@@ -35,15 +35,20 @@ public class AwsConfig {
 
   @Bean
   public QueueMessagingTemplate queueMessagingTemplate() {
-    return new QueueMessagingTemplate(amazonSQSAsync());
+    return new QueueMessagingTemplate(amazonSqsAsync());
   }
 
   @Primary
   @Bean
-  public AmazonSQSAsync amazonSQSAsync() {
+  public AmazonSQSAsync amazonSqsAsync() {
     return AmazonSQSAsyncClientBuilder.defaultClient();
   }
 
+  /**
+   * Creates a tracer, with the necessary configuration, e.g. tracing strategy
+   *
+   * @return the object that will create traces for AWS X-Ray
+   */
   @Bean
   public XRayTracer awsXrayTracer() {
     XRayTracer tracer = new XRayTracer();
