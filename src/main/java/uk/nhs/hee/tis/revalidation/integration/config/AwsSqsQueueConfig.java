@@ -24,35 +24,22 @@ package uk.nhs.hee.tis.revalidation.integration.config;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import org.apache.camel.component.aws.xray.EIPTracingStrategy;
-import org.apache.camel.component.aws.xray.XRayTracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class AwsConfig {
+public class AwsSqsQueueConfig {
 
   @Bean
   public QueueMessagingTemplate queueMessagingTemplate() {
-    return new QueueMessagingTemplate(amazonSqsAsync());
+    return new QueueMessagingTemplate(amazonSQSAsync());
   }
 
   @Primary
   @Bean
-  public AmazonSQSAsync amazonSqsAsync() {
+  public AmazonSQSAsync amazonSQSAsync() {
     return AmazonSQSAsyncClientBuilder.defaultClient();
   }
 
-  /**
-   * Creates a tracer, with the necessary configuration, e.g. tracing strategy
-   *
-   * @return the object that will create traces for AWS X-Ray
-   */
-  @Bean
-  public XRayTracer awsXrayTracer() {
-    XRayTracer tracer = new XRayTracer();
-    tracer.setTracingStrategy(new EIPTracingStrategy());
-    return tracer;
-  }
 }
