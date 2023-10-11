@@ -19,24 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.message.service;
+package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.javafaker.Faker;
 import java.time.LocalDate;
 import java.util.Collections;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -46,7 +46,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcTraineeUpdateService;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -55,7 +54,8 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @ExtendWith(MockitoExtension.class)
 class CdcTraineeUpdateServiceTest {
 
-  private final MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+  private final Faker faker = new Faker();
+
   private final Long tcsPersonId = 1L;
   private final String gmcRefereneNumber = "1234567";
   private final String doctorFirstName = "doctorFirstName";
@@ -66,7 +66,6 @@ class CdcTraineeUpdateServiceTest {
   private final String designatedBody = "designatedBody";
   private final String tcsDesignatedBody = "tcsDesignatedBody";
   private final String programmeOwner = "programmeOwner";
-  private final String connectionStatus = "connectionStatus";
   private final LocalDate programmeMembershipStartDate = LocalDate.now();
   private final LocalDate programmeMembershipEndDate = LocalDate.now();
   private final LocalDate curriculumEndDate = LocalDate.now();
@@ -83,9 +82,11 @@ class CdcTraineeUpdateServiceTest {
   private ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
   private ConnectionInfoDto traineeUpdate;
+  private MasterDoctorView masterDoctorView;
 
   @BeforeEach
   void setupTestData() {
+    masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
     traineeUpdate =
         ConnectionInfoDto.builder()
             .tcsPersonId(tcsPersonId)
@@ -107,6 +108,29 @@ class CdcTraineeUpdateServiceTest {
 
   @Test
   void shouldUpsertNewFields() {
+    when(repository.findByGmcReferenceNumberAndTcsPersonId(gmcRefereneNumber, tcsPersonId))
+        .thenReturn(List.of(masterDoctorView));
+    traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
+
+    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
+
+    verify(repository).save(masterDoctorViewCaptor.capture());
+
+    //new fields
+    final var savedEntity = masterDoctorViewCaptor.getValue();
+    assertThat(savedEntity.getDoctorFirstName(), is(doctorFirstName));
+    assertThat(savedEntity.getDoctorLastName(), is(doctorLastName));
+    assertThat(savedEntity.getTcsPersonId(), is(tcsPersonId));
+    //existing fields
+    assertThat(savedEntity.getGmcReferenceNumber(), is(masterDoctorView.getGmcReferenceNumber()));
+    assertThat(savedEntity.getTisStatus(), is(masterDoctorView.getTisStatus()));
+    assertThat(savedEntity.getAdmin(), is(masterDoctorView.getAdmin()));
+    assertThat(savedEntity.getDesignatedBody(), is(masterDoctorView.getDesignatedBody()));
+  }
+
+  @Test
+  void shouldUpsertNewFieldsWhenTcsPersonIdNotAlreadyExists() {
+    masterDoctorView.setTcsPersonId(null);
     when(repository.findByGmcReferenceNumber(gmcRefereneNumber))
         .thenReturn(List.of(masterDoctorView));
     traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
@@ -128,9 +152,25 @@ class CdcTraineeUpdateServiceTest {
   }
 
   @Test
-  void shouldUpsertTraineeInfoIfGmcNumberNull() {
+  void shouldRemoveTisInfoIfGmcNumberIsNull() {
+    final String programmeOwner = faker.lorem().characters(20);
+    final String programmeName = faker.lorem().characters(20);
+    final String membershipType = faker.lorem().characters(20);
+    final String placementGrade = faker.lorem().characters(20);
+    final LocalDate programmeMembershipStartDate = LocalDate.now();
+    final LocalDate programmeMembershipEndDate = LocalDate.now();
+    final LocalDate curriculumEndDate = LocalDate.now();
+
     final var masterDoctorViewNullGmc = CdcTestDataGenerator.getTestMasterDoctorView();
     masterDoctorViewNullGmc.setGmcReferenceNumber(null);
+    masterDoctorViewNullGmc.setProgrammeOwner(programmeOwner);
+    masterDoctorViewNullGmc.setProgrammeName(programmeName);
+    masterDoctorViewNullGmc.setPlacementGrade(placementGrade);
+    masterDoctorViewNullGmc.setMembershipType(membershipType);
+    masterDoctorViewNullGmc.setMembershipStartDate(programmeMembershipStartDate);
+    masterDoctorViewNullGmc.setMembershipEndDate(programmeMembershipEndDate);
+    masterDoctorViewNullGmc.setCurriculumEndDate(curriculumEndDate);
+
     when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorViewNullGmc));
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
@@ -138,29 +178,21 @@ class CdcTraineeUpdateServiceTest {
 
     //new fields
     final var savedEntity = masterDoctorViewCaptor.getValue();
-    assertThat(savedEntity.getDoctorFirstName(), is(doctorFirstName));
-    assertThat(savedEntity.getDoctorLastName(), is(doctorLastName));
-    assertThat(savedEntity.getTcsPersonId(), is(tcsPersonId));
-  }
-
-  @ParameterizedTest(name = "Should Find Existing by TIS ID if GMC Number is [{0}]")
-  @NullAndEmptySource
-  @ValueSource(strings = {"Unknown", "UNKNOWN", "unknown", " "})
-  void shouldFindExistingByTisIdIfUnknownGmc(String unknown) {
-    traineeUpdate.setGmcReferenceNumber(unknown);
-    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView));
-
-    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
-
-    verify(repository, never()).findByGmcReferenceNumber(any());
+    assertNull(savedEntity.getTcsPersonId());
+    assertNull(savedEntity.getProgrammeName());
+    assertNull(savedEntity.getProgrammeOwner());
+    assertNull(savedEntity.getCurriculumEndDate());
+    assertNull(savedEntity.getMembershipStartDate());
+    assertNull(savedEntity.getMembershipEndDate());
+    assertNull(savedEntity.getMembershipType());
+    assertNull(savedEntity.getPlacementGrade());
   }
 
   @Test
   void shouldInsertTraineeInfoIfNoMatch() {
-    final var masterDoctorViewNullGmc = CdcTestDataGenerator.getTestMasterDoctorView();
-    masterDoctorViewNullGmc.setGmcReferenceNumber(null);
-    when(repository.findByTcsPersonId(any())).thenReturn(Collections.emptyList());
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
+    traineeUpdate.setGmcReferenceNumber(faker.number().digits(8));
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
@@ -170,6 +202,27 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedMasterDoctorView.getDoctorFirstName(), is(doctorFirstName));
     assertThat(savedMasterDoctorView.getDoctorLastName(), is(doctorLastName));
     assertThat(savedMasterDoctorView.getTcsPersonId(), is(tcsPersonId));
+  }
+
+  @Test
+  void shouldRemoveTisInfoFromRecordsIfGmcNumberNotMatch() {
+    masterDoctorView.setDesignatedBody(null);
+    when(repository.findByTcsPersonIdAndGmcReferenceNumberNot(tcsPersonId, gmcRefereneNumber))
+        .thenReturn(List.of(masterDoctorView));
+    traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
+
+    cdcTraineeUpdateService.detachTisInfoIfGmcNumberNotMatch(traineeUpdate);
+    verify(repository).save(masterDoctorViewCaptor.capture());
+    final var savedEntity = masterDoctorViewCaptor.getValue();
+    assertThat(savedEntity.getTcsPersonId(), nullValue());
+    assertThat(savedEntity.getTcsDesignatedBody(), nullValue());
+    assertThat(savedEntity.getMembershipStartDate(), nullValue());
+    assertThat(savedEntity.getMembershipEndDate(), nullValue());
+    assertThat(savedEntity.getProgrammeName(), nullValue());
+    assertThat(savedEntity.getProgrammeOwner(), nullValue());
+    assertThat(savedEntity.getCurriculumEndDate(), nullValue());
+    assertThat(savedEntity.getMembershipType(), nullValue());
+    assertThat(savedEntity.getPlacementGrade(), nullValue());
   }
 
   @Test
@@ -183,19 +236,25 @@ class CdcTraineeUpdateServiceTest {
 
     cdcTraineeUpdateService.upsertEntity(traineeUpdate);
 
-    verify(publisher).publishCdcUpdate(updatedView);
+    verify(publisher, times(2)).publishCdcUpdate(updatedView);
   }
 
   @Test
-  void shouldPublishUpdateForTcsId() {
-    MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    when(repository.findByTcsPersonId(tcsPersonId)).thenReturn(List.of(masterDoctorView, view2));
-    MasterDoctorView updatedView = new MasterDoctorView();
-    when(repository.save(any())).thenReturn(updatedView);
+  void shouldDetachTisInfoIfGmcDbcPresent() {
+    cdcTraineeUpdateService.detachTisInfo(masterDoctorView);
 
-    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
+    verify(repository).save(masterDoctorViewCaptor.capture());
 
-    verify(publisher).publishCdcUpdate(updatedView);
+    final var savedEntity = masterDoctorViewCaptor.getValue();
+    assertThat(savedEntity.getTcsPersonId(), nullValue());
+    assertThat(savedEntity.getTcsDesignatedBody(), nullValue());
+    assertThat(savedEntity.getMembershipStartDate(), nullValue());
+    assertThat(savedEntity.getMembershipEndDate(), nullValue());
+    assertThat(savedEntity.getProgrammeName(), nullValue());
+    assertThat(savedEntity.getProgrammeOwner(), nullValue());
+    assertThat(savedEntity.getCurriculumEndDate(), nullValue());
+    assertThat(savedEntity.getMembershipType(), nullValue());
+    assertThat(savedEntity.getPlacementGrade(), nullValue());
   }
-
 }
+
