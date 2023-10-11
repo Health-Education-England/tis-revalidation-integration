@@ -35,7 +35,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionExceptionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionHiddenAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
@@ -52,8 +51,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
   private static final String API_CONNECTION_UNHIDE = "/api/connections/unhide?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
-  private static final String API_CONNECTION_EXCEPTION =
-      "/api/connections/exception?bridgeEndpoint=true";
+  private static final String API_CONNECTION_DISCREPANCIES =
+      "/api/connections/discrepancies?bridgeEndpoint=true";
   private static final String API_CONNECTION_CONNECTED =
       "/api/connections/connected?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCONNECTED =
@@ -83,9 +82,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Autowired
   private ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
-
-  @Autowired
-  private ConnectionExceptionAggregationStrategy connectionExceptionAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
@@ -121,8 +117,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     // Connection summary page - Exceptions queue tab
-    from("direct:connection-exception-summary")
-        .to(serviceUrlConnection + API_CONNECTION_EXCEPTION)
+    from("direct:connection-discrepancies-summary")
+        .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Connected queue tab
