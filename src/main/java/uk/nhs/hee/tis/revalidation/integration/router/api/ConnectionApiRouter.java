@@ -39,6 +39,7 @@ public class ConnectionApiRouter extends RouteBuilder {
         .get("/disconnected").bindingMode(RestBindingMode.auto).to("direct:connection-disconnected-summary")
         .get("/{gmcId}").bindingMode(RestBindingMode.auto).to("direct:connection-gmc-id-aggregation")
         .get("/hidden").bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
+        .get("/exceptionLog/today").bindingMode(RestBindingMode.auto).to("direct:connection-exception-log-today")
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
         .post("/hide").bindingMode(RestBindingMode.off).to("direct:connection-hide")
