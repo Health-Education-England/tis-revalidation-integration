@@ -69,6 +69,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_HISTORY =
       "/api/connections/${header.gmcId}?bridgeEndpoint=true";
+  private static final String API_CONNECTION_EXCEPTIONLOG_TODAY =
+      "/api/exceptionLog/today?bridgeEndpoint=true";
 
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
 
@@ -194,5 +196,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_CONNECTION_UNHIDE);
 
+    // Connection Exception Logs
+    from("direct:connection-exception-log-today")
+        .toD(serviceUrlConnection + API_CONNECTION_EXCEPTIONLOG_TODAY)
+        .unmarshal().json(JsonLibrary.Jackson);
   }
 }
