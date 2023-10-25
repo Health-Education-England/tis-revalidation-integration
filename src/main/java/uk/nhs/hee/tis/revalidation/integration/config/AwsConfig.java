@@ -21,29 +21,38 @@
 
 package uk.nhs.hee.tis.revalidation.integration.config;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import com.amazonaws.services.sqs.AmazonSQSAsync;
+import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
+import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import org.apache.camel.component.aws.xray.NoopTracingStrategy;
+import org.apache.camel.component.aws.xray.XRayTracer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+@Configuration
+public class AwsConfig {
 
-class AwsSqsQueueConfigTest {
-
-  private AwsSqsQueueConfig awsSqsQueueConfig;
-
-  @BeforeEach
-  void setUp() {
-    awsSqsQueueConfig = new AwsSqsQueueConfig();
+  @Bean
+  public QueueMessagingTemplate queueMessagingTemplate(AmazonSQSAsync amazonSqsAsync) {
+    return new QueueMessagingTemplate(amazonSqsAsync);
   }
 
-  @Test
-  public void testAmazonSqsAsync() {
-    assertThat(awsSqsQueueConfig.amazonSQSAsync(), notNullValue());
+  @Primary
+  @Bean
+  public AmazonSQSAsync amazonSqsAsync() {
+    return AmazonSQSAsyncClientBuilder.defaultClient();
   }
 
-  @Test
-  public void testQueueMessagingTemplate() {
-    assertThat(awsSqsQueueConfig.queueMessagingTemplate(), notNullValue());
+  /**
+   * Creates a tracer, with the necessary configuration, e.g. tracing strategy
+   *
+   * @return the object that will create traces for AWS X-Ray
+   */
+  @Bean
+  public XRayTracer awsXrayTracer() {
+    XRayTracer tracer = new XRayTracer();
+    tracer.setTracingStrategy(new NoopTracingStrategy());
+    return tracer;
   }
 }
-

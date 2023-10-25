@@ -38,9 +38,9 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 @Component
 public class CdcSqsMessageListener {
 
-  private CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
-  private CdcDoctorMessageHandler cdcDoctorMessageHandler;
-  private ObjectMapper mapper;
+  private final CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
+  private final CdcDoctorMessageHandler cdcDoctorMessageHandler;
+  private final ObjectMapper mapper;
 
   /**
    * Create a Listener.
@@ -54,8 +54,7 @@ public class CdcSqsMessageListener {
   public CdcSqsMessageListener(
       CdcRecommendationMessageHandler cdcRecommendationMessageHandler,
       CdcDoctorMessageHandler cdcDoctorMessageHandler,
-      ObjectMapper mapper
-  ) {
+      ObjectMapper mapper) {
     this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
     this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
     this.mapper = mapper;
@@ -70,8 +69,7 @@ public class CdcSqsMessageListener {
   public void getRecommendationMessage(String message) throws IOException {
     try {
       CdcDocumentDto<Recommendation> cdcDocument =
-          mapper.readValue(message, new TypeReference<CdcDocumentDto<Recommendation>>() {
-          });
+          mapper.readValue(message, new TypeReference<>() {});
       cdcRecommendationMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
@@ -87,8 +85,7 @@ public class CdcSqsMessageListener {
   public void getDoctorMessage(String message) throws IOException {
     try {
       CdcDocumentDto<DoctorsForDB> cdcDocument =
-          mapper.readValue(message, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {
-          });
+          mapper.readValue(message, new TypeReference<>() {});
       cdcDoctorMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
