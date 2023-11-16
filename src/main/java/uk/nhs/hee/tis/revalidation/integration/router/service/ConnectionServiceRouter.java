@@ -123,7 +123,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
-    // Connection summary page - Exceptions queue tab
+    // Connection summary page - Discrepancies queue tab
     from("direct:connection-exception-summary")
         .to(serviceUrlConnection + API_CONNECTION_EXCEPTION)
         .unmarshal().json(JsonLibrary.Jackson);
