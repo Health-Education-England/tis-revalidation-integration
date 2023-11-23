@@ -34,6 +34,7 @@ public class ConnectionApiRouter extends RouteBuilder {
 
     rest("/connection")
         .get().bindingMode(RestBindingMode.auto).to("direct:connection-summary")
+        .get("/exception").bindingMode(RestBindingMode.auto)
         .get("/discrepancies").bindingMode(RestBindingMode.auto)
         .to("direct:connection-exception-summary")
         .get("/connected").bindingMode(RestBindingMode.auto)
