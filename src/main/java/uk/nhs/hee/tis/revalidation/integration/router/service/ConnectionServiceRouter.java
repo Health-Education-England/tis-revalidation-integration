@@ -54,6 +54,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
+  private static final String API_CONNECTION_DISCREPANCIES =
+      "/api/connections/discrepancies?bridgeEndpoint=true";
   private static final String API_CONNECTION_CONNECTED =
       "/api/connections/connected?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCONNECTED =
@@ -123,9 +125,14 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
-    // Connection summary page - Discrepancies queue tab
+    // Connection summary page - exception queue tab
     from("direct:connection-exception-summary")
         .to(serviceUrlConnection + API_CONNECTION_EXCEPTION)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    // Connection summary page - Discrepancies queue tab
+    from("direct:connection-discrepancies-summary")
+        .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Connected queue tab
