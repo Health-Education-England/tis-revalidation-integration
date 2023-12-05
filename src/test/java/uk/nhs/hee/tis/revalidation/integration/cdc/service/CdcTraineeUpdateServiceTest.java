@@ -44,7 +44,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
@@ -74,8 +73,6 @@ class CdcTraineeUpdateServiceTest {
   private CdcTraineeUpdateService cdcTraineeUpdateService;
   @Mock
   private MasterDoctorElasticSearchRepository repository;
-  @Mock
-  private CdcMessagePublisher publisher;
   @Spy
   private MasterDoctorViewMapper mapper = new MasterDoctorViewMapperImpl();
   @Captor

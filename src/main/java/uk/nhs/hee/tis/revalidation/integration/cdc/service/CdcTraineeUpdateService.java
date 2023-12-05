@@ -25,7 +25,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -40,8 +39,8 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * Service responsible for updating the Trainee composite fields used for searching.
    */
   protected CdcTraineeUpdateService(MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
-    super(repository, cdcMessagePublisher);
+      MasterDoctorViewMapper mapper) {
+    super(repository);
     this.mapper = mapper;
   }
 
@@ -58,16 +57,13 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     List<MasterDoctorView> viewsToRemove = repository.findByTcsPersonId(receivedTcsId);
     // If the ES document is not present, ignore the change
     if (!viewsToRemove.isEmpty()) {
-      viewsToRemove.forEach(viewToRemove -> {
-        detachTisInfo(viewToRemove);
-      });
+      viewsToRemove.forEach(this::detachTisInfo);
     }
   }
 
   /**
    * If gmc DBC is null (doctor is not connected with GMC), remove the record; if gmc DBC is not
-   * null, detach TIS info.
-   * If the ES doc is deleted, publish a MasterDoctorView with only doc id;
+   * null, detach TIS info. If the ES doc is deleted, publish a MasterDoctorView with only doc id;
    * otherwise, publish the updated view.
    *
    * @param viewToRemove view to remove TIS info
@@ -104,9 +100,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     List<MasterDoctorView> viewsToRemoveTisInfo =
         repository.findByTcsPersonIdAndGmcReferenceNumberNot(receivedTcsId,
             receivedGmcReferenceNumber);
-    viewsToRemoveTisInfo.forEach(view -> {
-      detachTisInfo(view);
-    });
+    viewsToRemoveTisInfo.forEach(this::detachTisInfo);
   }
 
   /**
@@ -148,8 +142,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       }
 
       existingViews.forEach(view -> {
-        final var updatedView = repository
-            .save(mapper.updateMasterDoctorView(receivedDto, view));
+        repository.save(mapper.updateMasterDoctorView(receivedDto, view));
       });
 
       detachTisInfoIfGmcNumberNotMatch(receivedDto);

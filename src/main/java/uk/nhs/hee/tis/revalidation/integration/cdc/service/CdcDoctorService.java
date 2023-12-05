@@ -23,7 +23,6 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -44,8 +43,8 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param mapper     A mapper for converting to/from the persisted composite view
    */
   public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
-    super(repository, cdcMessagePublisher);
+      MasterDoctorViewMapper mapper) {
+    super(repository);
     this.mapper = mapper;
   }
 
@@ -73,7 +72,7 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
       }
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
-          entity.getGmcReferenceNumber(), e.getMessage()),
+              entity.getGmcReferenceNumber(), e.getMessage()),
           e);
       throw e;
     }

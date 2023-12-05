@@ -40,7 +40,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -56,9 +55,6 @@ class CdcRecommendationServiceTest {
 
   @Mock
   MasterDoctorElasticSearchRepository repository;
-
-  @Mock
-  CdcMessagePublisher publisher;
 
   @Captor
   ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
