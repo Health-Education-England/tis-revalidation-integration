@@ -86,17 +86,6 @@ class CdcRecommendationServiceTest {
   }
 
   @Test
-  void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
-
-    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
-
-    verify(publisher).publishCdcUpdate(masterDoctorView);
-  }
-
-  @Test
   void shouldAllowNullOutcomes() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);

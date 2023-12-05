@@ -56,12 +56,4 @@ class RabbitCdcMessagePublisherTest {
     setField(rabbitCdcMessagePublisher, "exchange", exchange);
 
   }
-
-  @Test
-  void shouldPublishUpdatesUsingRabbitTemplate() {
-    rabbitCdcMessagePublisher.publishCdcUpdate(masterDoctorView);
-
-    verify(rabbitTemplate).convertAndSend(exchange, routingKey, masterDoctorView);
-  }
-
 }

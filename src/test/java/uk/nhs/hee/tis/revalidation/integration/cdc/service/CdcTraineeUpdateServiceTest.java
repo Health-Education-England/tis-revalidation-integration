@@ -226,20 +226,6 @@ class CdcTraineeUpdateServiceTest {
   }
 
   @Test
-  void shouldPublishUpdateForGmcNumber() {
-    MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
-    when(repository.findByGmcReferenceNumber(gmcRefereneNumber))
-        .thenReturn(List.of(masterDoctorView, view2));
-    MasterDoctorView updatedView = new MasterDoctorView();
-    when(repository.save(any())).thenReturn(updatedView);
-
-    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
-
-    verify(publisher, times(2)).publishCdcUpdate(updatedView);
-  }
-
-  @Test
   void shouldDetachTisInfoIfGmcDbcPresent() {
     cdcTraineeUpdateService.detachTisInfo(masterDoctorView);
 

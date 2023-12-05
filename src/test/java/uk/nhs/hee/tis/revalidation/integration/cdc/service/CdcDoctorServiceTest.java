@@ -117,15 +117,4 @@ class CdcDoctorServiceTest {
     verify(repository).save(masterDoctorViewCaptor.capture());
     assertNull(masterDoctorViewCaptor.getValue().getDesignatedBody());
   }
-
-  @Test
-  void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
-
-    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctor();
-    cdcDoctorService.upsertEntity(newDoctor);
-
-    verify(publisher).publishCdcUpdate(masterDoctorView);
-  }
 }
