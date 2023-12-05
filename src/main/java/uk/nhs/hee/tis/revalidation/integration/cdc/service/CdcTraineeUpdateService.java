@@ -59,9 +59,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     // If the ES document is not present, ignore the change
     if (!viewsToRemove.isEmpty()) {
       viewsToRemove.forEach(viewToRemove -> {
-        MasterDoctorView returnedView = detachTisInfo(viewToRemove);
-        // propagate this update to recommendation index
-        publishUpdate(returnedView);
+        detachTisInfo(viewToRemove);
       });
     }
   }
@@ -107,8 +105,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
         repository.findByTcsPersonIdAndGmcReferenceNumberNot(receivedTcsId,
             receivedGmcReferenceNumber);
     viewsToRemoveTisInfo.forEach(view -> {
-      MasterDoctorView viewTisInfoRemoved = detachTisInfo(view);
-      publishUpdate(viewTisInfoRemoved);
+      detachTisInfo(view);
     });
   }
 
@@ -153,7 +150,6 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
       existingViews.forEach(view -> {
         final var updatedView = repository
             .save(mapper.updateMasterDoctorView(receivedDto, view));
-        publishUpdate(updatedView);
       });
 
       detachTisInfoIfGmcNumberNotMatch(receivedDto);

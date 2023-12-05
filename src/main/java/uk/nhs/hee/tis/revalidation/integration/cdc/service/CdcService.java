@@ -46,13 +46,4 @@ public abstract class CdcService<T> {
   }
 
   public abstract void upsertEntity(T entity);
-
-  /**
-   * Publish MasterDoctorView update using injected CdcMessagePublisher.
-   *
-   * @param masterDoctorView the updated MasterDoctorView to be published
-   */
-  public final void publishUpdate(MasterDoctorView masterDoctorView) {
-    cdcMessagePublisher.publishCdcUpdate(masterDoctorView);
-  }
 }
