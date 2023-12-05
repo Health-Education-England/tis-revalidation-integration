@@ -188,7 +188,8 @@ class DoctorUpsertElasticSearchServiceTest {
   void shouldAddCurrentConnectionsAliasToMasterDoctorIndex() throws IOException {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
-    verify(elasticsearchIndexHelper).addAlias(service.ES_INDEX, service.CURRENT_CONNECTIONS_ALIAS,
+    verify(elasticsearchIndexHelper).addAlias(service.MASTERDOCTORINDEX, service.CURRENT_CONNECTIONS_ALIAS,
         service.ES_CURRENT_CONNECIONS_FILTER);
+    verify(elasticsearchIndexHelper).addAlias(service.MASTERDOCTORINDEX, service.RECOMMENDATIONS_ALIAS);
   }
 }
