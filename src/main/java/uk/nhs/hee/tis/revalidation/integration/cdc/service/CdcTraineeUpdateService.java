@@ -141,9 +141,9 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
             receivedGmcReferenceNumber);
       }
 
-      existingViews.forEach(view -> {
-        repository.save(mapper.updateMasterDoctorView(receivedDto, view));
-      });
+      existingViews.forEach(view ->
+          repository.save(mapper.updateMasterDoctorView(receivedDto, view))
+      );
 
       detachTisInfoIfGmcNumberNotMatch(receivedDto);
     }
