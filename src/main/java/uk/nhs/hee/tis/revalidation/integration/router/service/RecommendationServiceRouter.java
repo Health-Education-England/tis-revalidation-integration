@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandlerProcessor;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.DtoNameProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 
@@ -108,8 +109,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     from("direct:recommendation-summary")
         .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true")
-        .transform(
-            body().regexReplaceAll("\\\"traineeInfo\\\"\\:", "\\\"recommendationInfo\\\"\\:"))
+        .process(new DtoNameProcessor())
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:doctors-autocomplete")
