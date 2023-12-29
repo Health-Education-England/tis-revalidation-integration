@@ -109,7 +109,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
     from("direct:recommendation-summary")
         .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true")
         .transform(
-            body().regexReplaceAll("\\\"traineeInfo\\\" \\:", "\\\"recommendationInfo\\\" \\:"))
+            body().regexReplaceAll("\\\"traineeInfo\\\"\\s?\\:", "\\\"recommendationInfo\\\" \\:"))
         .unmarshal().json(JsonLibrary.Jackson);
 
     from("direct:doctors-autocomplete")
