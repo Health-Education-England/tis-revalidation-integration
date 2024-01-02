@@ -38,7 +38,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -55,9 +54,6 @@ class CdcDoctorServiceTest {
 
   @Mock
   MasterDoctorElasticSearchRepository repository;
-
-  @Mock
-  CdcMessagePublisher publisher;
 
   @Spy
   MasterDoctorViewMapper mapper = (MasterDoctorViewMapper) new MasterDoctorViewMapperImpl();
@@ -116,16 +112,5 @@ class CdcDoctorServiceTest {
 
     verify(repository).save(masterDoctorViewCaptor.capture());
     assertNull(masterDoctorViewCaptor.getValue().getDesignatedBody());
-  }
-
-  @Test
-  void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
-
-    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctor();
-    cdcDoctorService.upsertEntity(newDoctor);
-
-    verify(publisher).publishCdcUpdate(masterDoctorView);
   }
 }

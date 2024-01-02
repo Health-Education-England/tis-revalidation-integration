@@ -44,7 +44,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
@@ -74,8 +73,6 @@ class CdcTraineeUpdateServiceTest {
   private CdcTraineeUpdateService cdcTraineeUpdateService;
   @Mock
   private MasterDoctorElasticSearchRepository repository;
-  @Mock
-  private CdcMessagePublisher publisher;
   @Spy
   private MasterDoctorViewMapper mapper = new MasterDoctorViewMapperImpl();
   @Captor
@@ -223,20 +220,6 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedEntity.getCurriculumEndDate(), nullValue());
     assertThat(savedEntity.getMembershipType(), nullValue());
     assertThat(savedEntity.getPlacementGrade(), nullValue());
-  }
-
-  @Test
-  void shouldPublishUpdateForGmcNumber() {
-    MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
-    when(repository.findByGmcReferenceNumber(gmcRefereneNumber))
-        .thenReturn(List.of(masterDoctorView, view2));
-    MasterDoctorView updatedView = new MasterDoctorView();
-    when(repository.save(any())).thenReturn(updatedView);
-
-    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
-
-    verify(publisher, times(2)).publishCdcUpdate(updatedView);
   }
 
   @Test
