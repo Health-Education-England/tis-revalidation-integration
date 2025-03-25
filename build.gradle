@@ -1,7 +1,7 @@
 plugins {
   id "java"
   id "org.springframework.boot" version "2.5.6"
-  id "io.spring.dependency-management" version "1.0.11.RELEASE"
+  id "io.spring.dependency-management" version "1.1.7"
 
   // Code quality plugins
   id "checkstyle"
@@ -26,8 +26,8 @@ repositories {
   maven {
     url "https://hee-430723991443.d.codeartifact.eu-west-1.amazonaws.com/maven/Health-Education-England/"
     credentials {
-      username "aws"
-      password System.env.CODEARTIFACT_AUTH_TOKEN
+      username = "aws"
+      password = System.env.CODEARTIFACT_AUTH_TOKEN
     }
   }
 }
@@ -41,7 +41,7 @@ dependencies {
   }
 
   // Apache Camel
-  implementation platform('org.apache.camel.springboot:camel-spring-boot-bom:3.20.5')
+  implementation platform("org.apache.camel.springboot:camel-spring-boot-bom:3.20.5")
   implementation "org.apache.camel.springboot:camel-spring-boot-starter"
   implementation "org.apache.camel.springboot:camel-http-starter"
   implementation "org.apache.camel.springboot:camel-servlet-starter"
@@ -98,8 +98,8 @@ checkstyle {
 
 jacocoTestReport {
   reports {
-    html.enabled true
-    xml.enabled true
+    html.required = true
+    xml.required = true
   }
 }
 
