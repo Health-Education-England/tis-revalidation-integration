@@ -99,8 +99,8 @@ checkstyle {
 
 tasks.jacocoTestReport {
   reports {
-    html.required = true
-    xml.required = true
+    html.required.set(true)
+    xml.required.set(true)
   }
 }
 
