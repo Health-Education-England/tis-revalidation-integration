@@ -15,6 +15,7 @@ version = "0.4.2"
 java {
   toolchain {
     languageVersion.set(JavaLanguageVersion.of(17))
+    vendor = JvmVendorSpec.ADOPTIUM
   }
 }
 
