@@ -38,7 +38,9 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class DoctorUpsertElasticSearchService {
   protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
+  protected static final String ES_DISCREPANCIES_FILTER = "{\"filter\":{\"script\":{\"script\":\"doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']\"}}}";
   protected static final String ES_INDEX = "masterdoctorindex";
+  protected static final String DISCREPANCIES_ALIAS = "discrepancies";
   protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final MasterDoctorElasticSearchRepository repository;
   private final MasterDoctorViewMapper mapper;
@@ -156,6 +158,8 @@ public class DoctorUpsertElasticSearchService {
     try {
       elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS,
           ES_CURRENT_CONNECIONS_FILTER);
+      elasticsearchIndexHelper.addAlias(ES_INDEX, DISCREPANCIES_ALIAS,
+          ES_DISCREPANCIES_FILTER);
     } catch (IOException e) {
       log.error("Could not add alias to masterDoctorIndex after create, please do it manually.",
           e);
