@@ -37,8 +37,15 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 @Service
 public class DoctorUpsertElasticSearchService {
+
   protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
-  protected static final String ES_DISCREPANCIES_FILTER = "{\"filter\":{\"script\":{\"script\":\"doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']\"}}}";
+  protected static final String ES_DISCREPANCIES_FILTER =
+      "{\"filter\":{"
+         + "\"script\":{"
+         + "\"script\":\"doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']\""
+         + "}"
+         + "}}";
+
   protected static final String ES_INDEX = "masterdoctorindex";
   protected static final String DISCREPANCIES_ALIAS = "discrepancies";
   protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
@@ -48,9 +55,9 @@ public class DoctorUpsertElasticSearchService {
   private final ElasticsearchIndexHelper elasticsearchIndexHelper;
 
   public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
-                                          MasterDoctorViewMapper mapper,
-                                          ElasticsearchOperations elasticSearchOperations,
-                                          ElasticsearchIndexHelper elasticsearchIndexHelper) {
+      MasterDoctorViewMapper mapper,
+      ElasticsearchOperations elasticSearchOperations,
+      ElasticsearchIndexHelper elasticsearchIndexHelper) {
     this.repository = repository;
     this.mapper = mapper;
     this.elasticSearchOperations = elasticSearchOperations;
