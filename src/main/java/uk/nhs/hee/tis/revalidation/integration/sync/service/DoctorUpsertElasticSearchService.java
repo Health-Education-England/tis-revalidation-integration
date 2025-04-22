@@ -41,8 +41,10 @@ public class DoctorUpsertElasticSearchService {
   protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
   protected static final String ES_DISCREPANCIES_FILTER =
       """
-         "script": {
-            "script": "doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']"
+         {
+           "script": {
+              "script": "doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']"
+           }
          }
       """;
   protected static final String ES_INDEX = "masterdoctorindex";
