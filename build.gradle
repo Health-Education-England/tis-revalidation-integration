@@ -92,7 +92,7 @@ dependencies {
 }
 
 checkstyle {
-  toolVersion = "8.29"
+  toolVersion = "10.12.1"
   config = resources.text.fromArchiveEntry(configurations.checkstyle[0], "google_checks.xml")
 }
 
