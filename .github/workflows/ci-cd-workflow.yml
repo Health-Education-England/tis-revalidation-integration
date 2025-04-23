@@ -41,7 +41,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-jar
+          name: app-jar-${{ github.run_id }}
           path: build/libs/*.jar
 
   check:
@@ -74,7 +74,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: reports
+          name: reports-check-${{ github.run_id }}
           path: build/reports
 
   test:
@@ -107,7 +107,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: reports
+          name: reports-test-${{ github.run_id }}
           path: build/reports
 
   analyze:
@@ -122,7 +122,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: reports
+          name: reports-check-${{ github.run_id }}
           path: build/reports
 
       - name: Set up JDK
@@ -182,7 +182,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: app-jar
+          name: app-jar-${{ github.run_id }}
           path: build/libs
 
       - name: Configure AWS credentials
