@@ -40,12 +40,13 @@ public class DoctorUpsertElasticSearchService {
 
   protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
   protected static final String ES_DISCREPANCIES_FILTER =
-      "{\"filter\":{"
-         + "\"script\":{"
-         + "\"script\":\"doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']\""
-         + "}"
-         + "}}";
-
+      """
+         {
+           "script": {
+              "script": "doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']"
+           }
+         }
+      """;
   protected static final String ES_INDEX = "masterdoctorindex";
   protected static final String DISCREPANCIES_ALIAS = "discrepancies";
   protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
