@@ -42,8 +42,10 @@ public class DoctorUpsertElasticSearchService {
   protected static final String ES_DISCREPANCIES_FILTER =
       """
          {
-           "script": {
-              "script": "doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']"
+           "filter": {
+             "script": {
+               "script": "doc['tcsDesignatedBody.keyword'] != doc['designatedBody.keyword']"
+             }
            }
          }
       """;
