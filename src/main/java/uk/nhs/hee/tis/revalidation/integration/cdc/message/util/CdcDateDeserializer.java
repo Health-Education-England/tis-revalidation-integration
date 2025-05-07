@@ -22,20 +22,24 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
-  private static final java.time.format.DateTimeFormatter cdcDateFormat =
+  private static final java.time.format.DateTimeFormatter CDC_DATE_FORMAT =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-  private LocalDateDeserializer localDateDeserializer;
+  private final LocalDateDeserializer localDateDeserializer;
 
   public CdcDateDeserializer() {
     this.localDateDeserializer = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -44,11 +48,20 @@ public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
   @Override
   public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
       throws IOException {
+
     try {
-      String dateString = p.getText();
-      return LocalDate.parse(dateString, cdcDateFormat);
+      JsonToken token = p.getCurrentToken();
+      if (token == JsonToken.START_OBJECT) {
+        JsonNode node = p.readValueAsTree();
+        String dateStr = node.get("$date").asText();
+        Instant instant = Instant.parse(dateStr);
+        return instant.atZone(ZoneOffset.UTC).toLocalDate();
+      } else {
+        String dateStr = p.getText();
+        return LocalDate.parse(dateStr, CDC_DATE_FORMAT);
+      }
     } catch (DateTimeParseException e) {
-      return localDateDeserializer.deserialize(p,ctx);
+      return localDateDeserializer.deserialize(p, ctx);
     }
   }
 }

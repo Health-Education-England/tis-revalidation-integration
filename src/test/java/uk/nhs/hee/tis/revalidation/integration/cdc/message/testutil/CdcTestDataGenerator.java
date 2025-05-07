@@ -134,6 +134,15 @@ public class CdcTestDataGenerator {
   }
 
   /**
+   * Get a test instance of an update DoctorsForDb CdcDocumentDto.
+   *
+   * @return CdcDocumentDto CdcDoctor test instance
+   */
+  public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUpdateCdcDocumentDto() {
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.UPDATE.getValue(), doctorsForDB);
+  }
+
+  /**
    * Get a test instance of an insert CdcRecommendation CdcDocumentDto.
    *
    * @return CdcDocumentDto CdcRecommendation insert test instance
