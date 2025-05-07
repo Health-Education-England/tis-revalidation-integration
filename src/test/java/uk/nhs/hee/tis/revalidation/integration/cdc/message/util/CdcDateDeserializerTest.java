@@ -3,6 +3,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+import java.time.LocalDate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.RevalidationIntegrationApplication;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-
-import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
 class CdcDateDeserializerTest {
