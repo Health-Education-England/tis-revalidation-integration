@@ -41,6 +41,7 @@ public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocument
     switch (operation) {
       case INSERT:
       case REPLACE:
+      case UPDATE:
         cdcService.upsertEntity(message.getFullDocument());
         break;
       default:

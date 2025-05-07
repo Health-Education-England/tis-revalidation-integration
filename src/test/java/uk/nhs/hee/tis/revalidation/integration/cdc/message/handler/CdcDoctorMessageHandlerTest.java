@@ -25,13 +25,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 import javax.naming.OperationNotSupportedException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
+import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+
+import java.util.Arrays;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class CdcDoctorMessageHandlerTest {
@@ -50,17 +58,17 @@ class CdcDoctorMessageHandlerTest {
         () -> cdcDoctorMessageHandler.handleMessage(testMessage));
   }
 
-  @Test
-  void shouldHandleInserts() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto();
-    cdcDoctorMessageHandler.handleMessage(testMessage);
-
-    verify(cdcDoctorService).upsertEntity(testMessage.getFullDocument());
+  private static List<CdcDocumentDto<DoctorsForDB>> cdcDtos() {
+    return Arrays.asList(
+        CdcTestDataGenerator.getCdcDoctorUpdateCdcDocumentDto(),
+        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto(),
+        CdcTestDataGenerator.getCdcDoctorReplaceCdcDocumentDto());
   }
 
-  @Test
-  void shouldHandleReplace() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getCdcDoctorReplaceCdcDocumentDto();
+  @ParameterizedTest
+  @MethodSource("cdcDtos")
+  void shouldHandleDifferentOperationTypes() throws OperationNotSupportedException {
+    var testMessage = CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto();
     cdcDoctorMessageHandler.handleMessage(testMessage);
 
     verify(cdcDoctorService).upsertEntity(testMessage.getFullDocument());
