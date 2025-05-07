@@ -22,10 +22,13 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,24 +41,29 @@ public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
   private static final java.time.format.DateTimeFormatter CDC_DATE_FORMAT =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-  @Override
-  public LocalDate deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
+  private final LocalDateDeserializer localDateDeserializer;
 
-    JsonNode node = p.readValueAsTree();
+  public CdcDateDeserializer() {
+    this.localDateDeserializer = new LocalDateDeserializer(DateTimeFormatter.ISO_LOCAL_DATE);
+  }
+
+  @Override
+  public LocalDate deserialize(JsonParser p, DeserializationContext ctx)
+      throws IOException {
+
     try {
-      if (node.isObject() && node.has("$date")) {
-        // handle MongoDB {"$date": "..."} format
+      JsonToken token = p.getCurrentToken();
+      if (token == JsonToken.START_OBJECT) {
+        JsonNode node = p.readValueAsTree();
         String dateStr = node.get("$date").asText();
         Instant instant = Instant.parse(dateStr);
         return instant.atZone(ZoneOffset.UTC).toLocalDate();
-      } else if (node.isTextual()) {
-        // handle "yyyy-MM-dd HH:mm:ss" format
-        String dateStr = node.asText();
+      } else {
+        String dateStr = p.getText();
         return LocalDate.parse(dateStr, CDC_DATE_FORMAT);
       }
     } catch (DateTimeParseException e) {
-      throw new JsonMappingException(p, "Not supported date format:" + node);
+      return localDateDeserializer.deserialize(p, ctx);
     }
-    throw new JsonMappingException(p, "Not supported date format:" + node);
   }
 }

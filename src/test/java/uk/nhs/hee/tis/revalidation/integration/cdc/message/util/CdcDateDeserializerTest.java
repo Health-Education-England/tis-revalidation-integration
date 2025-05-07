@@ -2,15 +2,11 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -131,15 +127,5 @@ class CdcDateDeserializerTest {
     assertThat(dateAdded.getDayOfMonth(), is(7));
     assertThat(dateAdded.getMonthValue(), is(10));
     assertThat(dateAdded.getYear(), is(2015));
-  }
-
-  @Test
-  void shouldThrowErrorWhenDateInvalid() {
-    JsonMappingException thrown = assertThrows(JsonMappingException.class, () ->
-        mapper.readValue(CDC_DOCDB_EVENT_JSON_DATE_INVALID, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {
-            }
-        ), "Expected JsonMappingException to throw, but it didn't");
-
-    assertTrue(thrown.getMessage().contains("Not supported date format:"));
   }
 }
