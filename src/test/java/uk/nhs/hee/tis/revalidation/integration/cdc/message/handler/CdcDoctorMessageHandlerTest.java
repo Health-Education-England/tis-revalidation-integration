@@ -33,13 +33,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.List;
+
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcDoctorService;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-
-import java.util.Arrays;
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class CdcDoctorMessageHandlerTest {
@@ -51,8 +52,7 @@ class CdcDoctorMessageHandlerTest {
   CdcDoctorService cdcDoctorService;
 
   @Test
-  void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException {
+  void shouldRejectOtherDoctorOperationMessageFromSqsQueueToHandler() {
     var testMessage = CdcTestDataGenerator.getCdcDoctorUnsupportedCdcDocumentDto();
     assertThrows(OperationNotSupportedException.class,
         () -> cdcDoctorMessageHandler.handleMessage(testMessage));

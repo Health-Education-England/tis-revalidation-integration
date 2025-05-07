@@ -39,9 +39,7 @@ public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocument
   public void handleMessage(CdcDocumentDto<T> message) throws OperationNotSupportedException {
     final OperationType operation = OperationType.valueOf(message.getOperationType().toUpperCase());
     switch (operation) {
-      case INSERT:
-      case REPLACE:
-      case UPDATE:
+      case INSERT, REPLACE, UPDATE:
         cdcService.upsertEntity(message.getFullDocument());
         break;
       default:

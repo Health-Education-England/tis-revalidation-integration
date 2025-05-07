@@ -21,7 +21,7 @@ import java.time.LocalDate;
 class CdcDateDeserializerTest {
 
   private ObjectMapper mapper;
-  private final static String CDC_DOC_JSON =
+  private static final String CDC_DOC_JSON =
       """
           {
             "_id":{"_data":"01625a0706000001c001000001c000020042"},
@@ -30,15 +30,20 @@ class CdcDateDeserializerTest {
             "ns":{"db":"revalidation","coll":"doctorsForDB"},
             "documentKey":{"_id":"1234567"},
             "fullDocument":{
-                              "_id":"1234567","doctorFirstName":"First","doctorLastName":"Last",
-                               "submissionDate":"2017-10-19 00:00:00","dateAdded":"2015-10-07 00:00:00",
-                               "underNotice":"NO","sanction":"No","doctorStatus":"COMPLETED",
-                               "lastUpdatedDate":"2022-04-15 00:00:00","designatedBodyCode":"1-AIIDWI",
-                               "existsInGmc":false,"_class":"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"}
+                              "_id":"1234567","doctorFirstName":"First",
+                              "doctorLastName":"Last",
+                              "submissionDate":"2017-10-19 00:00:00",
+                              "dateAdded":"2015-10-07 00:00:00",
+                              "underNotice":"NO","sanction":"No",
+                              "doctorStatus":"COMPLETED",
+                              "lastUpdatedDate":"2022-04-15 00:00:00",
+                              "designatedBodyCode":"1-AIIDWI",
+                              "existsInGmc":false,
+                              "_class":"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"}
           }
           """;
 
-  private final static String CDC_DOCDB_JSON_GMC_NUMBER =
+  private static final String CDC_DOCDB_JSON_GMC_NUMBER =
       """
           {
             "gmcReferenceNumber":{"_data":"01625a0706000001c001000001c000020042"},
@@ -47,15 +52,20 @@ class CdcDateDeserializerTest {
             "ns":{"db":"revalidation","coll":"doctorsForDB"},
             "documentKey":{"_id":"1234567"},
             "fullDocument":{
-                              "_id":"1234567","doctorFirstName":"First","doctorLastName":"Last",
-                              "submissionDate":"2017-10-19 00:00:00","dateAdded":"2015-10-07 00:00:00",
-                              "underNotice":"NO","sanction":"No","doctorStatus":"COMPLETED",
-                              "lastUpdatedDate":"2022-04-15 00:00:00","designatedBodyCode":"1-AIIDWI",
-                              "existsInGmc":false,"_class":"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"}}
+                              "_id":"1234567","doctorFirstName":"First",
+                              "doctorLastName":"Last",
+                              "submissionDate":"2017-10-19 00:00:00",
+                              "dateAdded":"2015-10-07 00:00:00",
+                              "underNotice":"NO","sanction":"No",
+                              "doctorStatus":"COMPLETED",
+                              "lastUpdatedDate":"2022-04-15 00:00:00",
+                              "designatedBodyCode":"1-AIIDWI",
+                              "existsInGmc":false,
+                              "_class":"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"}}
           """;
 
 
-  private final static String CDC_DOCDB_EVENT_JSON =
+  private static final String CDC_DOCDB_EVENT_JSON =
       """
           {
             "_id": {"_data": "016819321a00000001010000000000020042"},
@@ -72,30 +82,11 @@ class CdcDateDeserializerTest {
                               "_class": "uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"},
             "ns": {"db": "revalidation", "coll": "doctorsForDB"},
             "operationType": "update",
-            "updateDescription": {"removedFields": [], "truncatedArrays": [], "updatedFields": {"underNotice": "YES"}}
+            "updateDescription": {"removedFields": [], "truncatedArrays": [],
+                                  "updatedFields": {"underNotice": "YES"}}
           }
           """;
 
-  private final static String CDC_DOCDB_EVENT_JSON_DATE_INVALID =
-      """
-          {
-            "_id": {"_data": "016819321a00000001010000000000020042"},
-            "clusterTime": {"$timestamp": {"t": 1746481690, "i": 1}},
-            "documentKey": {"_id": "1234567"},
-            "fullDocument": {
-                              "_id": "1234567", "doctorFirstName": "AAA", "doctorLastName": "BBB",
-                              "submissionDate": {"$date": "05/08/2024"},
-                              "dateAdded": {"$date": "07/10/2015"}, "underNotice": "YES",
-                              "sanction": "No", "doctorStatus": "DRAFT",
-                              "lastUpdatedDate": {"$date": "2025-04-29T00:00:00Z"},
-                              "gmcLastUpdatedDateTime": {"$date": "2025-04-29T00:00:54.956Z"},
-                              "designatedBodyCode": "1-1RSSQ05", "existsInGmc": true,
-                              "_class": "uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"},
-            "ns": {"db": "revalidation", "coll": "doctorsForDB"},
-            "operationType": "update",
-            "updateDescription": {"removedFields": [], "truncatedArrays": [], "updatedFields": {"underNotice": "YES"}}
-          }
-          """;
   private String gmcId = "1234567";
 
   @BeforeEach
