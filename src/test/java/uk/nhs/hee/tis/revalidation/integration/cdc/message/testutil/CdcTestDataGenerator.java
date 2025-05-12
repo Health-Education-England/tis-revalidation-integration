@@ -39,6 +39,9 @@ import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationType;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+/**
+ * The utility class to help generate test data.
+ */
 @Component
 public class CdcTestDataGenerator {
 
