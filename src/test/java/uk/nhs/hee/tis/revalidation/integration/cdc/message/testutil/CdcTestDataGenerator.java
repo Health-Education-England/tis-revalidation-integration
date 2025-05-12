@@ -85,15 +85,6 @@ public class CdcTestDataGenerator {
       .existsInGmc(EXISTS_IN_GMC_VAL)
       .build();
 
-  private static Recommendation recommendation = Recommendation.builder()
-      .id("1")
-      .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-      .recommendationType(RecommendationType.REVALIDATE)
-      .recommendationStatus(DRAFT)
-      .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-      .admin(ADMIN_VAL)
-      .build();
-
   /**
    * Get a test instance of MasterDoctorView.
    *
@@ -204,9 +195,9 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor unsupported test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUnsupportedCdcDocumentDto() {
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
+    DoctorsForDB doctorsForDb = DoctorsForDB.builder().build();
 
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDB);
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDb);
   }
 
   /**

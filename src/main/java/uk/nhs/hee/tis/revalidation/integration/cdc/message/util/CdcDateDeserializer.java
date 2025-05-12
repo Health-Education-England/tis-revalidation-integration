@@ -21,6 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
+import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -29,10 +31,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Date deserializer for deserializing dates for cdc messages.
+ */
 public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
 
   private static final DateTimeFormatter CDC_DATE_FORMAT =
@@ -53,7 +57,7 @@ public class CdcDateDeserializer extends JsonDeserializer<LocalDate> {
       if (token == JsonToken.START_OBJECT) {
         JsonNode node = p.readValueAsTree();
         String dateStr = node.get("$date").asText();
-        return OffsetDateTime.parse(dateStr).toLocalDate();
+        return LocalDate.parse(dateStr, ISO_DATE_TIME);
       } else {
         String dateStr = p.getText();
         return LocalDate.parse(dateStr, CDC_DATE_FORMAT);

@@ -27,6 +27,11 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcService;
 import uk.nhs.hee.tis.revalidation.integration.message.MessageHandler;
 
+/**
+ * An abstract class to handle cdc messages.
+ *
+ * @param <T> the message type
+ */
 public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocumentDto<T>> {
 
   CdcService<T> cdcService;
