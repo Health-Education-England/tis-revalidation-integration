@@ -39,6 +39,9 @@ import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationType;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+/**
+ * The utility class to help generate test data.
+ */
 @Component
 public class CdcTestDataGenerator {
 
@@ -85,15 +88,6 @@ public class CdcTestDataGenerator {
       .existsInGmc(EXISTS_IN_GMC_VAL)
       .build();
 
-  private static Recommendation recommendation = Recommendation.builder()
-      .id("1")
-      .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-      .recommendationType(RecommendationType.REVALIDATE)
-      .recommendationStatus(DRAFT)
-      .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-      .admin(ADMIN_VAL)
-      .build();
-
   /**
    * Get a test instance of MasterDoctorView.
    *
@@ -131,6 +125,15 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorReplaceCdcDocumentDto() {
     return new CdcDocumentDto<DoctorsForDB>(OperationType.REPLACE.getValue(), doctorsForDB);
+  }
+
+  /**
+   * Get a test instance of an update DoctorsForDb CdcDocumentDto.
+   *
+   * @return CdcDocumentDto CdcDoctor test instance
+   */
+  public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUpdateCdcDocumentDto() {
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.UPDATE.getValue(), doctorsForDB);
   }
 
   /**
@@ -195,9 +198,9 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor unsupported test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUnsupportedCdcDocumentDto() {
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder().build();
+    DoctorsForDB doctorsForDb = DoctorsForDB.builder().build();
 
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDB);
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDb);
   }
 
   /**
