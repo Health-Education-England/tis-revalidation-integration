@@ -69,7 +69,7 @@ class GmcDoctorMessageListenerTest {
     gmcDoctorMessageListener = new GmcDoctorMessageListener(
         doctorUpsertElasticSearchService, elasticsearchIndexServiceMock, mapper);
 
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder()
+    DoctorsForDB doctorsForDb = DoctorsForDB.builder()
         .gmcReferenceNumber("101")
         .doctorFirstName("AAA")
         .doctorLastName("BBB")
@@ -84,7 +84,7 @@ class GmcDoctorMessageListenerTest {
         .existsInGmc(true).build();
 
     RevalidationSummaryDto revalidationSummaryDto = RevalidationSummaryDto.builder()
-        .doctor(doctorsForDB)
+        .doctor(doctorsForDb)
         .gmcOutcome("Approved").build();
 
     message = new IndexSyncMessage<>();
