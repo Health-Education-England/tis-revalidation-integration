@@ -21,11 +21,13 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
@@ -37,8 +39,8 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
-
   private final ElasticsearchIndexService elasticsearchIndexService;
+  private final ObjectMapper mapper;
 
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
@@ -49,13 +51,18 @@ public class GmcDoctorMessageListener {
   private long traineeCount;
 
   public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
-      ElasticsearchIndexService elasticsearchIndexService) {
+      ElasticsearchIndexService elasticsearchIndexService,
+      ObjectMapper mapper) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
     this.elasticsearchIndexService = elasticsearchIndexService;
+    this.mapper = mapper;
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
+  public void getMessage(String strMsg) throws IOException {
+    IndexSyncMessage<RevalidationSummaryDto> message = mapper.readValue(strMsg,
+        new TypeReference<>() {
+        });
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
