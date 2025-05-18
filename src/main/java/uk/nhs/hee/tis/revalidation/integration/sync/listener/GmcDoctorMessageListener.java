@@ -21,10 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -59,7 +59,7 @@ public class GmcDoctorMessageListener {
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(String strMsg) throws IOException {
+  public void getMessage(String strMsg) throws JsonProcessingException {
     IndexSyncMessage<RevalidationSummaryDto> message = mapper.readValue(strMsg,
         new TypeReference<>() {
         });
