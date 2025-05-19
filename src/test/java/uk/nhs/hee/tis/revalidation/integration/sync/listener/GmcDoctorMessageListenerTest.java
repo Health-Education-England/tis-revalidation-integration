@@ -24,15 +24,19 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -49,16 +53,23 @@ class GmcDoctorMessageListenerTest {
 
   private IndexSyncMessage<RevalidationSummaryDto> message;
 
-  @InjectMocks
   private GmcDoctorMessageListener gmcDoctorMessageListener;
+  private ObjectMapper mapper;
+
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   @Mock
   private ElasticsearchIndexService elasticsearchIndexServiceMock;
 
+
   @BeforeEach
   void setUp() {
-    DoctorsForDB doctorsForDB = DoctorsForDB.builder()
+    mapper = new ObjectMapper();
+    mapper.registerModules(new JavaTimeModule());
+    gmcDoctorMessageListener = new GmcDoctorMessageListener(
+        doctorUpsertElasticSearchService, elasticsearchIndexServiceMock, mapper);
+
+    DoctorsForDB doctorsForDb = DoctorsForDB.builder()
         .gmcReferenceNumber("101")
         .doctorFirstName("AAA")
         .doctorLastName("BBB")
@@ -73,7 +84,7 @@ class GmcDoctorMessageListenerTest {
         .existsInGmc(true).build();
 
     RevalidationSummaryDto revalidationSummaryDto = RevalidationSummaryDto.builder()
-        .doctor(doctorsForDB)
+        .doctor(doctorsForDb)
         .gmcOutcome("Approved").build();
 
     message = new IndexSyncMessage<>();
@@ -81,8 +92,9 @@ class GmcDoctorMessageListenerTest {
   }
 
   @Test
-  void testMessagesAreReceivedFromSqsQueue() {
-    gmcDoctorMessageListener.getMessage(message);
+  void testMessagesAreReceivedFromSqsQueue() throws IOException {
+    String messageStr = mapper.writeValueAsString(message);
+    gmcDoctorMessageListener.getMessage(messageStr);
 
     ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
         .forClass(MasterDoctorView.class);
@@ -100,10 +112,20 @@ class GmcDoctorMessageListenerTest {
   @Test
   void shouldNotThrowErrorWhenRecommendationReindexHasException() throws Exception {
     message.setSyncEnd(true);
+    String messageStr = mapper.writeValueAsString(message);
 
     doThrow(Exception.class).when(elasticsearchIndexServiceMock)
         .resync("masterdoctorindex", "recommendationindex");
 
-    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(message));
+    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(messageStr));
+  }
+
+  @Test
+  void shouldThrowErrorWhenReadMessageFails() throws Exception {
+    String messageStr = mapper.writeValueAsString(message);
+    String invalidJsonStr = messageStr.substring(1, messageStr.length() - 2);
+
+    assertThrows(JsonProcessingException.class,
+        () -> gmcDoctorMessageListener.getMessage(invalidJsonStr));
   }
 }

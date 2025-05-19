@@ -21,24 +21,29 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+/**
+ * Listener for handling ES rebuild gmc sync messages.
+ */
 @Slf4j
 @Service
 public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
-
   private final ElasticsearchIndexService elasticsearchIndexService;
+  private final ObjectMapper mapper;
 
   @Value("${cloud.aws.end-point.uri}")
   private String sqsEndPoint;
@@ -48,14 +53,27 @@ public class GmcDoctorMessageListener {
 
   private long traineeCount;
 
+  /**
+   * The listener to handle gmc sync messages.
+   *
+   * @param doctorUpsertElasticSearchService the service to upsert doctors to ES
+   * @param elasticsearchIndexService        the service to process elasticsearch indices
+   * @param mapper                           the object mapper to convert messages from String to
+   *                                         IndexSyncMessage
+   */
   public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
-      ElasticsearchIndexService elasticsearchIndexService) {
+      ElasticsearchIndexService elasticsearchIndexService,
+      ObjectMapper mapper) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
     this.elasticsearchIndexService = elasticsearchIndexService;
+    this.mapper = mapper;
   }
 
   @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(IndexSyncMessage<RevalidationSummaryDto> message) {
+  public void getMessage(String strMsg) throws JsonProcessingException {
+    IndexSyncMessage<RevalidationSummaryDto> message = mapper.readValue(strMsg,
+        new TypeReference<>() {
+        });
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
@@ -67,19 +85,19 @@ public class GmcDoctorMessageListener {
       traineeCount = 0;
     } else {
       //prepare the MasterDoctorView and call the service method
-      final var doctorsForDB = message.getPayload().getDoctor();
+      final var doctorsForDb = message.getPayload().getDoctor();
       MasterDoctorView masterDoctorView = MasterDoctorView.builder()
-          .gmcReferenceNumber(doctorsForDB.getGmcReferenceNumber())
-          .doctorFirstName(doctorsForDB.getDoctorFirstName())
-          .doctorLastName(doctorsForDB.getDoctorLastName())
-          .submissionDate(doctorsForDB.getSubmissionDate())
-          .designatedBody(doctorsForDB.getDesignatedBodyCode())
+          .gmcReferenceNumber(doctorsForDb.getGmcReferenceNumber())
+          .doctorFirstName(doctorsForDb.getDoctorFirstName())
+          .doctorLastName(doctorsForDb.getDoctorLastName())
+          .submissionDate(doctorsForDb.getSubmissionDate())
+          .designatedBody(doctorsForDb.getDesignatedBodyCode())
           .gmcStatus(message.getPayload().getGmcOutcome())
           .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
-          .admin(doctorsForDB.getAdmin())
-          .lastUpdatedDate(doctorsForDB.getLastUpdatedDate())
-          .underNotice(doctorsForDB.getUnderNotice())
-          .existsInGmc(doctorsForDB.getExistsInGmc())
+          .admin(doctorsForDb.getAdmin())
+          .lastUpdatedDate(doctorsForDb.getLastUpdatedDate())
+          .underNotice(doctorsForDb.getUnderNotice())
+          .existsInGmc(doctorsForDb.getExistsInGmc())
           .build();
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
       traineeCount++;
