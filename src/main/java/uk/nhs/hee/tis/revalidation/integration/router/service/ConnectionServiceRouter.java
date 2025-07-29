@@ -56,6 +56,10 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/exception?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCREPANCIES =
       "/api/connections/discrepancies?bridgeEndpoint=true";
+  private static final String API_CONNECTION_DISCREPANCIES_CONNECTABLE =
+      "/api/connections/discrepancies/connectable?bridgeEndpoint=true";
+  private static final String API_CONNECTION_DISCREPANCIES_DISCONNECTABLE =
+      "/api/connections/discrepancies/disconnectable?bridgeEndpoint=true";
   private static final String API_CONNECTION_CONNECTED =
       "/api/connections/connected?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCONNECTED =
@@ -133,6 +137,16 @@ public class ConnectionServiceRouter extends RouteBuilder {
     // Connection summary page - Discrepancies queue tab
     from("direct:connection-discrepancies-summary")
         .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    // Connection summary page - Discrepancies - doctors to connect
+    from("direct:connection-discrepancies-connectable")
+        .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES_CONNECTABLE)
+        .unmarshal().json(JsonLibrary.Jackson);
+
+    // Connection summary page - Discrepancies -doctors to disconnect
+    from("direct:connection-discrepancies-disconnectable")
+        .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES_DISCONNECTABLE)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Connected queue tab
