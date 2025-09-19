@@ -95,7 +95,6 @@ sentry:
 cloud:
   aws:
     end-point:
-      uri: ${SQS_SYNC_GMC_QUEUE:}
-      cdc.doctor: ${SQS_CDC_DOCTOR_QUEUE:}
-      cdc.recommendation: ${SQS_CDC_RECOMMENDATION_QUEUE:}
-
+      uri: ${SQS_SYNC_GMC_QUEUE:tis-revalidation-sync-gmc-queue}
+      cdc.doctor: ${SQS_CDC_DOCTOR_QUEUE:tis-revalidation-documentdb-cdc-doctorsfordb}
+      cdc.recommendation: ${SQS_CDC_RECOMMENDATION_QUEUE:tis-revalidation-documentdb-cdc-recommendation}

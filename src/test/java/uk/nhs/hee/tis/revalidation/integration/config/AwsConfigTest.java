@@ -26,8 +26,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.apache.camel.component.aws.xray.NoopTracingStrategy;
 import org.apache.camel.component.aws.xray.XRayTracer;
 import org.junit.jupiter.api.Test;
@@ -45,13 +44,8 @@ class AwsConfigTest {
   ApplicationContext ctx;
 
   @Test
-  void testAmazonSqsAsync() {
-    assertThat(ctx.getBean(AmazonSQSAsync.class), notNullValue());
-  }
-
-  @Test
-  void testQueueMessagingTemplate() {
-    assertThat(ctx.getBean(QueueMessagingTemplate.class), notNullValue());
+  void testSqsTemplate() {
+    assertThat(ctx.getBean(SqsTemplate.class), notNullValue());
   }
 
   @Test

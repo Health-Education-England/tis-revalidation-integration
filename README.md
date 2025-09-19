@@ -40,6 +40,9 @@ Example:
         .to(exampleServiceUrl + "/api/example/someEndpoint?bridgeEndpoint=true");
 ```
 
+## Integration Tests
+This project uses localstack for integration tests. Docker must be running locally for these tests to run and pass.
+
 ## TODO
  - Provide dynamic `SENTRY_ENVIRONMENT` as environmental variable during
    deployment, this should be set based on where the container is being

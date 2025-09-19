@@ -69,9 +69,10 @@ dependencies {
   implementation "org.springframework.boot:spring-boot-starter-amqp"
 
   // AWS cloud
-  ext.cloudVersion = "2.3.2"
-  implementation "io.awspring.cloud:spring-cloud-starter-aws:$cloudVersion"
-  implementation "io.awspring.cloud:spring-cloud-starter-aws-messaging:$cloudVersion"
+  ext.cloudVersion = "3.4.0"
+  implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:${cloudVersion}")
+  implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
+  implementation 'io.awspring.cloud:spring-cloud-aws-autoconfigure'
 
   // Elastic Search
   implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch"
@@ -89,6 +90,15 @@ dependencies {
   ext.mongoDriverVersion = "4.5.1"
   implementation "org.mongodb:mongodb-driver-core:$mongoDriverVersion"
   implementation "org.mongodb:bson:$mongoDriverVersion"
+
+  //Testcontainers
+  ext.testcontainersVersion = "1.21.3"
+  testImplementation "org.testcontainers:testcontainers:$testcontainersVersion"
+  testImplementation "org.testcontainers:localstack:$testcontainersVersion"
+  testImplementation "org.testcontainers:elasticsearch:$testcontainersVersion"
+  testImplementation "org.testcontainers:junit-jupiter:$testcontainersVersion"
+  testImplementation "org.testcontainers:rabbitmq:$testcontainersVersion"
+
 }
 
 checkstyle {
@@ -96,12 +106,12 @@ checkstyle {
   config = resources.text.fromArchiveEntry(configurations.checkstyle[0], "google_checks.xml")
 }
 
-jacocoTestReport {
-  reports {
-    html.enabled true
-    xml.enabled true
-  }
-}
+//jacocoTestReport {
+//  reports {
+//    html.enabled true
+//    xml.enabled true
+//  }
+//}
 
 sonarqube {
   properties {

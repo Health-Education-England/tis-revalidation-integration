@@ -21,27 +21,37 @@
 
 package uk.nhs.hee.tis.revalidation.integration.config;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+
+import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.apache.camel.component.aws.xray.NoopTracingStrategy;
 import org.apache.camel.component.aws.xray.XRayTracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 
 @Configuration
 public class AwsConfig {
 
+  /**
+   * Creates a bean for accessing SQS asynchronously
+   *
+   * @return the object that will access SQS asynchronously
+   */
   @Bean
-  public QueueMessagingTemplate queueMessagingTemplate(AmazonSQSAsync amazonSqsAsync) {
-    return new QueueMessagingTemplate(amazonSqsAsync);
+  public SqsAsyncClient sqsAsyncClient() {
+    return SqsAsyncClient.create();
   }
 
-  @Primary
+  /**
+   * Creates a bean for sending SQS messages
+   *
+   * @return the object that will send SQS messages
+   */
   @Bean
-  public AmazonSQSAsync amazonSqsAsync() {
-    return AmazonSQSAsyncClientBuilder.defaultClient();
+  public SqsTemplate sqsTemplate(SqsAsyncClient sqsAsyncClient) {
+    return SqsTemplate.builder()
+        .sqsAsyncClient(sqsAsyncClient)
+        .build();
   }
 
   /**

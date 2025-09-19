@@ -23,7 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.awspring.cloud.messaging.listener.annotation.SqsListener;
+import io.awspring.cloud.sqs.annotation.SqsListener;
 import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
