@@ -74,6 +74,7 @@ class TraineeDetailProcessorTest {
   private String lastName2;
   private LocalDate submissionDate;
   private LocalDate curriculumEndDate;
+  private LocalDate programmeEndDate;
   private LocalDate dateAdded;
   private RecommendationStatus doctorStatus;
   private String admin;
@@ -114,6 +115,7 @@ class TraineeDetailProcessorTest {
     assertThat(dto.getCurrentGrade(), is(currentGrade));
     assertThat(dto.getProgrammeName(), is(programmeName));
     assertThat(dto.getCurriculumEndDate(), is(curriculumEndDate));
+    assertThat(dto.getProgrammeEndDate(), is(programmeEndDate));
     assertThat(dto.getProgrammeMembershipType(), is(programmeMembershipType));
     assertThat(dto.getTisPersonId(), is(tisPersonId));
     assertThat(dto.getNotes().size(), equalTo(1));
@@ -140,6 +142,7 @@ class TraineeDetailProcessorTest {
     assertThat(dto.getCurrentGrade(), is(currentGrade));
     assertThat(dto.getProgrammeName(), is(programmeName));
     assertThat(dto.getCurriculumEndDate(), is(curriculumEndDate));
+    assertThat(dto.getProgrammeEndDate(), is(programmeEndDate));
     assertThat(dto.getProgrammeMembershipType(), is(programmeMembershipType));
     assertThat(dto.getTisPersonId(), is(tisPersonId));
     assertThat(dto.getNotes().size(), equalTo(1));
@@ -166,6 +169,7 @@ class TraineeDetailProcessorTest {
     assertThat(dto.getCurrentGrade(), nullValue());
     assertThat(dto.getProgrammeName(), nullValue());
     assertThat(dto.getCurriculumEndDate(), nullValue());
+    assertThat(dto.getProgrammeEndDate(), nullValue());
     assertThat(dto.getProgrammeMembershipType(), nullValue());
     assertThat(dto.getTisPersonId(), nullValue());
     assertThat(dto.getNotes().size(), equalTo(1));
@@ -197,6 +201,7 @@ class TraineeDetailProcessorTest {
     lastName2 = faker.name().lastName();
     submissionDate = now();
     curriculumEndDate = now();
+    programmeEndDate = curriculumEndDate.plusMonths(1);
     dateAdded = now().minusDays(5);
     doctorStatus = RecommendationStatus.SUBMITTED_TO_GMC;
     admin = faker.internet().emailAddress();
@@ -235,6 +240,7 @@ class TraineeDetailProcessorTest {
         .forenames(firstName1)
         .surname(lastName1)
         .curriculumEndDate(curriculumEndDate)
+        .programmeEndDate(programmeEndDate)
         .programmeName(programmeName)
         .programmeMembershipType(programmeMembershipType)
         .currentGrade(currentGrade)

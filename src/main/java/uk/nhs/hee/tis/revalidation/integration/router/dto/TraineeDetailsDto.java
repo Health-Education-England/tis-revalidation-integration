@@ -29,6 +29,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * A DTO for the TraineeDetails, including the doctor details from TCS and Recommendation services,
+ * and notes from core service.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -40,6 +44,7 @@ public class TraineeDetailsDto {
   private String forenames;
   private String surname;
   private LocalDate curriculumEndDate;
+  private LocalDate programmeEndDate;
   private String programmeMembershipType;
   private String programmeName;
   private String currentGrade;
