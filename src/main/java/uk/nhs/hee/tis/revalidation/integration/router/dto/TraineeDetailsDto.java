@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * A DTO for the TraineeDetails, including the doctor details from TCS and Recommendation services,
- * and notes from core service
+ * and notes from core service.
  */
 @Data
 @Builder
