@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.sync.view;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -94,4 +95,9 @@ public class MasterDoctorView {
   private String placementGrade;
   @Nullable
   private Boolean existsInGmc;
+  private String updatedBy;
+  @Nullable
+  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+  private LocalDateTime eventDateTime;
 }

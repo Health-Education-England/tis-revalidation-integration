@@ -98,4 +98,5 @@ cloud:
       uri: ${SQS_SYNC_GMC_QUEUE:}
       cdc.doctor: ${SQS_CDC_DOCTOR_QUEUE:}
       cdc.recommendation: ${SQS_CDC_RECOMMENDATION_QUEUE:}
+      cdc.connection: ${SQS_CDC_CONNECTION_QUEUE:http://localhost:4566/000000000000/tis-revalidation-documentdb-cdc-local-connectionlogs}
 

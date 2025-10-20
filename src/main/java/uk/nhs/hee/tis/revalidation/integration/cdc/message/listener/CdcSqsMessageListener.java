@@ -91,4 +91,20 @@ public class CdcSqsMessageListener {
       log.error(e.getMessage(), e);
     }
   }
+
+  /**
+   * Get doctor cdc message which is a json string.
+   *
+   * @param message containing change data for doctorsForDb
+   */
+  @SqsListener("${cloud.aws.end-point.cdc.connection}")
+  public void getConnectionMessage(String message) throws IOException {
+    try {
+      CdcDocumentDto<DoctorsForDB> cdcDocument =
+          mapper.readValue(message, new TypeReference<>() {});
+      cdcDoctorMessageHandler.handleMessage(cdcDocument);
+    } catch (OperationNotSupportedException e) {
+      log.error(e.getMessage(), e);
+    }
+  }
 }
