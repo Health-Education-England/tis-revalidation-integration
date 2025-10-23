@@ -25,7 +25,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,7 +41,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
-import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcRecommendationService;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -63,7 +61,7 @@ class CdcRecommendationServiceTest {
   @Captor
   ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
-  private MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+  private final MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
 
   @Test
   void shouldAddNewFields() {
