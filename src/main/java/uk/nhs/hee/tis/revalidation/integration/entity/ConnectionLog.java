@@ -47,5 +47,5 @@ public class ConnectionLog {
   private String updatedBy;
   @JsonDeserialize(using = CdcDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
-  private LocalDateTime eventDateTime;
+  private LocalDateTime requestTime;
 }
