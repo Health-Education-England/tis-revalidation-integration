@@ -36,6 +36,10 @@ import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
+/**
+ * A class to listen all the log messages.
+ *
+ */
 @Slf4j
 @Component
 public class CdcSqsMessageListener {

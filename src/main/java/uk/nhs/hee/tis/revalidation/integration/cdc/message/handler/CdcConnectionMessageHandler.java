@@ -25,6 +25,10 @@ import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcConnectionService;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 
+/**
+ * A component class to handle cdc connection log messages.
+ *
+ */
 @Component
 public class CdcConnectionMessageHandler extends CdcMessageHandler<ConnectionLog> {
 

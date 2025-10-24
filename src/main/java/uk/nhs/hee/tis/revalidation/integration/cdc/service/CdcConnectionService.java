@@ -18,6 +18,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import java.util.List;
@@ -28,6 +29,10 @@ import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
+/**
+ * A service class that updates connection log fields.
+ *
+ */
 @Slf4j
 @Service
 public class CdcConnectionService extends CdcService<ConnectionLog> {

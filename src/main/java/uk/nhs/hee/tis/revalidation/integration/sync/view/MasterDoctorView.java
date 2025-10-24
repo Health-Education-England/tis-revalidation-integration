@@ -40,6 +40,10 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 
+/**
+ * A data class to handle main elastic search document.
+ *
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

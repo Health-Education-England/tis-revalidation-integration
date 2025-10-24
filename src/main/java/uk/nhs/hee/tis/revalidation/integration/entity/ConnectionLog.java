@@ -33,6 +33,10 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
 
+/**
+ * A class that has all connection log messages' fields.
+ *
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
