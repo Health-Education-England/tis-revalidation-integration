@@ -99,7 +99,7 @@ class CdcConnectionServiceTest {
 
     verify(publisher).publishCdcUpdate(masterDoctorViewCaptor.capture());
     assertThat(masterDoctorViewCaptor.getValue().getUpdatedBy(), is("admin"));
-    assertThat(masterDoctorViewCaptor.getValue().getEventDateTime().getMonth(),
+    assertThat(masterDoctorViewCaptor.getValue().getLastConnectionDateTime().getMonth(),
         is(LocalDateTime.now().getMonth()));
   }
 }
