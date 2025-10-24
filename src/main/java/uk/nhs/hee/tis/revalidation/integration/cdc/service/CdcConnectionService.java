@@ -64,7 +64,7 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
         masterDoctorView.setUpdatedBy(entity.getUpdatedBy());
-        masterDoctorView.setEventDateTime(entity.getRequestTime());
+        masterDoctorView.setLastConnectionDateTime(entity.getRequestTime());
         final var updatedView = repository.save(masterDoctorView);
         publishUpdate(updatedView);
       }

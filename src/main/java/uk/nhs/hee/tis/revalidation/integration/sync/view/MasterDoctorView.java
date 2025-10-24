@@ -103,5 +103,5 @@ public class MasterDoctorView {
   @Nullable
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-  private LocalDateTime eventDateTime;
+  private LocalDateTime lastConnectionDateTime;
 }
