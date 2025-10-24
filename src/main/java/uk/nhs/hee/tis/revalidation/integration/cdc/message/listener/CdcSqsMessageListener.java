@@ -98,11 +98,11 @@ public class CdcSqsMessageListener {
   }
 
   /**
-   * Get doctor cdc message which is a json string.
+   * Get connection log cdc message which is a json string.
    *
-   * @param message containing change data for doctorsForDb
+   * @param message containing change data for connectionLog
    */
-  @SqsListener("${cloud.aws.end-point.cdc.connection}")
+  @SqsListener("${cloud.aws.end-point.cdc.connectionlog}")
   public void getConnectionMessage(String message) throws IOException {
     try {
       CdcDocumentDto<ConnectionLog> cdcDocument =

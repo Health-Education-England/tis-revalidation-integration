@@ -97,7 +97,7 @@ public class MasterDoctorView {
   private Boolean existsInGmc;
   private String updatedBy;
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime eventDateTime;
 }
