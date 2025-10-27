@@ -29,17 +29,24 @@ import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
+import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
+/**
+ * A class to listen all the log messages.
+ *
+ */
 @Slf4j
 @Component
 public class CdcSqsMessageListener {
 
   private final CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
   private final CdcDoctorMessageHandler cdcDoctorMessageHandler;
+  private final CdcConnectionMessageHandler cdcConnectionMessageHandler;
   private final ObjectMapper mapper;
 
   /**
@@ -54,9 +61,11 @@ public class CdcSqsMessageListener {
   public CdcSqsMessageListener(
       CdcRecommendationMessageHandler cdcRecommendationMessageHandler,
       CdcDoctorMessageHandler cdcDoctorMessageHandler,
+      CdcConnectionMessageHandler cdcConnectionMessageHandler,
       ObjectMapper mapper) {
     this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
     this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
+    this.cdcConnectionMessageHandler = cdcConnectionMessageHandler;
     this.mapper = mapper;
   }
 
@@ -87,6 +96,22 @@ public class CdcSqsMessageListener {
       CdcDocumentDto<DoctorsForDB> cdcDocument =
           mapper.readValue(message, new TypeReference<>() {});
       cdcDoctorMessageHandler.handleMessage(cdcDocument);
+    } catch (OperationNotSupportedException e) {
+      log.error(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Get connection log cdc message which is a json string.
+   *
+   * @param message containing change data for connectionLog
+   */
+  @SqsListener("${cloud.aws.end-point.cdc.connectionlog}")
+  public void getConnectionMessage(String message) throws IOException {
+    try {
+      CdcDocumentDto<ConnectionLog> cdcDocument =
+          mapper.readValue(message, new TypeReference<>() {});
+      cdcConnectionMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
     }

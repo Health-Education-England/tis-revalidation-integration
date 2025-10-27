@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2022 Crown Copyright (Health Education England)
+ * Copyright 2025 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,12 +23,12 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
@@ -44,31 +44,26 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataG
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
-
 @ExtendWith(MockitoExtension.class)
-class CdcRecommendationServiceTest {
-
-  @InjectMocks
-  @Spy
-  CdcRecommendationService cdcRecommendationService;
-
-  @Mock
-  MasterDoctorElasticSearchRepository repository;
-
-  @Mock
-  CdcMessagePublisher publisher;
-
-  @Captor
-  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
+class CdcConnectionServiceTest {
 
   private final MasterDoctorView masterDoctorView = CdcTestDataGenerator.getTestMasterDoctorView();
+  @InjectMocks
+  @Spy
+  CdcConnectionService cdcConnectionService;
+  @Mock
+  MasterDoctorElasticSearchRepository repository;
+  @Mock
+  CdcMessagePublisher publisher;
+  @Captor
+  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
   @Test
   void shouldAddNewFields() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
+    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
+    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(repository).save(any());
   }
@@ -77,8 +72,8 @@ class CdcRecommendationServiceTest {
   void shouldNotInsertRecordIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
+    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
+    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(repository, never()).save(any());
   }
@@ -88,22 +83,23 @@ class CdcRecommendationServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
+    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
+    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(publisher).publishCdcUpdate(masterDoctorView);
   }
 
   @Test
-  void shouldAllowNullOutcomes() {
+  void shouldProvideCorrectConnectionLogValue() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(repository.save(any())).thenReturn(masterDoctorView);
 
-    var newRecommendation = CdcTestDataGenerator
-        .getCdcRecommendationInsertCdcDocumentDtoNullOutcome();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
+    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
+    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(publisher).publishCdcUpdate(masterDoctorViewCaptor.capture());
-    assertThat(masterDoctorViewCaptor.getValue().getGmcStatus(), is(nullValue()));
+    assertThat(masterDoctorViewCaptor.getValue().getUpdatedBy(), is("admin"));
+    assertThat(masterDoctorViewCaptor.getValue().getLastConnectionDateTime().getMonth(),
+        is(LocalDateTime.now().getMonth()));
   }
 }

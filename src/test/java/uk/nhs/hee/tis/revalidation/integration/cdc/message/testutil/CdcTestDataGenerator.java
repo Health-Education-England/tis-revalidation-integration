@@ -28,9 +28,11 @@ import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
 
 import com.mongodb.client.model.changestream.OperationType;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
@@ -249,5 +251,21 @@ public class CdcTestDataGenerator {
    */
   public static DoctorsForDB getCdcDoctorNullDbc() {
     return doctorsForDBNullDbc;
+  }
+
+  /**
+   * Get a test instance of an insert CdcConnectionLog CdcDocumentDto.
+   *
+   * @return CdcDocumentDto CdcConnectionLog insert test instance
+   */
+  public static CdcDocumentDto<ConnectionLog> getCdcConnectionLogInsertCdcDocumentDto() {
+    ConnectionLog connectionLog = ConnectionLog.builder()
+        .id("1")
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
+        .requestTime(LocalDateTime.now())
+        .updatedBy(ADMIN_VAL)
+        .build();
+
+    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
   }
 }

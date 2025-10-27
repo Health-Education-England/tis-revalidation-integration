@@ -34,9 +34,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
@@ -51,6 +53,9 @@ class CdcSqsMessageListenerTest {
 
   @Mock
   CdcDoctorMessageHandler cdcDoctorMessageHandler;
+
+  @Mock
+  CdcConnectionMessageHandler cdcConnectionMessageHandler;
 
   @Spy
   ObjectMapper objectMapper;
@@ -78,6 +83,20 @@ class CdcSqsMessageListenerTest {
 
     verify(cdcRecommendationMessageHandler).handleMessage(
         objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
+    );
+  }
+
+  @Test
+  void shouldPassConnectionLogInsertMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException, IOException {
+    var testMessage = objectMapper.writeValueAsString(
+        CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto()
+    );
+    cdcSqsMessageListener.getConnectionMessage(testMessage);
+
+    verify(cdcConnectionMessageHandler).handleMessage(
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<ConnectionLog>>() {
+        })
     );
   }
 }
