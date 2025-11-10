@@ -23,15 +23,43 @@
 
 package uk.nhs.hee.tis.revalidation.integration.config;
 
-public interface EsConstant {
+/**
+ * A utility class that defines constants related to Elasticsearch.
+ */
+public final class EsConstant {
 
-  interface Indexes {
-    String MASTER_DOCTOR_INDEX = "masterdoctorindex";
-    String RECOMMENDATION_INDEX = "recommendationindex";
+  /**
+   * Private constructor to prevent instantiation.
+   */
+  private EsConstant() {
+    throw new IllegalStateException("Cannot instantiate EsConstant");
   }
 
-  interface Aliases {
-    String DISCREPANCIES_ALIAS = "discrepancies";
-    String CURRENT_CONNECTIONS_ALIAS = "current_connections";
+  /**
+   * Contains constant names for Elasticsearch index definitions.
+   */
+  public static final class Indexes {
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private Indexes() {
+      throw new IllegalStateException("Cannot instantiate Indexes");
+    }
+    public static final String MASTER_DOCTOR_INDEX = "masterdoctorindex";
+    public static final String RECOMMENDATION_INDEX = "recommendationindex";
+  }
+
+  /**
+   * Contains constant names for Elasticsearch alias definitions.
+   */
+  public static final class Aliases {
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private Aliases() {
+      throw new IllegalStateException("Cannot instantiate Aliases");
+    }
+    public static final String DISCREPANCIES_ALIAS = "discrepancies";
+    public static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   }
 }

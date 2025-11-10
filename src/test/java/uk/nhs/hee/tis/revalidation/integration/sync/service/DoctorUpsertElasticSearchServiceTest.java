@@ -27,6 +27,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.CURRENT_CONNECTIONS_ALIAS;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.DISCREPANCIES_ALIAS;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -118,7 +121,7 @@ class DoctorUpsertElasticSearchServiceTest {
     service.clearMasterDoctorIndex();
 
     verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());
-    indexCaptor.getAllValues().forEach(i -> assertEquals("masterdoctorindex", i.getIndexName()));
+    indexCaptor.getAllValues().forEach(i -> assertEquals(MASTER_DOCTOR_INDEX, i.getIndexName()));
   }
 
   @Test
@@ -188,16 +191,15 @@ class DoctorUpsertElasticSearchServiceTest {
   void shouldAddCurrentConnectionsAliasToMasterDoctorIndex() throws IOException {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
-    verify(elasticsearchIndexHelper).addAlias(service.ES_INDEX, service.CURRENT_CONNECTIONS_ALIAS,
-        service.ES_CURRENT_CONNECIONS_FILTER);
+    verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, CURRENT_CONNECTIONS_ALIAS,
+        DoctorUpsertElasticSearchService.ES_CURRENT_CONNECIONS_FILTER);
   }
 
   @Test
   void shouldAddDiscrepanciesAliasToMasterDoctorIndex() throws IOException {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
-    verify(elasticsearchIndexHelper).addAlias(DoctorUpsertElasticSearchService.ES_INDEX,
-        DoctorUpsertElasticSearchService.DISCREPANCIES_ALIAS,
+    verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, DISCREPANCIES_ALIAS,
         DoctorUpsertElasticSearchService.ES_DISCREPANCIES_FILTER);
   }
 }

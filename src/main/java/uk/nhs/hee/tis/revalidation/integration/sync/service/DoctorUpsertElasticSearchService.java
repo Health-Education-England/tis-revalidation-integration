@@ -21,6 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.CURRENT_CONNECTIONS_ALIAS;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.DISCREPANCIES_ALIAS;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +51,6 @@ public class DoctorUpsertElasticSearchService {
            }
          }
       """;
-  protected static final String ES_INDEX = "masterdoctorindex";
-  protected static final String DISCREPANCIES_ALIAS = "discrepancies";
-  protected static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
   private final MasterDoctorElasticSearchRepository repository;
   private final MasterDoctorViewMapper mapper;
   private final ElasticsearchOperations elasticSearchOperations;
@@ -149,7 +150,7 @@ public class DoctorUpsertElasticSearchService {
   private void deleteMasterDoctorIndex() {
     log.info("deleting masterdoctorindex elastic search index");
     try {
-      elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).delete();
+      elasticSearchOperations.indexOps(IndexCoordinates.of(MASTER_DOCTOR_INDEX)).delete();
     } catch (IndexNotFoundException e) {
       log.info("Could not delete an index that does not exist, continuing");
     }
@@ -157,16 +158,16 @@ public class DoctorUpsertElasticSearchService {
 
   private void createMasterDoctorIndex() {
     log.info("creating and updating mappings");
-    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX)).create();
-    elasticSearchOperations.indexOps(IndexCoordinates.of(ES_INDEX))
+    elasticSearchOperations.indexOps(IndexCoordinates.of(MASTER_DOCTOR_INDEX)).create();
+    elasticSearchOperations.indexOps(IndexCoordinates.of(MASTER_DOCTOR_INDEX))
         .putMapping(MasterDoctorView.class);
   }
 
   private void addAliasToMasterDoctorIndex() {
     try {
-      elasticsearchIndexHelper.addAlias(ES_INDEX, CURRENT_CONNECTIONS_ALIAS,
+      elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, CURRENT_CONNECTIONS_ALIAS,
           ES_CURRENT_CONNECIONS_FILTER);
-      elasticsearchIndexHelper.addAlias(ES_INDEX, DISCREPANCIES_ALIAS,
+      elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, DISCREPANCIES_ALIAS,
           ES_DISCREPANCIES_FILTER);
     } catch (IOException e) {
       log.error("Could not add alias to masterDoctorIndex after create, please do it manually.",

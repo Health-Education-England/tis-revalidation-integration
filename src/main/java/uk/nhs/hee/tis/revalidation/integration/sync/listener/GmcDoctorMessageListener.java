@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,7 +81,7 @@ public class GmcDoctorMessageListener {
       log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
           traineeCount);
       try {
-        elasticsearchIndexService.resync("masterdoctorindex", "recommendationindex");
+        elasticsearchIndexService.resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
       } catch (Exception e) {
         log.error(e.getMessage(), e);
       }
