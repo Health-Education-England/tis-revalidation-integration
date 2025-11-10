@@ -38,7 +38,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
  * A service class that updates connection log fields.
- *
  */
 @Slf4j
 @Service
@@ -85,7 +84,8 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
         Map<String, Object> doc = new HashMap<>();
         doc.put("updatedBy", updatedBy);
         doc.put("lastConnectionDateTime", requestTime.format(ES_DATETIME_FORMATTER));
-        MasterDoctorView updatedView = esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX, masterDoctorView.getId(), doc, MasterDoctorView.class);
+        MasterDoctorView updatedView = esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
+            masterDoctorView.getId(), doc, MasterDoctorView.class);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {

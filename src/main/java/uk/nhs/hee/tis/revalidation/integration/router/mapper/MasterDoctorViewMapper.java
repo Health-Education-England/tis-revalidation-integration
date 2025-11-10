@@ -73,14 +73,14 @@ public interface MasterDoctorViewMapper {
       @MappingTarget MasterDoctorView target);
 
   /**
-   * Map the DoctorForDB entity from the sqs queue of CDC stream to a ElasticSearch document
+   * Map the DoctorForDB entity from the sqs queue of CDC stream to a ElasticSearch document.
    *
    * @param cdcDoctor the doctor entity from cdc queue
    * @return a map of fields for Elasticsearch document
    */
   default Map<String, Object> doctorToEsDoc(DoctorsForDB cdcDoctor) {
     if (cdcDoctor == null) {
-      return null;
+      return Map.of();
     }
     Map<String, Object> map = new HashMap<>();
     // Map fields explicitly

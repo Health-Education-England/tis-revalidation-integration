@@ -26,7 +26,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -209,7 +209,8 @@ class MasterDoctorViewMapperTest {
     Map<String, Object> result = masterDoctorViewMapper.doctorToEsDoc(null);
 
     // then
-    assertNull(result);
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
   }
 
   @Test
