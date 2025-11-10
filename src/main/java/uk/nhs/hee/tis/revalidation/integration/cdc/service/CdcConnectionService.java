@@ -21,10 +21,15 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
+import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.ElasticSearchUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -37,14 +42,23 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcConnectionService extends CdcService<ConnectionLog> {
 
+  private static final String ES_INDEX = "masterdoctorindex";
+
+  private static final DateTimeFormatter ES_DATETIME_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
+  private final ElasticSearchUpdateHelper esUpdateHelper;
+
   /**
    * Service responsible for updating the ConnectionLog composite fields used for searching.
    */
   public CdcConnectionService(
       MasterDoctorElasticSearchRepository repository,
+      ElasticSearchUpdateHelper esUpdateHelper,
       CdcMessagePublisher cdcMessagePublisher
   ) {
     super(repository, cdcMessagePublisher);
+    this.esUpdateHelper = esUpdateHelper;
   }
 
   /**
@@ -63,9 +77,15 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
           log.error("Multiple doctors assigned to the same GMC number!");
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-        masterDoctorView.setUpdatedBy(entity.getUpdatedBy());
-        masterDoctorView.setLastConnectionDateTime(entity.getRequestTime());
-        final var updatedView = repository.save(masterDoctorView);
+
+        String updatedBy = entity.getUpdatedBy();
+        LocalDateTime requestTime = entity.getRequestTime();
+
+        // Partial updates fields related to connection logs
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("updatedBy", updatedBy);
+        doc.put("lastConnectionDateTime", requestTime.format(ES_DATETIME_FORMATTER));
+        MasterDoctorView updatedView = esUpdateHelper.partialUpdate(ES_INDEX, masterDoctorView.getId(), doc, MasterDoctorView.class);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {

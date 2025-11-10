@@ -21,12 +21,15 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
+import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.ElasticSearchUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
  * Service responsible for updating the repository of composite Doctor records used for searching.
@@ -35,7 +38,11 @@ import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElast
 @Slf4j
 public class CdcDoctorService extends CdcService<DoctorsForDB> {
 
-  private MasterDoctorViewMapper mapper;
+  private static final String ES_INDEX = "masterdoctorindex";
+
+  private final MasterDoctorViewMapper mapper;
+
+  private final ElasticSearchUpdateHelper esUpdateHelper;
 
   /**
    * Create a service.
@@ -44,8 +51,10 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    * @param mapper     A mapper for converting to/from the persisted composite view
    */
   public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
+      ElasticSearchUpdateHelper esUpdateHelper, CdcMessagePublisher cdcMessagePublisher,
+      MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
+    this.esUpdateHelper = esUpdateHelper;
     this.mapper = mapper;
   }
 
@@ -68,9 +77,11 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
           log.error("Multiple doctors assigned to the same GMC number: {}",
               entity.getGmcReferenceNumber());
         }
-        var updatedDoctor = mapper
-            .updateMasterDoctorView(mapper.doctorToMasterView(entity), existingDoctors.get(0));
-        var updatedView = repository.save(updatedDoctor);
+
+        Map<String, Object> doc = mapper.doctorToEsDoc(entity);
+        MasterDoctorView updatedView = esUpdateHelper.partialUpdate(ES_INDEX,
+            existingDoctors.get(0).getId(), doc,
+            MasterDoctorView.class);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
