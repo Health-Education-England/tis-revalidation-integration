@@ -45,7 +45,7 @@ import org.springframework.data.elasticsearch.core.query.UpdateResponse;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
-class ElasticSearchUpdateHelperTest {
+class EsDocUpdateHelperTest {
 
   private static final String INDEX_NAME = "index";
   private static final String DOC_ID = "123";
@@ -58,7 +58,7 @@ class ElasticSearchUpdateHelperTest {
   private ElasticsearchOperations esOperations;
 
   @InjectMocks
-  private ElasticSearchUpdateHelper esUpdateHelper;
+  private EsDocUpdateHelper esDocUpdateHelper;
 
   @Test
   void testPartialUpdate() {
@@ -76,7 +76,7 @@ class ElasticSearchUpdateHelperTest {
         mockResponse);
 
     // when
-    MasterDoctorView result = esUpdateHelper.partialUpdate(INDEX_NAME, DOC_ID, UPDATES,
+    MasterDoctorView result = esDocUpdateHelper.partialUpdate(INDEX_NAME, DOC_ID, UPDATES,
         MasterDoctorView.class);
 
     // Then

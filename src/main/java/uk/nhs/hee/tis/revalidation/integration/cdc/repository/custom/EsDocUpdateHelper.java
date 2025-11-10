@@ -31,19 +31,19 @@ import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Component;
 
 /**
- * ElasticUpdateHelper provides utility methods for updating Elasticsearch documents.
+ * EsDocUpdateHelper provides utility methods for updating Elasticsearch documents.
  */
 @Component
-public class ElasticSearchUpdateHelper {
+public class EsDocUpdateHelper {
 
   private final ElasticsearchOperations esOperations;
 
   /**
-   * Constructs an ElasticSearchUpdateHelper with the given ElasticsearchOperations instance.
+   * Constructs an EsDocUpdateHelper with the given ElasticsearchOperations instance.
    *
    * @param esOperations the ElasticsearchOperations bean used for performing updates and queries
    */
-  public ElasticSearchUpdateHelper(ElasticsearchOperations esOperations) {
+  public EsDocUpdateHelper(ElasticsearchOperations esOperations) {
     this.esOperations = esOperations;
   }
 
