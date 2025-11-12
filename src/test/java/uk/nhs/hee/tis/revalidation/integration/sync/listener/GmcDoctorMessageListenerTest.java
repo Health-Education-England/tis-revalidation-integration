@@ -27,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,7 +115,7 @@ class GmcDoctorMessageListenerTest {
     String messageStr = mapper.writeValueAsString(message);
 
     doThrow(Exception.class).when(elasticsearchIndexServiceMock)
-        .resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
+        .resync("masterdoctorindex", "recommendationindex");
 
     assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(messageStr));
   }
