@@ -24,12 +24,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,9 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
-import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
-import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,12 +52,6 @@ class MasterDoctorViewMapperTest {
   private static final String POSTFIX_NEW = "_new";
   private static final String ADMIN = "admin";
   private static final String GMC_STATUS = "gmcStatus";
-  private static final LocalDate SUBMISSION_DATE = LocalDate.of(2025, 11, 10);
-  private static final LocalDate LAST_UPDATED_DATE = LocalDate.of(2025, 11, 10);
-  private static final RecommendationStatus DOCTOR_STATUS = RecommendationStatus.READY_TO_REVIEW;
-  private static final String DESIGNATED_BODY_CODE = "dbc";
-  private static final UnderNotice UNDER_NOTICE = UnderNotice.NO;
-  private static final Boolean EXISTS_IN_GMC = true;
 
   @InjectMocks
   MasterDoctorViewMapperImpl masterDoctorViewMapper;
@@ -201,47 +188,5 @@ class MasterDoctorViewMapperTest {
     assertThat(result.getMembershipStartDate(), nullValue());
     assertThat(result.getMembershipEndDate(), nullValue());
     assertThat(result.getTcsDesignatedBody(), nullValue());
-  }
-
-  @Test
-  void testDoctorToEsDoc_shouldReturnNullWhenInputIsNull() {
-    // when
-    Map<String, Object> result = masterDoctorViewMapper.doctorToEsDoc(null);
-
-    // then
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
-  }
-
-  @Test
-  void testDoctorToEsDoc_shouldMapAllExpectedFields() {
-    // given
-    DoctorsForDB doctor = new DoctorsForDB();
-    doctor.setDoctorFirstName(DOCTOR_FIRST_NAME);
-    doctor.setDoctorLastName(DOCTOR_LAST_NAME);
-    doctor.setGmcReferenceNumber(GMC_REFERENCE_NUMBER);
-    doctor.setSubmissionDate(SUBMISSION_DATE);
-    doctor.setDoctorStatus(DOCTOR_STATUS);
-    doctor.setDesignatedBodyCode(DESIGNATED_BODY_CODE);
-    doctor.setAdmin(ADMIN);
-    doctor.setLastUpdatedDate(LAST_UPDATED_DATE);
-    doctor.setUnderNotice(UNDER_NOTICE);
-    doctor.setExistsInGmc(EXISTS_IN_GMC);
-
-    // when
-    Map<String, Object> result = masterDoctorViewMapper.doctorToEsDoc(doctor);
-
-    // then
-    assertNotNull(result);
-    assertEquals(DOCTOR_FIRST_NAME, result.get("doctorFirstName"));
-    assertEquals(DOCTOR_LAST_NAME, result.get("doctorLastName"));
-    assertEquals(GMC_REFERENCE_NUMBER, result.get("gmcReferenceNumber"));
-    assertEquals(SUBMISSION_DATE, result.get("submissionDate"));
-    assertEquals(DOCTOR_STATUS, result.get("tisStatus"));
-    assertEquals(DESIGNATED_BODY_CODE, result.get("designatedBody"));
-    assertEquals(ADMIN, result.get("admin"));
-    assertEquals(LAST_UPDATED_DATE, result.get("lastUpdatedDate"));
-    assertEquals(UNDER_NOTICE, result.get("underNotice"));
-    assertEquals(EXISTS_IN_GMC, result.get("existsInGmc"));
   }
 }

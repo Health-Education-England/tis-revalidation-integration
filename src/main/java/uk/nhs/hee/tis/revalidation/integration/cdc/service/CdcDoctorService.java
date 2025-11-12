@@ -21,17 +21,12 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
-
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
-import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
  * Service responsible for updating the repository of composite Doctor records used for searching.
@@ -40,23 +35,17 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 public class CdcDoctorService extends CdcService<DoctorsForDB> {
 
-  private final MasterDoctorViewMapper mapper;
-
-  private final EsDocUpdateHelper esDocUpdateHelper;
+  private MasterDoctorViewMapper mapper;
 
   /**
    * Create a service.
    *
    * @param repository The ElasticSearch repository with the index managed by the service
-   * @param esDocUpdateHelper the helper to update ES docs
-   * @param cdcMessagePublisher the publisher to publish MasterDoctorView update
-   * @param mapper a mapper for converting to/from the persisted composite view
+   * @param mapper     A mapper for converting to/from the persisted composite view
    */
   public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
-      EsDocUpdateHelper esDocUpdateHelper, CdcMessagePublisher cdcMessagePublisher,
-      MasterDoctorViewMapper mapper) {
+      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
     super(repository, cdcMessagePublisher);
-    this.esDocUpdateHelper = esDocUpdateHelper;
     this.mapper = mapper;
   }
 
@@ -79,11 +68,9 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
           log.error("Multiple doctors assigned to the same GMC number: {}",
               entity.getGmcReferenceNumber());
         }
-
-        Map<String, Object> doc = mapper.doctorToEsDoc(entity);
-        MasterDoctorView updatedView = esDocUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
-            existingDoctors.get(0).getId(), doc,
-            MasterDoctorView.class);
+        var updatedDoctor = mapper
+            .updateMasterDoctorView(mapper.doctorToMasterView(entity), existingDoctors.get(0));
+        var updatedView = repository.save(updatedDoctor);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
