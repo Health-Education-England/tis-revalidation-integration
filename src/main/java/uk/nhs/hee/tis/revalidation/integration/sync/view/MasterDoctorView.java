@@ -21,6 +21,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.view;
 
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,7 +50,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 @AllArgsConstructor
 @Builder
 @Data
-@Document(indexName = "masterdoctorindex")
+@Document(indexName = MASTER_DOCTOR_INDEX)
 public class MasterDoctorView {
 
   @Id

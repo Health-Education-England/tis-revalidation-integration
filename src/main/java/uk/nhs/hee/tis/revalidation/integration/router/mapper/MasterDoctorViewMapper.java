@@ -20,6 +20,8 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -69,4 +71,30 @@ public interface MasterDoctorViewMapper {
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   MasterDoctorView updateMasterDoctorView(ConnectionInfoDto source,
       @MappingTarget MasterDoctorView target);
+
+  /**
+   * Map the DoctorForDB entity from the sqs queue of CDC stream to a ElasticSearch document.
+   *
+   * @param cdcDoctor the doctor entity from cdc queue
+   * @return a map of fields for Elasticsearch document
+   */
+  default Map<String, Object> doctorToEsDoc(DoctorsForDB cdcDoctor) {
+    if (cdcDoctor == null) {
+      return Map.of();
+    }
+    Map<String, Object> map = new HashMap<>();
+    // Map fields explicitly
+    map.put("doctorFirstName", cdcDoctor.getDoctorFirstName());
+    map.put("doctorLastName", cdcDoctor.getDoctorLastName());
+    map.put("gmcReferenceNumber", cdcDoctor.getGmcReferenceNumber());
+    map.put("submissionDate", cdcDoctor.getSubmissionDate());
+    map.put("tisStatus", cdcDoctor.getDoctorStatus());
+    map.put("designatedBody", cdcDoctor.getDesignatedBodyCode());
+    map.put("admin", cdcDoctor.getAdmin());
+    map.put("lastUpdatedDate", cdcDoctor.getLastUpdatedDate());
+    map.put("underNotice", cdcDoctor.getUnderNotice());
+    map.put("existsInGmc", cdcDoctor.getExistsInGmc());
+
+    return map;
+  }
 }

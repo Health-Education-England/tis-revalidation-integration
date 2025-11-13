@@ -21,15 +21,18 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcConnectionService.ES_DATETIME_FORMATTER;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +44,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -54,9 +58,11 @@ class CdcConnectionServiceTest {
   @Mock
   MasterDoctorElasticSearchRepository repository;
   @Mock
+  EsDocUpdateHelper esUpdateHelper;
+  @Mock
   CdcMessagePublisher publisher;
   @Captor
-  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
+  ArgumentCaptor<Map<String, Object>> esUpdateDocCaptor;
 
   @Test
   void shouldAddNewFields() {
@@ -65,7 +71,8 @@ class CdcConnectionServiceTest {
     var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
     cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
 
-    verify(repository).save(any());
+    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class));
   }
 
   @Test
@@ -75,13 +82,16 @@ class CdcConnectionServiceTest {
     var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
     cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
 
-    verify(repository, never()).save(any());
+    verify(esUpdateHelper, never()).partialUpdate(eq(MASTER_DOCTOR_INDEX),
+        eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class));
   }
 
   @Test
   void shouldPublishUpdates() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
+    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
 
     var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
     cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
@@ -92,14 +102,16 @@ class CdcConnectionServiceTest {
   @Test
   void shouldProvideCorrectConnectionLogValue() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
+    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        esUpdateDocCaptor.capture(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
 
-    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
-    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
+    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto()
+        .getFullDocument();
+    cdcConnectionService.upsertEntity(newConnectionLog);
 
-    verify(publisher).publishCdcUpdate(masterDoctorViewCaptor.capture());
-    assertThat(masterDoctorViewCaptor.getValue().getUpdatedBy(), is("admin"));
-    assertThat(masterDoctorViewCaptor.getValue().getLastConnectionDateTime().getMonth(),
-        is(LocalDateTime.now().getMonth()));
+    final var partialUpdateDoc = esUpdateDocCaptor.getValue();
+    assertEquals(newConnectionLog.getUpdatedBy(), partialUpdateDoc.get("updatedBy"));
+    assertEquals(newConnectionLog.getRequestTime().format(ES_DATETIME_FORMATTER),
+        partialUpdateDoc.get("lastConnectionDateTime"));
   }
 }
