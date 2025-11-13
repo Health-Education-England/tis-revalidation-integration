@@ -97,6 +97,9 @@ public class EsDocUpdateHelper {
     }
   }
 
+  /**
+   * A custom runtime exception indicating a failure during an Elasticsearch update operation.
+   */
   public static class EsUpdateException extends RuntimeException {
 
     public EsUpdateException(String message) {

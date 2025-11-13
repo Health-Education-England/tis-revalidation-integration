@@ -141,7 +141,7 @@ class EsDocUpdateHelperTest {
   }
 
   @Test
-  void testPartialUpdateIOException() throws Exception {
+  void testPartialUpdateIoException() throws Exception {
     when(highLevelClient.update(any(UpdateRequest.class), any(RequestOptions.class)))
         .thenThrow(new IOException("Connection failed"));
 
