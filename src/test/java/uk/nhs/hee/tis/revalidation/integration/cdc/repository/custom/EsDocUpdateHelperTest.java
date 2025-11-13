@@ -23,22 +23,26 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.Map;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.get.GetResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.UpdateQuery;
-import org.springframework.data.elasticsearch.core.query.UpdateResponse;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,31 +52,39 @@ class EsDocUpdateHelperTest {
   private static final String DOC_ID = "123";
   private static final Map<String, Object> UPDATES = Map.of(
       "doctorFirstName", "Alice",
-      "doctorLastName", "Brown"
+      "doctorLastName", "Brown",
+      "lastConnectionDateTime", "2025-11-06T10:26:23.049"
   );
 
   @Mock
-  private ElasticsearchOperations esOperations;
+  private RestHighLevelClient highLevelClient;
 
-  @InjectMocks
   private EsDocUpdateHelper esDocUpdateHelper;
 
+  @BeforeEach
+  void setUp() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+    esDocUpdateHelper = new EsDocUpdateHelper(highLevelClient, objectMapper);
+  }
+
   @Test
-  void testPartialUpdate() {
+  void testPartialUpdateSuccess() throws IOException {
     // Given
-    // Mock esOperations.get
-    MasterDoctorView updatedView = new MasterDoctorView();
-    updatedView.setDoctorFirstName("Alice");
-    updatedView.setDoctorLastName("Brown");
-    when(esOperations.get(DOC_ID, MasterDoctorView.class, IndexCoordinates.of(INDEX_NAME)))
-        .thenReturn(updatedView);
+    // Mock GetResult
+    var getResult = mock(GetResult.class);
+    when(getResult.isExists()).thenReturn(true);
+    when(getResult.sourceAsMap()).thenReturn(UPDATES);
 
-    // Mock esOperations.update
-    UpdateResponse mockResponse = mock(UpdateResponse.class);
-    when(esOperations.update(any(UpdateQuery.class), eq(IndexCoordinates.of(INDEX_NAME))))
-        .thenReturn(mockResponse);
+    // Mock UpdateResponse
+    UpdateResponse updateResponse = mock(UpdateResponse.class);
+    when(updateResponse.getGetResult()).thenReturn(getResult);
 
-    // when
+    // Mock highLevelClient.update
+    when(highLevelClient.update(any(UpdateRequest.class), any(RequestOptions.class)))
+        .thenReturn(updateResponse);
+
+    // When
     MasterDoctorView result = esDocUpdateHelper.partialUpdate(INDEX_NAME, DOC_ID, UPDATES,
         MasterDoctorView.class);
 
@@ -80,8 +92,64 @@ class EsDocUpdateHelperTest {
     assertNotNull(result);
     assertEquals("Alice", result.getDoctorFirstName());
     assertEquals("Brown", result.getDoctorLastName());
+    assertNotNull(result.getLastConnectionDateTime());
+    assertEquals(2025, result.getLastConnectionDateTime().getYear());
+    assertEquals(11, result.getLastConnectionDateTime().getMonthValue());
+    assertEquals(6, result.getLastConnectionDateTime().getDayOfMonth());
 
-    verify(esOperations).update(any(UpdateQuery.class), eq(IndexCoordinates.of(INDEX_NAME)));
-    verify(esOperations).get(DOC_ID, MasterDoctorView.class, IndexCoordinates.of(INDEX_NAME));
+    verify(highLevelClient).update(any(UpdateRequest.class), any(RequestOptions.class));
+  }
+
+  @Test
+  void testPartialUpdateDocumentNotFound() throws Exception {
+    // Mock UpdateResponse with null getResult
+    var updateResponse = mock(UpdateResponse.class);
+    when(updateResponse.getGetResult()).thenReturn(null);
+
+    when(highLevelClient.update(any(UpdateRequest.class), any(RequestOptions.class)))
+        .thenReturn(updateResponse);
+
+    // Expect exception
+    EsDocUpdateHelper.EsUpdateException ex = assertThrows(
+        EsDocUpdateHelper.EsUpdateException.class,
+        () -> esDocUpdateHelper.partialUpdate(INDEX_NAME, DOC_ID, UPDATES, MasterDoctorView.class)
+    );
+
+    assertTrue(ex.getMessage().contains("Document not found after update"));
+  }
+
+  @Test
+  void testPartialUpdateSourceIsNull() throws Exception {
+    var getResult = mock(GetResult.class);
+    when(getResult.isExists()).thenReturn(true);
+    when(getResult.sourceAsMap()).thenReturn(null);
+
+    // Mock UpdateResponse
+    var updateResponse = mock(UpdateResponse.class);
+    when(updateResponse.getGetResult()).thenReturn(getResult);
+
+    // Mock highLevelClient.update
+    when(highLevelClient.update(any(UpdateRequest.class), any(RequestOptions.class)))
+        .thenReturn(updateResponse);
+
+    EsDocUpdateHelper.EsUpdateException ex = assertThrows(
+        EsDocUpdateHelper.EsUpdateException.class,
+        () -> esDocUpdateHelper.partialUpdate(INDEX_NAME, DOC_ID, UPDATES, MasterDoctorView.class)
+    );
+
+    assertTrue(ex.getMessage().contains("Updated document source is null"));
+  }
+
+  @Test
+  void testPartialUpdateIOException() throws Exception {
+    when(highLevelClient.update(any(UpdateRequest.class), any(RequestOptions.class)))
+        .thenThrow(new IOException("Connection failed"));
+
+    EsDocUpdateHelper.EsUpdateException ex = assertThrows(
+        EsDocUpdateHelper.EsUpdateException.class,
+        () -> esDocUpdateHelper.partialUpdate(INDEX_NAME, DOC_ID, UPDATES, MasterDoctorView.class)
+    );
+
+    assertTrue(ex.getMessage().contains("Failed to update document"));
   }
 }

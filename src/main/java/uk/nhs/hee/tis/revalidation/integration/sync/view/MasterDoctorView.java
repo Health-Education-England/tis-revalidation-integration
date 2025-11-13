@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.sync.view;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -44,12 +45,12 @@ import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 
 /**
  * A data class to handle main elastic search document.
- *
  */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Document(indexName = MASTER_DOCTOR_INDEX)
 public class MasterDoctorView {
 
@@ -104,6 +105,6 @@ public class MasterDoctorView {
   private String updatedBy;
   @Nullable
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime lastConnectionDateTime;
 }

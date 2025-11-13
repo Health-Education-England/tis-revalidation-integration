@@ -21,10 +21,15 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
+import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -33,14 +38,18 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class CdcRecommendationService extends CdcService<Recommendation> {
 
+  private final EsDocUpdateHelper esUpdateHelper;
+
   /**
    * Service responsible for updating the Recommendation composite fields used for searching.
    */
   public CdcRecommendationService(
       MasterDoctorElasticSearchRepository repository,
+      EsDocUpdateHelper esUpdateHelper,
       CdcMessagePublisher cdcMessagePublisher
   ) {
     super(repository, cdcMessagePublisher);
+    this.esUpdateHelper = esUpdateHelper;
   }
 
   /**
@@ -59,11 +68,14 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
           log.error("Multiple doctors assigned to the same GMC number!");
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
-        masterDoctorView.setAdmin(entity.getAdmin());
+        // Partial updates on fields related to recommendation
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("admin", entity.getAdmin());
         if (entity.getOutcome() != null) {
-          masterDoctorView.setGmcStatus(entity.getOutcome().getOutcome());
+          doc.put("outcome", entity.getOutcome().getOutcome());
         }
-        final var updatedView = repository.save(masterDoctorView);
+        MasterDoctorView updatedView = esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
+            masterDoctorView.getId(), doc, MasterDoctorView.class);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {

@@ -25,9 +25,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import java.util.Collections;
 import org.elasticsearch.common.collect.List;
@@ -41,9 +44,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
+import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
-
 
 @ExtendWith(MockitoExtension.class)
 class CdcRecommendationServiceTest {
@@ -54,6 +57,9 @@ class CdcRecommendationServiceTest {
 
   @Mock
   MasterDoctorElasticSearchRepository repository;
+
+  @Mock
+  EsDocUpdateHelper esUpdateHelper;
 
   @Mock
   CdcMessagePublisher publisher;
@@ -70,7 +76,8 @@ class CdcRecommendationServiceTest {
     var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
 
-    verify(repository).save(any());
+    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class));
   }
 
   @Test
@@ -86,7 +93,8 @@ class CdcRecommendationServiceTest {
   @Test
   void shouldPublishUpdates() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
+    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
 
     var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
     cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
@@ -97,7 +105,8 @@ class CdcRecommendationServiceTest {
   @Test
   void shouldAllowNullOutcomes() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(repository.save(any())).thenReturn(masterDoctorView);
+    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
 
     var newRecommendation = CdcTestDataGenerator
         .getCdcRecommendationInsertCdcDocumentDtoNullOutcome();
