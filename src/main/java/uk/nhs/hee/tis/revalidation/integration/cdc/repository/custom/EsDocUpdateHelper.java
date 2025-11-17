@@ -38,6 +38,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class EsDocUpdateHelper {
 
+  private static final int DEFAULT_RETRY_ON_CONFLICT = 5;
+
   private final RestHighLevelClient highLevelClient;
 
   private final ObjectMapper objectMapper;
@@ -72,7 +74,8 @@ public class EsDocUpdateHelper {
   public <T> T partialUpdate(String index, String id, Map<String, Object> fields, Class<T> clazz) {
     UpdateRequest request = new UpdateRequest(index, id)
         .doc(fields)
-        .fetchSource(true);
+        .fetchSource(true)
+        .retryOnConflict(DEFAULT_RETRY_ON_CONFLICT);
 
     try {
       UpdateResponse response = highLevelClient.update(request, RequestOptions.DEFAULT);
