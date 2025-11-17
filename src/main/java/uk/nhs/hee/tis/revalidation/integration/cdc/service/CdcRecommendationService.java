@@ -72,7 +72,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         Map<String, Object> doc = new HashMap<>();
         doc.put("admin", entity.getAdmin());
         if (entity.getOutcome() != null) {
-          doc.put("outcome", entity.getOutcome().getOutcome());
+          doc.put("gmcStatus", entity.getOutcome().getOutcome());
         }
         MasterDoctorView updatedView = esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
             masterDoctorView.getId(), doc, MasterDoctorView.class);
