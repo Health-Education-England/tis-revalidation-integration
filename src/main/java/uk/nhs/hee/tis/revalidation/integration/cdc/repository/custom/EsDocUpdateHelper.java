@@ -123,6 +123,15 @@ public class EsDocUpdateHelper {
     }
   }
 
+  /**
+   * Performs a bulk partial update of documents in the specified Elasticsearch index.
+   *
+   * <p>Only the fields provided in the {@code fieldsById} map will be updated, leaving
+   * other fields intact.
+   *
+   * @param index      the name of the Elasticsearch index where the document resides
+   * @param fieldsById a map of fields to update, mapped by documentId
+   */
   public void bulkPartialUpdate(String index, Map<String, Map<String, Object>> fieldsById) {
     List<UpdateQuery> queries = new ArrayList<>();
 

@@ -35,6 +35,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 
+/**
+ * A data class combining DoctorsForDB fields and the latest Recommendation.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -69,7 +69,8 @@ class EsDocUpdateHelperTest {
   void setUp() {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-    esDocUpdateHelper = new EsDocUpdateHelper(highLevelClient, objectMapper, elasticsearchOperations);
+    esDocUpdateHelper = new EsDocUpdateHelper(highLevelClient, objectMapper,
+        elasticsearchOperations);
   }
 
   @Test

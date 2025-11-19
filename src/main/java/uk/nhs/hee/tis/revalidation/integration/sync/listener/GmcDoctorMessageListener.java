@@ -63,6 +63,11 @@ public class GmcDoctorMessageListener {
     this.mapper = mapper;
   }
 
+  /**
+   * Handles messages to sync gmc doctor data into elasticsearch, and reindexes when complete.
+   *
+   * @param message the payload from the doctor sync queue including a flag for the end of the sync
+   */
   @RabbitListener(queues = "${app.rabbit.reval.queue.revalidationsummary.essync.integration}")
   public void getMessage(IndexSyncMessage message) throws Exception {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
@@ -76,7 +81,7 @@ public class GmcDoctorMessageListener {
     } else {
       var docs = mapper.fromRevalidationSummaries(message.getPayload());
       doctorUpsertElasticSearchService.populateMasterIndex(docs);
-      doctorCount+= docs.size();
+      doctorCount += docs.size();
     }
   }
 }

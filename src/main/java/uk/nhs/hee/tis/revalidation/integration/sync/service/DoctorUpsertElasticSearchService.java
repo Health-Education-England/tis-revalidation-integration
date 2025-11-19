@@ -79,7 +79,12 @@ public class DoctorUpsertElasticSearchService {
     this.rabbitTemplate = rabbitTemplate;
   }
 
-  public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) throws Exception {
+  /**
+   * Populate the masterdoctorindex by upserting a single masterdoctorview.
+   *
+   * @param masterDoctorDocumentToSave MasterDoctorView to save
+   */
+  public void populateMasterIndex(MasterDoctorView masterDoctorDocumentToSave) {
     // find trainee record from Exception ES index
     Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcNumberPersonId(
         masterDoctorDocumentToSave);
@@ -94,6 +99,11 @@ public class DoctorUpsertElasticSearchService {
     }
   }
 
+  /**
+   * Populate the masterdoctorindex in bulk by upserting mutliple MasterDoctorViews at once.
+   *
+   * @param docs MasterDoctorViews to save
+   */
   public void populateMasterIndex(List<MasterDoctorView> docs) {
     // find trainee record from Exception ES index
     List<MasterDoctorView> newRecords = new ArrayList<>();

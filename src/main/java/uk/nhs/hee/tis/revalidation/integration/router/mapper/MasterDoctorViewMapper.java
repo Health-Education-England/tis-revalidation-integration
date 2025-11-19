@@ -101,7 +101,9 @@ public interface MasterDoctorViewMapper {
   }
 
   @Mapping(target = "tisStatus", source = "doctorStatus")
-  @Mapping(target = "gmcStatus", expression = "java(dto.getLatestRecommendation() != null && dto.getLatestRecommendation().getOutcome() != null ? dto.getLatestRecommendation().getOutcome().toString() : null)")
+  @Mapping(target = "gmcStatus", expression = "java(dto.getLatestRecommendation() != null &&"
+      + " dto.getLatestRecommendation().getOutcome() != null ? "
+      + "dto.getLatestRecommendation().getOutcome().toString() : null)")
   @Mapping(source = "designatedBodyCode", target = "designatedBody")
   MasterDoctorView fromRevalidationSummary(RevalidationSummary dto);
 

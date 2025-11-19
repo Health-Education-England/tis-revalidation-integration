@@ -54,9 +54,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
@@ -93,7 +91,11 @@ class DoctorUpsertElasticSearchServiceTest {
   private ArgumentCaptor<List<MasterDoctorView>> updateListCaptor;
   @InjectMocks
   private DoctorUpsertElasticSearchService service;
-  private MasterDoctorView currentDoctorView, dataToSave, mappedView, mappedNewViewGmcOnly, mappedExistingViewGmcOnly;
+  private MasterDoctorView currentDoctorView;
+  private MasterDoctorView dataToSave;
+  private MasterDoctorView mappedView;
+  private MasterDoctorView mappedNewViewGmcOnly;
+  private MasterDoctorView mappedExistingViewGmcOnly;
   private final String routingKey = "routingkey.revalidationsummary.essyncwritefail";
 
   @BeforeEach
@@ -313,7 +315,8 @@ class DoctorUpsertElasticSearchServiceTest {
         mappedExistingViewGmcOnly.getGmcReferenceNumber())).thenReturn(
         recordsAlreadyInEs);
 
-    doThrow(ActionRequestValidationException.class).when(esDocUpdateHelper).bulkPartialUpdate(any(), any());
+    doThrow(ActionRequestValidationException.class).when(esDocUpdateHelper)
+        .bulkPartialUpdate(any(), any());
 
     service.populateMasterIndex(List.of(mappedExistingViewGmcOnly));
 
