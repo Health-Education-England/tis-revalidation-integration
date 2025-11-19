@@ -38,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
@@ -46,6 +47,7 @@ import uk.nhs.hee.tis.revalidation.integration.entity.RevalidationSummary;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
@@ -73,18 +75,18 @@ class GmcDoctorMessageListenerTest {
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   @Mock
   private ElasticsearchIndexService elasticsearchIndexServiceMock;
-  @Mock
-  private MasterDoctorViewMapper mapper;
-  @InjectMocks
+  private final MasterDoctorViewMapper mapper = new MasterDoctorViewMapperImpl();
   private GmcDoctorMessageListener gmcDoctorMessageListener;
 
   @Captor
   ArgumentCaptor<RevalidationSummary> dlqArgumentCaptor;
+  @Captor
+  ArgumentCaptor<List<MasterDoctorView>> payloadCaptor;
 
   @BeforeEach
   void setUp() {
-    gmcDoctorMessageListener = new GmcDoctorMessageListener(
-        doctorUpsertElasticSearchService, elasticsearchIndexServiceMock, mapper);
+    gmcDoctorMessageListener = new GmcDoctorMessageListener(doctorUpsertElasticSearchService,
+        elasticsearchIndexServiceMock, mapper);
 
     Recommendation recommendation = Recommendation.builder().gmcNumber(gmcNumber)
         .gmcSubmissionDate(submissionDate).outcome(outcome
@@ -113,10 +115,8 @@ class GmcDoctorMessageListenerTest {
   void testMessagesAreReceivedFromQueue() throws Exception {
     gmcDoctorMessageListener.getMessage(message);
 
-    ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
-        .forClass(MasterDoctorView.class);
-    verify(doctorUpsertElasticSearchService).populateMasterIndex(masterDoctorViewCaptor.capture());
-    MasterDoctorView masterDoctorView = masterDoctorViewCaptor.getValue();
+    verify(doctorUpsertElasticSearchService).populateMasterIndex(payloadCaptor.capture());
+    MasterDoctorView masterDoctorView = payloadCaptor.getAllValues().get(0).get(0);
 
     assertThat(masterDoctorView.getGmcReferenceNumber(), is(gmcNumber));
     assertThat(masterDoctorView.getDoctorFirstName(), is(firstName));
