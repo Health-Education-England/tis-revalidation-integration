@@ -26,12 +26,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
@@ -41,9 +45,16 @@ import org.elasticsearch.index.get.GetResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
+import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
+import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
+import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +67,19 @@ class EsDocUpdateHelperTest {
       "doctorLastName", "Brown",
       "lastConnectionDateTime", "2025-11-06T10:26:23.049"
   );
+  private final String gmcNumber = "101";
+  private final String firstName = "AAA";
+  private final String lastName = "BBB";
+  private final LocalDate submissionDate = LocalDate.now();
+  private final LocalDate dateAdded = LocalDate.now();
+  private final UnderNotice underNotice = UnderNotice.NO;
+  private final String sanction = "sanction";
+  private final RecommendationStatus recommendationStatus = RecommendationStatus.NOT_STARTED;
+  private final LocalDate lastUpdated = LocalDate.now();
+  private final String designatedBodyCode = "PQR";
+  private final String admin = "Reval Admin";
+  private final boolean existsInGmc = true;
+  private final RecommendationGmcOutcome outcome = RecommendationGmcOutcome.UNDER_REVIEW;
 
   @Mock
   private RestHighLevelClient highLevelClient;
@@ -64,6 +88,9 @@ class EsDocUpdateHelperTest {
   private ElasticsearchOperations elasticsearchOperations;
 
   private EsDocUpdateHelper esDocUpdateHelper;
+
+  @Captor
+  ArgumentCaptor<List<UpdateQuery>> bulkUpdateCaptor;
 
   @BeforeEach
   void setUp() {
@@ -157,4 +184,47 @@ class EsDocUpdateHelperTest {
 
     assertTrue(ex.getMessage().contains("Failed to update document"));
   }
+
+  @Test
+  void shouldBulkUpdate() {
+    Map<String, Object> map = new HashMap<>();
+    // Map fields explicitly
+    map.put("doctorFirstName", firstName);
+    map.put("doctorLastName", lastName);
+    map.put("gmcReferenceNumber", gmcNumber);
+    map.put("submissionDate", submissionDate);
+    map.put("tisStatus", recommendationStatus);
+    map.put("designatedBody", designatedBodyCode);
+    map.put("admin", admin);
+    map.put("lastUpdatedDate", lastUpdated);
+    map.put("underNotice",underNotice);
+    map.put("existsInGmc", existsInGmc);
+    map.put("gmcStatus", outcome);
+
+    Map<String, Map<String, Object>> mapById = new HashMap<>();
+    mapById.put("123", map);
+
+    var indexCoords = IndexCoordinates.of("index");
+
+    esDocUpdateHelper.bulkPartialUpdate("index", mapById);
+
+    verify(elasticsearchOperations).bulkUpdate(bulkUpdateCaptor.capture(), eq(indexCoords));
+
+    var bulkUpdateRequests = bulkUpdateCaptor.getValue();
+    assertEquals(1, bulkUpdateRequests.size());
+
+    var bulkUpdate = bulkUpdateRequests.get(0).getDocument();
+    assertEquals(firstName, bulkUpdate.get("doctorFirstName"));
+    assertEquals(lastName, bulkUpdate.get("doctorLastName"));
+    assertEquals(gmcNumber, bulkUpdate.get("gmcReferenceNumber"));
+    assertEquals(submissionDate, bulkUpdate.get("submissionDate"));
+    assertEquals(recommendationStatus, bulkUpdate.get("tisStatus"));
+    assertEquals(designatedBodyCode, bulkUpdate.get("designatedBody"));
+    assertEquals(admin, bulkUpdate.get("admin"));
+    assertEquals(lastUpdated, bulkUpdate.get("lastUpdatedDate"));
+    assertEquals(underNotice, bulkUpdate.get("underNotice"));
+    assertEquals(existsInGmc, bulkUpdate.get("existsInGmc"));
+    assertEquals(outcome, bulkUpdate.get("gmcStatus"));
+  }
+
 }
