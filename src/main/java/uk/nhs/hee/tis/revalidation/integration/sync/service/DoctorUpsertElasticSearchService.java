@@ -102,6 +102,8 @@ public class DoctorUpsertElasticSearchService {
   /**
    * Populate the masterdoctorindex in bulk by upserting mutliple MasterDoctorViews at once.
    *
+   * <p> On failing to process the list, will publish to a rabbit DLQ
+   *
    * @param docs MasterDoctorViews to save
    */
   public void populateMasterIndex(List<MasterDoctorView> docs) {

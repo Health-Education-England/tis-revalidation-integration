@@ -166,7 +166,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldUpdateMasterDoctorViewsWithGmcIdAndPersonId() throws Exception {
+  void shouldUpdateMasterDoctorViewsWithGmcIdAndPersonId() {
     // set dataToSave with TcsPersonId and GmcReferenceNumber
     dataToSave.setTcsPersonId(1001L);
     dataToSave.setGmcReferenceNumber("56789");
@@ -183,7 +183,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldUpdateMasterDoctorViewsWithGmcId() throws Exception {
+  void shouldUpdateMasterDoctorViewsWithGmcId() {
     // set dataToSave with GmcReferenceNumber
     dataToSave.setGmcReferenceNumber("56789");
 
@@ -199,7 +199,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldUpdateMasterDoctorViewsWithPersonId() throws Exception {
+  void shouldUpdateMasterDoctorViewsWithPersonId()  {
     // set dataToSave with TcsPersonId
     dataToSave.setTcsPersonId(1001L);
 
@@ -214,7 +214,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldAddMasterDoctorViewsWhenRecordIsNotInEs() throws Exception {
+  void shouldAddMasterDoctorViewsWhenRecordIsNotInEs() {
     // set dataToSave with a different GmcReferenceNumber
     dataToSave.setGmcReferenceNumber("12345");
 
