@@ -71,9 +71,7 @@ class EsDocUpdateHelperTest {
   private final String firstName = "AAA";
   private final String lastName = "BBB";
   private final LocalDate submissionDate = LocalDate.now();
-  private final LocalDate dateAdded = LocalDate.now();
   private final UnderNotice underNotice = UnderNotice.NO;
-  private final String sanction = "sanction";
   private final RecommendationStatus recommendationStatus = RecommendationStatus.NOT_STARTED;
   private final LocalDate lastUpdated = LocalDate.now();
   private final String designatedBodyCode = "PQR";
@@ -197,7 +195,7 @@ class EsDocUpdateHelperTest {
     map.put("designatedBody", designatedBodyCode);
     map.put("admin", admin);
     map.put("lastUpdatedDate", lastUpdated);
-    map.put("underNotice",underNotice);
+    map.put("underNotice", underNotice);
     map.put("existsInGmc", existsInGmc);
     map.put("gmcStatus", outcome);
 
