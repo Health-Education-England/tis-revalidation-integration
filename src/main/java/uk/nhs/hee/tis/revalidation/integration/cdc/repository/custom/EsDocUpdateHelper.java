@@ -23,12 +23,18 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.document.Document;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,6 +50,8 @@ public class EsDocUpdateHelper {
 
   private final ObjectMapper objectMapper;
 
+  private final ElasticsearchOperations esOperations;
+
   /**
    * Constructs an EsDocUpdateHelper with the given ElasticsearchOperations instance.
    *
@@ -52,9 +60,10 @@ public class EsDocUpdateHelper {
    *                        response {@code updatedMap} into the corresponding Java entity.
    */
   public EsDocUpdateHelper(RestHighLevelClient highLevelClient,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper, ElasticsearchOperations esOperations) {
     this.highLevelClient = highLevelClient;
     this.objectMapper = objectMapper;
+    this.esOperations = esOperations;
   }
 
   /**
@@ -112,5 +121,17 @@ public class EsDocUpdateHelper {
     public EsUpdateException(String message, Throwable cause) {
       super(message, cause);
     }
+  }
+
+  public void bulkPartialUpdate(String index, Map<String, Map<String, Object>> fieldsById) {
+    List<UpdateQuery> queries = new ArrayList<>();
+
+    for (var entry : fieldsById.entrySet()) {
+      queries.add(UpdateQuery.builder(entry.getKey())
+          .withDocument(Document.from(entry.getValue()))
+          .build());
+    }
+
+    esOperations.bulkUpdate(queries, IndexCoordinates.of(index));
   }
 }

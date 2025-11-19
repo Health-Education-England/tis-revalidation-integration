@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,13 +60,16 @@ class EsDocUpdateHelperTest {
   @Mock
   private RestHighLevelClient highLevelClient;
 
+  @Mock
+  private ElasticsearchOperations elasticsearchOperations;
+
   private EsDocUpdateHelper esDocUpdateHelper;
 
   @BeforeEach
   void setUp() {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-    esDocUpdateHelper = new EsDocUpdateHelper(highLevelClient, objectMapper);
+    esDocUpdateHelper = new EsDocUpdateHelper(highLevelClient, objectMapper, elasticsearchOperations);
   }
 
   @Test

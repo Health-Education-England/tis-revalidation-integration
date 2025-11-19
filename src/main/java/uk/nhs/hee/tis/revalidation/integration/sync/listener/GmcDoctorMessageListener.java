@@ -24,18 +24,15 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
-import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
  * Listener for handling ES rebuild gmc sync messages.
@@ -46,64 +43,41 @@ public class GmcDoctorMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   private final ElasticsearchIndexService elasticsearchIndexService;
-  private final ObjectMapper mapper;
+  private final MasterDoctorViewMapper mapper;
 
-  @Value("${cloud.aws.end-point.uri}")
-  private String sqsEndPoint;
 
-  @Value("${app.rabbit.reval.exchange}")
-  private String revalExchange;
-
-  private long traineeCount;
+  private long doctorCount;
 
   /**
-   * The listener to handle gmc sync messages.
+   * The listener to handle gmc doctor elasticsearch sync messages.
    *
    * @param doctorUpsertElasticSearchService the service to upsert doctors to ES
    * @param elasticsearchIndexService        the service to process elasticsearch indices
-   * @param mapper                           the object mapper to convert messages from String to
-   *                                         IndexSyncMessage
+   * @param mapper                           the class mapping messages to documents
    */
   public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
       ElasticsearchIndexService elasticsearchIndexService,
-      ObjectMapper mapper) {
+      MasterDoctorViewMapper mapper) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
     this.elasticsearchIndexService = elasticsearchIndexService;
     this.mapper = mapper;
   }
 
-  @SqsListener(value = "${cloud.aws.end-point.uri}")
-  public void getMessage(String strMsg) throws JsonProcessingException {
-    IndexSyncMessage<RevalidationSummaryDto> message = mapper.readValue(strMsg,
-        new TypeReference<>() {
-        });
+  @RabbitListener(queues = "${app.rabbit.reval.queue.revalidationsummary.essync.integration}")
+  public void getMessage(IndexSyncMessage message) throws Exception {
+    log.info("received doctor message");
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("GMC sync completed. {} trainees in total. Reindexing Recommendations",
-          traineeCount);
+      log.info("GMC sync completed. {} doctors processed in total. Reindexing Recommendations",
+          doctorCount);
       try {
         elasticsearchIndexService.resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
       } catch (Exception e) {
         log.error(e.getMessage(), e);
       }
-      traineeCount = 0;
     } else {
-      //prepare the MasterDoctorView and call the service method
-      final var doctorsForDb = message.getPayload().getDoctor();
-      MasterDoctorView masterDoctorView = MasterDoctorView.builder()
-          .gmcReferenceNumber(doctorsForDb.getGmcReferenceNumber())
-          .doctorFirstName(doctorsForDb.getDoctorFirstName())
-          .doctorLastName(doctorsForDb.getDoctorLastName())
-          .submissionDate(doctorsForDb.getSubmissionDate())
-          .designatedBody(doctorsForDb.getDesignatedBodyCode())
-          .gmcStatus(message.getPayload().getGmcOutcome())
-          .tisStatus(message.getPayload().getDoctor().getDoctorStatus())
-          .admin(doctorsForDb.getAdmin())
-          .lastUpdatedDate(doctorsForDb.getLastUpdatedDate())
-          .underNotice(doctorsForDb.getUnderNotice())
-          .existsInGmc(doctorsForDb.getExistsInGmc())
-          .build();
-      doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
-      traineeCount++;
+      var docs = mapper.fromRevalidationSummaries(message.getPayload());
+      doctorUpsertElasticSearchService.populateMasterIndex(docs);
+      doctorCount+= docs.size();
     }
   }
 }

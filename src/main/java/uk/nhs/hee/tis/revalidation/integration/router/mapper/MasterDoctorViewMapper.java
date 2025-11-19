@@ -21,6 +21,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,6 +29,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.RevalidationSummary;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Mapper(componentModel = "spring",
@@ -97,4 +99,9 @@ public interface MasterDoctorViewMapper {
 
     return map;
   }
+
+  @Mapping(target = "tisStatus", expression = "java(dto.getDoctorStatus().toString())")
+  @Mapping(target = "gmcStatus", expression = "java(dto.getlatestRecommendation().getOutcome().toString())")
+  List<MasterDoctorView> fromRevalidationSummaries(List<RevalidationSummary> dto);
+
 }
