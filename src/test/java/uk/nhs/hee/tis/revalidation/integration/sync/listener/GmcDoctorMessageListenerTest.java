@@ -34,11 +34,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
+import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
-import uk.nhs.hee.tis.revalidation.integration.entity.RevalidationSummary;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
@@ -62,7 +62,7 @@ class GmcDoctorMessageListenerTest {
   private final String designatedBodyCode = "PQR";
   private final String admin = "Reval Admin";
   private final boolean existsInGmc = true;
-  private final RecommendationGmcOutcome outcome = RecommendationGmcOutcome.UNDER_REVIEW;
+  private final String outcome = String.valueOf(RecommendationGmcOutcome.UNDER_REVIEW);
 
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
@@ -72,7 +72,7 @@ class GmcDoctorMessageListenerTest {
   private GmcDoctorMessageListener gmcDoctorMessageListener;
 
   @Captor
-  ArgumentCaptor<RevalidationSummary> dlqArgumentCaptor;
+  ArgumentCaptor<RevalidationSummaryDto> dlqArgumentCaptor;
   @Captor
   ArgumentCaptor<List<MasterDoctorView>> payloadCaptor;
 
@@ -81,11 +81,7 @@ class GmcDoctorMessageListenerTest {
     gmcDoctorMessageListener = new GmcDoctorMessageListener(doctorUpsertElasticSearchService,
         elasticsearchIndexServiceMock, mapper);
 
-    Recommendation recommendation = Recommendation.builder().gmcNumber(gmcNumber)
-        .gmcSubmissionDate(submissionDate).outcome(outcome
-        ).build();
-
-    RevalidationSummary revalidationSummary = RevalidationSummary.builder()
+    DoctorsForDB doctor = DoctorsForDB.builder()
         .gmcReferenceNumber(gmcNumber)
         .doctorFirstName(firstName)
         .doctorLastName(lastName)
@@ -98,10 +94,15 @@ class GmcDoctorMessageListenerTest {
         .designatedBodyCode(designatedBodyCode)
         .admin(admin)
         .existsInGmc(existsInGmc)
-        .latestRecommendation(recommendation).build();
+        .build();
+
+    RevalidationSummaryDto summaryDto = RevalidationSummaryDto.builder()
+        .doctor(doctor)
+        .gmcOutcome(outcome)
+        .build();
 
     message = new IndexSyncMessage();
-    message.setPayload(List.of(revalidationSummary));
+    message.setPayload(List.of(summaryDto));
   }
 
   @Test
@@ -117,5 +118,6 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getSubmissionDate(), is(submissionDate));
     assertThat(masterDoctorView.getDesignatedBody(), is(designatedBodyCode));
     assertThat(masterDoctorView.getExistsInGmc(), is(existsInGmc));
+    assertThat(masterDoctorView.getGmcStatus(), is(outcome));
   }
 }

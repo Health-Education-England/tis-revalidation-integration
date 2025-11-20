@@ -29,7 +29,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.RevalidationSummary;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Mapper(componentModel = "spring",
@@ -100,13 +100,19 @@ public interface MasterDoctorViewMapper {
     return map;
   }
 
-  @Mapping(target = "tisStatus", source = "doctorStatus")
-  @Mapping(target = "gmcStatus", expression = "java(dto.getLatestRecommendation() != null &&"
-      + " dto.getLatestRecommendation().getOutcome() != null ? "
-      + "dto.getLatestRecommendation().getOutcome().toString() : null)")
-  @Mapping(source = "designatedBodyCode", target = "designatedBody")
-  MasterDoctorView fromRevalidationSummary(RevalidationSummary dto);
+  @Mapping(target = "doctorFirstName", expression = "java(dto.getDoctor().getDoctorFirstName())")
+  @Mapping(target = "doctorLastName", expression = "java(dto.getDoctor().getDoctorLastName())")
+  @Mapping(target = "gmcReferenceNumber", expression = "java(dto.getDoctor().getGmcReferenceNumber())")
+  @Mapping(target = "submissionDate", expression = "java(dto.getDoctor().getSubmissionDate())")
+  @Mapping(target = "tisStatus", expression = "java(dto.getDoctor().getDoctorStatus())")
+  @Mapping(target = "designatedBody", expression = "java(dto.getDoctor().getDesignatedBodyCode())")
+  @Mapping(target = "admin", expression = "java(dto.getDoctor().getAdmin())")
+  @Mapping(target = "lastUpdatedDate", expression = "java(dto.getDoctor().getLastUpdatedDate())")
+  @Mapping(target = "underNotice", expression = "java(dto.getDoctor().getUnderNotice())")
+  @Mapping(target = "existsInGmc", expression = "java(dto.getDoctor().getExistsInGmc())")
+  @Mapping(target = "gmcStatus", source = "gmcOutcome")
+  MasterDoctorView fromRevalidationSummaryDto(RevalidationSummaryDto dto);
 
-  List<MasterDoctorView> fromRevalidationSummaries(List<RevalidationSummary> dtos);
+  List<MasterDoctorView> fromRevalidationSummaryDtos(List<RevalidationSummaryDto> dtos);
 
 }

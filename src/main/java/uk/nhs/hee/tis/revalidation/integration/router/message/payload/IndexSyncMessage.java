@@ -26,13 +26,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.nhs.hee.tis.revalidation.integration.entity.RevalidationSummary;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class IndexSyncMessage {
-  private List<RevalidationSummary> payload;
+  private List<RevalidationSummaryDto> payload;
   private Boolean syncEnd;
 }

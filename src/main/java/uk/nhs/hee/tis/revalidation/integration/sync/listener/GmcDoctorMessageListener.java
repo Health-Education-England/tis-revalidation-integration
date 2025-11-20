@@ -26,8 +26,6 @@ import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
@@ -79,7 +77,7 @@ public class GmcDoctorMessageListener {
         log.error(e.getMessage(), e);
       }
     } else {
-      var docs = mapper.fromRevalidationSummaries(message.getPayload());
+      var docs = mapper.fromRevalidationSummaryDtos(message.getPayload());
       doctorUpsertElasticSearchService.populateMasterIndex(docs);
       doctorCount += docs.size();
     }
