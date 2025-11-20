@@ -102,7 +102,8 @@ public interface MasterDoctorViewMapper {
 
   @Mapping(target = "doctorFirstName", expression = "java(dto.getDoctor().getDoctorFirstName())")
   @Mapping(target = "doctorLastName", expression = "java(dto.getDoctor().getDoctorLastName())")
-  @Mapping(target = "gmcReferenceNumber", expression = "java(dto.getDoctor().getGmcReferenceNumber())")
+  @Mapping(target = "gmcReferenceNumber", expression = "java(dto.getDoctor()"
+      + ".getGmcReferenceNumber())")
   @Mapping(target = "submissionDate", expression = "java(dto.getDoctor().getSubmissionDate())")
   @Mapping(target = "tisStatus", expression = "java(dto.getDoctor().getDoctorStatus())")
   @Mapping(target = "designatedBody", expression = "java(dto.getDoctor().getDesignatedBodyCode())")
