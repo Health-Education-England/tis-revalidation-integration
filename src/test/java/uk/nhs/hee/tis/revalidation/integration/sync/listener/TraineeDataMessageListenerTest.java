@@ -125,7 +125,7 @@ class TraineeDataMessageListenerTest {
   }
 
   @Test
-  void shouldPopulateMasterIndexWhenNotSyncEnd() {
+  void shouldPopulateMasterIndexWhenNotSyncEnd() throws Exception {
     connectionInfo.setSyncEnd(null);
 
     traineeDataMessageListener.receiveMessage(connectionInfo);
@@ -149,7 +149,7 @@ class TraineeDataMessageListenerTest {
   }
 
   @Test
-  void shouldSendSyncStartMessageWhenSyncEnd() {
+  void shouldSendSyncStartMessageWhenSyncEnd() throws Exception {
     connectionInfo.setSyncEnd(true);
 
     traineeDataMessageListener.receiveMessage(connectionInfo);
