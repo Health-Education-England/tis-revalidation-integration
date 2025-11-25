@@ -23,28 +23,24 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
+import uk.nhs.hee.tis.revalidation.integration.enums.RecommendationGmcOutcome;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
+import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
@@ -53,81 +49,74 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @ExtendWith(MockitoExtension.class)
 class GmcDoctorMessageListenerTest {
 
-  private IndexSyncMessage<RevalidationSummaryDto> message;
-
-  private GmcDoctorMessageListener gmcDoctorMessageListener;
-  private ObjectMapper mapper;
+  private IndexSyncMessage message;
+  private static final String GMC_NUMBER = "101";
+  private static final String FIRST_NAME = "AAA";
+  private static final String LAST_NAME = "BBB";
+  private static final LocalDate SUBMISSION_DATE = LocalDate.now();
+  private static final LocalDate DATE_ADDED = LocalDate.now();
+  private static final UnderNotice UNDER_NOTICE = UnderNotice.NO;
+  private static final String SANCTION = "sanction";
+  private static final RecommendationStatus RECOMMENDATION_STATUS
+      = RecommendationStatus.NOT_STARTED;
+  private static final LocalDate LAST_UPDATED = LocalDate.now();
+  private static final String DESIGNATED_BODY_CODE = "PQR";
+  private static final String ADMIN = "Reval Admin";
+  private static final boolean EXISTS_IN_GMC = true;
+  private static final String OUTCOME = String.valueOf(RecommendationGmcOutcome.UNDER_REVIEW);
 
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   @Mock
   private ElasticsearchIndexService elasticsearchIndexServiceMock;
+  private final MasterDoctorViewMapper mapper = new MasterDoctorViewMapperImpl();
+  private GmcDoctorMessageListener gmcDoctorMessageListener;
 
+  @Captor
+  ArgumentCaptor<List<MasterDoctorView>> payloadCaptor;
 
   @BeforeEach
   void setUp() {
-    mapper = new ObjectMapper();
-    mapper.registerModules(new JavaTimeModule());
-    gmcDoctorMessageListener = new GmcDoctorMessageListener(
-        doctorUpsertElasticSearchService, elasticsearchIndexServiceMock, mapper);
+    gmcDoctorMessageListener = new GmcDoctorMessageListener(doctorUpsertElasticSearchService,
+        elasticsearchIndexServiceMock, mapper);
 
-    DoctorsForDB doctorsForDb = DoctorsForDB.builder()
-        .gmcReferenceNumber("101")
-        .doctorFirstName("AAA")
-        .doctorLastName("BBB")
-        .submissionDate(LocalDate.now())
-        .dateAdded(LocalDate.now())
-        .underNotice(UnderNotice.NO)
-        .sanction("sanc")
-        .doctorStatus(RecommendationStatus.NOT_STARTED)
-        .lastUpdatedDate(LocalDate.now())
-        .designatedBodyCode("PQR")
-        .admin("Reval Admin")
-        .existsInGmc(true).build();
+    DoctorsForDB doctor = DoctorsForDB.builder()
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(FIRST_NAME)
+        .doctorLastName(LAST_NAME)
+        .submissionDate(SUBMISSION_DATE)
+        .dateAdded(DATE_ADDED)
+        .underNotice(UNDER_NOTICE)
+        .sanction(SANCTION)
+        .doctorStatus(RECOMMENDATION_STATUS)
+        .lastUpdatedDate(LAST_UPDATED)
+        .designatedBodyCode(DESIGNATED_BODY_CODE)
+        .admin(ADMIN)
+        .existsInGmc(EXISTS_IN_GMC)
+        .build();
 
-    RevalidationSummaryDto revalidationSummaryDto = RevalidationSummaryDto.builder()
-        .doctor(doctorsForDb)
-        .gmcOutcome("Approved").build();
+    RevalidationSummaryDto summaryDto = RevalidationSummaryDto.builder()
+        .doctor(doctor)
+        .gmcOutcome(OUTCOME)
+        .build();
 
-    message = new IndexSyncMessage<>();
-    message.setPayload(revalidationSummaryDto);
+    message = new IndexSyncMessage();
+    message.setPayload(List.of(summaryDto));
   }
 
   @Test
-  void testMessagesAreReceivedFromSqsQueue() throws IOException {
-    String messageStr = mapper.writeValueAsString(message);
-    gmcDoctorMessageListener.getMessage(messageStr);
+  void testMessagesAreReceivedFromQueue() {
+    gmcDoctorMessageListener.getMessage(message);
 
-    ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor = ArgumentCaptor
-        .forClass(MasterDoctorView.class);
-    verify(doctorUpsertElasticSearchService).populateMasterIndex(masterDoctorViewCaptor.capture());
-    MasterDoctorView masterDoctorView = masterDoctorViewCaptor.getValue();
+    verify(doctorUpsertElasticSearchService).populateMasterIndex(payloadCaptor.capture());
+    MasterDoctorView masterDoctorView = payloadCaptor.getAllValues().get(0).get(0);
 
-    assertThat(masterDoctorView.getGmcReferenceNumber(), is("101"));
-    assertThat(masterDoctorView.getDoctorFirstName(), is("AAA"));
-    assertThat(masterDoctorView.getDoctorLastName(), is("BBB"));
-    assertThat(masterDoctorView.getSubmissionDate(), is(LocalDate.now()));
-    assertThat(masterDoctorView.getDesignatedBody(), is("PQR"));
-    assertThat(masterDoctorView.getExistsInGmc(), is(true));
-  }
-
-  @Test
-  void shouldNotThrowErrorWhenRecommendationReindexHasException() throws Exception {
-    message.setSyncEnd(true);
-    String messageStr = mapper.writeValueAsString(message);
-
-    doThrow(Exception.class).when(elasticsearchIndexServiceMock)
-        .resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
-
-    assertDoesNotThrow(() -> gmcDoctorMessageListener.getMessage(messageStr));
-  }
-
-  @Test
-  void shouldThrowErrorWhenReadMessageFails() throws Exception {
-    String messageStr = mapper.writeValueAsString(message);
-    String invalidJsonStr = messageStr.substring(1, messageStr.length() - 2);
-
-    assertThrows(JsonProcessingException.class,
-        () -> gmcDoctorMessageListener.getMessage(invalidJsonStr));
+    assertThat(masterDoctorView.getGmcReferenceNumber(), is(GMC_NUMBER));
+    assertThat(masterDoctorView.getDoctorFirstName(), is(FIRST_NAME));
+    assertThat(masterDoctorView.getDoctorLastName(), is(LAST_NAME));
+    assertThat(masterDoctorView.getSubmissionDate(), is(SUBMISSION_DATE));
+    assertThat(masterDoctorView.getDesignatedBody(), is(DESIGNATED_BODY_CODE));
+    assertThat(masterDoctorView.getExistsInGmc(), is(EXISTS_IN_GMC));
+    assertThat(masterDoctorView.getGmcStatus(), is(OUTCOME));
   }
 }

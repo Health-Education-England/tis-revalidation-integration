@@ -21,6 +21,7 @@
 package uk.nhs.hee.tis.revalidation.integration.router.mapper;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,6 +29,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @Mapper(componentModel = "spring",
@@ -97,4 +99,20 @@ public interface MasterDoctorViewMapper {
 
     return map;
   }
+
+  @Mapping(target = "doctorFirstName", source = "doctor.doctorFirstName")
+  @Mapping(target = "doctorLastName", source = "doctor.doctorLastName")
+  @Mapping(target = "gmcReferenceNumber", source = "doctor.gmcReferenceNumber")
+  @Mapping(target = "submissionDate", source = "doctor.submissionDate")
+  @Mapping(target = "tisStatus", source = "doctor.doctorStatus")
+  @Mapping(target = "designatedBody", source = "doctor.designatedBodyCode")
+  @Mapping(target = "admin", source = "doctor.admin")
+  @Mapping(target = "lastUpdatedDate", source = "doctor.lastUpdatedDate")
+  @Mapping(target = "underNotice", source = "doctor.underNotice")
+  @Mapping(target = "existsInGmc", source = "doctor.existsInGmc")
+  @Mapping(target = "gmcStatus", source = "gmcOutcome")
+  MasterDoctorView fromRevalidationSummaryDto(RevalidationSummaryDto dto);
+
+  List<MasterDoctorView> fromRevalidationSummaryDtos(List<RevalidationSummaryDto> dtos);
+
 }
