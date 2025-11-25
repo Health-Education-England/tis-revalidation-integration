@@ -174,7 +174,12 @@ public class DoctorUpsertElasticSearchService {
   }
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {
-    repository.save(dataToSave);
+    try {
+      repository.save(dataToSave);
+    } catch (Exception ex) {
+      log.info("Exception in `addMasterDoctorViews` (GmcId: {}; PersonId: {}): ",
+          dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
+    }
   }
 
   private Map<String, Object> generateUpdatedDocument(MasterDoctorView doctorUpdate) {
