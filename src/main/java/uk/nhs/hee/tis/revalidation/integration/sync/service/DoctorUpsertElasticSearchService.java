@@ -64,19 +64,16 @@ public class DoctorUpsertElasticSearchService {
   private final ElasticsearchOperations elasticSearchOperations;
   private final ElasticsearchIndexHelper elasticsearchIndexHelper;
   private final EsDocUpdateHelper esDocUpdateHelper;
-  private final RabbitTemplate rabbitTemplate;
 
   public DoctorUpsertElasticSearchService(MasterDoctorElasticSearchRepository repository,
       MasterDoctorViewMapper mapper,
       ElasticsearchOperations elasticSearchOperations,
-      ElasticsearchIndexHelper elasticsearchIndexHelper, EsDocUpdateHelper esDocUpdateHelper,
-      RabbitTemplate rabbitTemplate) {
+      ElasticsearchIndexHelper elasticsearchIndexHelper, EsDocUpdateHelper esDocUpdateHelper) {
     this.repository = repository;
     this.mapper = mapper;
     this.elasticSearchOperations = elasticSearchOperations;
     this.elasticsearchIndexHelper = elasticsearchIndexHelper;
     this.esDocUpdateHelper = esDocUpdateHelper;
-    this.rabbitTemplate = rabbitTemplate;
   }
 
   /**
