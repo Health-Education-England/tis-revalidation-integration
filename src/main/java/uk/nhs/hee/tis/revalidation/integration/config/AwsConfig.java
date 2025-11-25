@@ -24,7 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.config;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import org.apache.camel.component.aws.xray.NoopTracingStrategy;
+import org.apache.camel.component.aws.xray.TraceAnnotatedTracingStrategy;
 import org.apache.camel.component.aws.xray.XRayTracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +52,7 @@ public class AwsConfig {
   @Bean
   public XRayTracer awsXrayTracer() {
     XRayTracer tracer = new XRayTracer();
-    tracer.setTracingStrategy(new NoopTracingStrategy());
+    tracer.setTracingStrategy(new TraceAnnotatedTracingStrategy());
     return tracer;
   }
 }
