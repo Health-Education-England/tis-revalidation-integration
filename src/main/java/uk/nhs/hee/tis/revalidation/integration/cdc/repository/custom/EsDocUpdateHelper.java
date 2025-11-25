@@ -31,6 +31,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.data.elasticsearch.BulkFailureException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -140,7 +141,10 @@ public class EsDocUpdateHelper {
           .withDocument(Document.from(entry.getValue()))
           .build());
     }
-
-    esOperations.bulkUpdate(queries, IndexCoordinates.of(index));
+    try {
+      esOperations.bulkUpdate(queries, IndexCoordinates.of(index));
+    } catch (BulkFailureException e) {
+      log.error("Exception during elasticsearch bulk update: ", e);
+    }
   }
 }
