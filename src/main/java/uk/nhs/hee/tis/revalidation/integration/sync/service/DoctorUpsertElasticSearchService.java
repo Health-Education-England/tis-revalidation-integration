@@ -111,30 +111,25 @@ public class DoctorUpsertElasticSearchService {
     List<MasterDoctorView> newRecords = new ArrayList<>();
     Map<String, Map<String, Object>> updates = new HashMap<>();
 
-    try {
-      docs.forEach(doctor -> {
-        var existing = findMasterDoctorRecordByGmcNumberPersonId(doctor);
-        if (!existing.isEmpty()) {
-          if (existing.size() > 1) {
-            log.warn("Multiple doctors found for gmcID: {} while syncing ES gmc records",
-                doctor.getGmcReferenceNumber());
-          }
-          updates.put(existing.get(0).getId(), generateUpdatedDocument(doctor));
-
-        } else {
-          newRecords.add(doctor);
+    docs.forEach(doctor -> {
+      var existing = findMasterDoctorRecordByGmcNumberPersonId(doctor);
+      if (!existing.isEmpty()) {
+        if (existing.size() > 1) {
+          log.warn("Multiple doctors found for gmcID: {} while syncing ES gmc records",
+              doctor.getGmcReferenceNumber());
         }
-      });
+        updates.put(existing.get(0).getId(), generateUpdatedDocument(doctor));
 
-      if (!newRecords.isEmpty()) {
-        repository.saveAll(newRecords);
+      } else {
+        newRecords.add(doctor);
       }
-      if (!updates.isEmpty()) {
-        esDocUpdateHelper.bulkPartialUpdate(MASTER_DOCTOR_INDEX, updates);
-      }
-    } catch (Exception e) {
-      log.error("Failed to process es sync gmc doctor batch, sending to DLQ");
-      rabbitTemplate.convertAndSend(writeFailDlqRoutingKey, docs);
+    });
+
+    if (!newRecords.isEmpty()) {
+      repository.saveAll(newRecords);
+    }
+    if (!updates.isEmpty()) {
+      esDocUpdateHelper.bulkPartialUpdate(MASTER_DOCTOR_INDEX, updates);
     }
   }
 

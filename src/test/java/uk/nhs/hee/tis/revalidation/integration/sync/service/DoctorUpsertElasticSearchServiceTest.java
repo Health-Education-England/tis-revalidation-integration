@@ -199,7 +199,7 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldUpdateMasterDoctorViewsWithPersonId()  {
+  void shouldUpdateMasterDoctorViewsWithPersonId() {
     // set dataToSave with TcsPersonId
     dataToSave.setTcsPersonId(1001L);
 
@@ -307,24 +307,6 @@ class DoctorUpsertElasticSearchServiceTest {
     service.populateMasterIndex(List.of(mappedNewViewGmcOnly));
 
     verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
-  }
-
-  @Test
-  void shouldPublishFailedUpdatesToDlq() {
-    when(repository.findByGmcReferenceNumber(
-        mappedExistingViewGmcOnly.getGmcReferenceNumber())).thenReturn(
-        recordsAlreadyInEs);
-
-    doThrow(ActionRequestValidationException.class).when(esDocUpdateHelper)
-        .bulkPartialUpdate(any(), any());
-
-    service.populateMasterIndex(List.of(mappedExistingViewGmcOnly));
-
-    verify(rabbitTemplate).convertAndSend(routingKeyCaptor.capture(),
-        updateListCaptor.capture());
-
-    assertEquals(routingKey, routingKeyCaptor.getValue());
-    assertEquals(List.of(mappedExistingViewGmcOnly), updateListCaptor.getValue());
   }
 
 }

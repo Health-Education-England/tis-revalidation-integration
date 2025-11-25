@@ -100,17 +100,16 @@ public interface MasterDoctorViewMapper {
     return map;
   }
 
-  @Mapping(target = "doctorFirstName", expression = "java(dto.getDoctor().getDoctorFirstName())")
-  @Mapping(target = "doctorLastName", expression = "java(dto.getDoctor().getDoctorLastName())")
-  @Mapping(target = "gmcReferenceNumber", expression = "java(dto.getDoctor()"
-      + ".getGmcReferenceNumber())")
-  @Mapping(target = "submissionDate", expression = "java(dto.getDoctor().getSubmissionDate())")
-  @Mapping(target = "tisStatus", expression = "java(dto.getDoctor().getDoctorStatus())")
-  @Mapping(target = "designatedBody", expression = "java(dto.getDoctor().getDesignatedBodyCode())")
-  @Mapping(target = "admin", expression = "java(dto.getDoctor().getAdmin())")
-  @Mapping(target = "lastUpdatedDate", expression = "java(dto.getDoctor().getLastUpdatedDate())")
-  @Mapping(target = "underNotice", expression = "java(dto.getDoctor().getUnderNotice())")
-  @Mapping(target = "existsInGmc", expression = "java(dto.getDoctor().getExistsInGmc())")
+  @Mapping(target = "doctorFirstName", source = "doctor.doctorFirstName")
+  @Mapping(target = "doctorLastName", source = "doctor.doctorLastName")
+  @Mapping(target = "gmcReferenceNumber", source = "doctor.gmcReferenceNumber")
+  @Mapping(target = "submissionDate", source = "doctor.submissionDate")
+  @Mapping(target = "tisStatus", source = "doctor.doctorStatus")
+  @Mapping(target = "designatedBody", source = "doctor.designatedBodyCode")
+  @Mapping(target = "admin", source = "doctor.admin")
+  @Mapping(target = "lastUpdatedDate", source = "doctor.lastUpdatedDate")
+  @Mapping(target = "underNotice", source = "doctor.underNotice")
+  @Mapping(target = "existsInGmc", source = "doctor.existsInGmc")
   @Mapping(target = "gmcStatus", source = "gmcOutcome")
   MasterDoctorView fromRevalidationSummaryDto(RevalidationSummaryDto dto);
 

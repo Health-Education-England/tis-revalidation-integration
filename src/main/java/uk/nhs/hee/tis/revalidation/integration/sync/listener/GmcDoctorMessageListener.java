@@ -71,6 +71,7 @@ public class GmcDoctorMessageListener {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} doctors processed in total. Reindexing Recommendations",
           doctorCount);
+      doctorCount = 0;
       try {
         elasticsearchIndexService.resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
       } catch (Exception e) {
