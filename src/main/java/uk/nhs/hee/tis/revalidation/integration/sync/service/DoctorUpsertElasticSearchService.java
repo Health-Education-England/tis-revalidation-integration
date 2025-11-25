@@ -47,8 +47,6 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Service
 public class DoctorUpsertElasticSearchService {
 
-  @Value("${app.rabbit.reval.routingKey.revalidationsummary.essyncwritefail.dlq}")
-  private String writeFailDlqRoutingKey;
   protected static final String ES_CURRENT_CONNECIONS_FILTER = "{\"term\":{\"existsInGmc\":true}}";
   protected static final String ES_DISCREPANCIES_FILTER =
       """

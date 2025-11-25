@@ -67,7 +67,7 @@ public class GmcDoctorMessageListener {
    * @param message the payload from the doctor sync queue including a flag for the end of the sync
    */
   @RabbitListener(queues = "${app.rabbit.reval.queue.revalidationsummary.essync.integration}")
-  public void getMessage(IndexSyncMessage message) throws Exception {
+  public void getMessage(IndexSyncMessage message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
       log.info("GMC sync completed. {} doctors processed in total. Reindexing Recommendations",
           doctorCount);
