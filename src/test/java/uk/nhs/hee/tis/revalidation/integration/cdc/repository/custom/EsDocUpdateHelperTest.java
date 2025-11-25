@@ -72,7 +72,8 @@ class EsDocUpdateHelperTest {
   private static final String LAST_NAME = "BBB";
   private static final LocalDate SUBMISSION_DATE = LocalDate.now();
   private static final UnderNotice UNDER_NOTICE = UnderNotice.NO;
-  private static final RecommendationStatus RECOMMENDATION_STATUS = RecommendationStatus.NOT_STARTED;
+  private static final RecommendationStatus RECOMMENDATION_STATUS
+      = RecommendationStatus.NOT_STARTED;
   private static final LocalDate LAST_UPDATED = LocalDate.now();
   private static final String DESIGNATED_BODY_CODE = "PQR";
   private static final String ADMIN = "Reval Admin";
