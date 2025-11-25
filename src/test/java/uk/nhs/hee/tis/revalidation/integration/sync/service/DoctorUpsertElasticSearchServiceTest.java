@@ -30,7 +30,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.CURRENT_CONNECTIONS_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.DISCREPANCIES_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
@@ -94,7 +93,6 @@ class DoctorUpsertElasticSearchServiceTest {
   private MasterDoctorView mappedView;
   private MasterDoctorView mappedNewViewGmcOnly;
   private MasterDoctorView mappedExistingViewGmcOnly;
-  private final String routingKey = "routingkey.revalidationsummary.essyncwritefail";
 
   @BeforeEach
   void setUp() {
@@ -134,9 +132,6 @@ class DoctorUpsertElasticSearchServiceTest {
 
     // prepare existing record in ES Master
     recordsAlreadyInEs.add(currentDoctorView);
-
-    setField(service, "writeFailDlqRoutingKey",
-        routingKey);
   }
 
   @Test
