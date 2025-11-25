@@ -33,7 +33,6 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.util.iterable.Iterables;
 import org.elasticsearch.index.IndexNotFoundException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -135,17 +134,31 @@ public class DoctorUpsertElasticSearchService {
     List<MasterDoctorView> result = new ArrayList<>();
 
     if (dataToSave.getGmcReferenceNumber() != null && dataToSave.getTcsPersonId() != null) {
-      result = repository.findByGmcReferenceNumberAndTcsPersonId(
-          dataToSave.getGmcReferenceNumber(),
-          dataToSave.getTcsPersonId());
-    } else if (dataToSave.getGmcReferenceNumber() != null
-        && dataToSave.getTcsPersonId() == null) {
-      result = repository.findByGmcReferenceNumber(
-          dataToSave.getGmcReferenceNumber());
-    } else if (dataToSave.getGmcReferenceNumber() == null
-        && dataToSave.getTcsPersonId() != null) {
-      result = repository.findByTcsPersonId(
-          dataToSave.getTcsPersonId());
+      try {
+        result = repository.findByGmcReferenceNumberAndTcsPersonId(
+            dataToSave.getGmcReferenceNumber(),
+            dataToSave.getTcsPersonId());
+      } catch (Exception ex) {
+        log.info("Exception in `findByGmcReferenceNumberAndTcsPersonId`"
+                + "(GmcId: {}; PersonId: {}):",
+            dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
+      }
+    } else if (dataToSave.getGmcReferenceNumber() != null) {
+      try {
+        result = repository.findByGmcReferenceNumber(
+            dataToSave.getGmcReferenceNumber());
+      } catch (Exception ex) {
+        log.info("Exception in `findByGmcReferenceNumber` (GmcId: {}):",
+            dataToSave.getGmcReferenceNumber(), ex);
+      }
+    } else if (dataToSave.getTcsPersonId() != null) {
+      try {
+        result = repository.findByTcsPersonId(
+            dataToSave.getTcsPersonId());
+      } catch (Exception ex) {
+        log.info("Exception in `findByTcsPersonId` (PersonId: {}):",
+            dataToSave.getTcsPersonId(), ex);
+      }
     }
 
     return result;
