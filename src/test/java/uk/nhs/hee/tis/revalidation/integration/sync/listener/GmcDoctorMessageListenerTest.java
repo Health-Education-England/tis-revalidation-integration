@@ -72,8 +72,6 @@ class GmcDoctorMessageListenerTest {
   private GmcDoctorMessageListener gmcDoctorMessageListener;
 
   @Captor
-  ArgumentCaptor<RevalidationSummaryDto> dlqArgumentCaptor;
-  @Captor
   ArgumentCaptor<List<MasterDoctorView>> payloadCaptor;
 
   @BeforeEach
@@ -106,7 +104,7 @@ class GmcDoctorMessageListenerTest {
   }
 
   @Test
-  void testMessagesAreReceivedFromQueue() throws Exception {
+  void testMessagesAreReceivedFromQueue() {
     gmcDoctorMessageListener.getMessage(message);
 
     verify(doctorUpsertElasticSearchService).populateMasterIndex(payloadCaptor.capture());
