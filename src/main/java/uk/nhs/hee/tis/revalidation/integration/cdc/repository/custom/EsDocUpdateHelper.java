@@ -57,8 +57,8 @@ public class EsDocUpdateHelper {
    * Constructs an EsDocUpdateHelper with the given ElasticsearchOperations instance.
    *
    * @param highLevelClient the Elasticsearch high-level client used to execute update operations.
-   * @param objectMapper    the object mapper used to convert the Elasticsearch
-   *                        response {@code updatedMap} into the corresponding Java entity.
+   * @param objectMapper    the object mapper used to convert the Elasticsearch response
+   *                        {@code updatedMap} into the corresponding Java entity.
    */
   public EsDocUpdateHelper(RestHighLevelClient highLevelClient,
       ObjectMapper objectMapper, ElasticsearchOperations esOperations) {
@@ -71,14 +71,13 @@ public class EsDocUpdateHelper {
    * Performs a partial update on a document in the specified Elasticsearch index.
    *
    * <p>Only the fields provided in the {@code fields} map will be updated, leaving
-   * other fields intact. After the update, the method retrieves and returns the
-   * updated document.
+   * other fields intact. After the update, the method retrieves and returns the updated document.
    *
-   * @param index the name of the Elasticsearch index where the document resides
-   * @param id the unique identifier of the document to update
+   * @param index  the name of the Elasticsearch index where the document resides
+   * @param id     the unique identifier of the document to update
    * @param fields a map of field names and their new values to be updated
-   * @param clazz the class type of the document to be returned
-   * @param <T> the type of the document
+   * @param clazz  the class type of the document to be returned
+   * @param <T>    the type of the document
    * @return the updated document of type {@code T} after the partial update
    */
   public <T> T partialUpdate(String index, String id, Map<String, Object> fields, Class<T> clazz) {
@@ -144,7 +143,9 @@ public class EsDocUpdateHelper {
     try {
       esOperations.bulkUpdate(queries, IndexCoordinates.of(index));
     } catch (BulkFailureException e) {
-      log.error("Exception during elasticsearch bulk update: ", e);
+      log.error(
+          "Exception during elasticsearch bulk update with the following failed documents: {} ",
+          e.getFailedDocuments());
     }
   }
 }
