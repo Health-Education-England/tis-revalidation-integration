@@ -94,40 +94,52 @@ class DoctorUpsertElasticSearchServiceTest {
   private MasterDoctorView mappedNewViewGmcOnly;
   private MasterDoctorView mappedExistingViewGmcOnly;
 
+  private static final String GMC_NUMBER = "1111111";
+  private static final String GMC_NUMBER_KEY = "gmcReferenceNumber";
+  private static final String DOCUMENT_ID = "1";
+  private static final Long TIS_ID = 1111111L;
+  private static final String TIS_ID_KEY = "tisPersonId";
+  private static final String DOCTOR_FIRST_NAME = "firstName";
+  private static final String DOCTOR_FIRST_NAME_KEY = "doctorFirstName";
+  private static final String DOCTOR_FIRST_NAME_NEW = "firstName_new";
+  private static final String DOCTOR_LAST_NAME = "lastName";
+  private static final String DOCTOR_LAST_NAME_KEY = "doctorLastName";
+  private static final String DOCTOR_LAST_NAME_NEW = "lastName_new";
+
   @BeforeEach
   void setUp() {
     currentDoctorView = MasterDoctorView.builder()
-        .id("1a2b3c")
-        .tcsPersonId(1001L)
-        .gmcReferenceNumber("56789")
-        .doctorFirstName("doctorFirstName")
-        .doctorLastName("doctorLastName")
+        .id(DOCUMENT_ID)
+        .tcsPersonId(TIS_ID)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME)
+        .doctorLastName(DOCTOR_LAST_NAME)
         .build();
 
     dataToSave = MasterDoctorView.builder()
-        .doctorFirstName("doctorFirstName")
-        .doctorLastName("doctorLastName_new")
+        .doctorFirstName(DOCTOR_FIRST_NAME)
+        .doctorLastName(DOCTOR_LAST_NAME_NEW)
         .build();
 
     mappedView = MasterDoctorView.builder()
-        .id("1a2b3c")
-        .tcsPersonId(1001L)
-        .gmcReferenceNumber("56789")
-        .doctorFirstName("doctorFirstName_new")
-        .doctorLastName("doctorLastName_new")
+        .id(DOCUMENT_ID)
+        .tcsPersonId(TIS_ID)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME_NEW)
+        .doctorLastName(DOCTOR_LAST_NAME_NEW)
         .build();
 
     mappedNewViewGmcOnly = MasterDoctorView.builder()
-        .gmcReferenceNumber("56789")
-        .doctorFirstName("doctorFirstName_new")
-        .doctorLastName("doctorLastName_new")
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME_NEW)
+        .doctorLastName(DOCTOR_LAST_NAME_NEW)
         .build();
 
     mappedExistingViewGmcOnly = MasterDoctorView.builder()
-        .id("1a2b3c")
-        .gmcReferenceNumber("56789")
-        .doctorFirstName("doctorFirstName_new")
-        .doctorLastName("doctorLastName_new")
+        .id(DOCUMENT_ID)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME_NEW)
+        .doctorLastName(DOCTOR_LAST_NAME_NEW)
         .build();
 
     // prepare existing record in ES Master
@@ -161,8 +173,8 @@ class DoctorUpsertElasticSearchServiceTest {
   @Test
   void shouldUpdateMasterDoctorViewsWithGmcIdAndPersonId() {
     // set dataToSave with TcsPersonId and GmcReferenceNumber
-    dataToSave.setTcsPersonId(1001L);
-    dataToSave.setGmcReferenceNumber("56789");
+    dataToSave.setTcsPersonId(TIS_ID);
+    dataToSave.setGmcReferenceNumber(GMC_NUMBER);
 
     // find es index by GmcReferenceNumber and TcsPersonId will return and existing record
     when(repository.findByGmcReferenceNumberAndTcsPersonId(dataToSave.getGmcReferenceNumber(),
@@ -178,7 +190,7 @@ class DoctorUpsertElasticSearchServiceTest {
   @Test
   void shouldUpdateMasterDoctorViewsWithGmcId() {
     // set dataToSave with GmcReferenceNumber
-    dataToSave.setGmcReferenceNumber("56789");
+    dataToSave.setGmcReferenceNumber(GMC_NUMBER);
 
     // find es index by GmcReferenceNumber will return and existing record
     when(repository.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
@@ -194,7 +206,7 @@ class DoctorUpsertElasticSearchServiceTest {
   @Test
   void shouldUpdateMasterDoctorViewsWithPersonId() {
     // set dataToSave with TcsPersonId
-    dataToSave.setTcsPersonId(1001L);
+    dataToSave.setTcsPersonId(TIS_ID);
 
     // find es index by TcsPersonId will return and existing record
     when(repository.findByTcsPersonId(dataToSave.getTcsPersonId())).thenReturn(recordsAlreadyInEs);
@@ -209,7 +221,7 @@ class DoctorUpsertElasticSearchServiceTest {
   @Test
   void shouldAddMasterDoctorViewsWhenRecordIsNotInEs() {
     // set dataToSave with a different GmcReferenceNumber
-    dataToSave.setGmcReferenceNumber("12345");
+    dataToSave.setGmcReferenceNumber(GMC_NUMBER);
 
     // find es index by GmcReferenceNumber don't return any existing record
     when(repository.findByGmcReferenceNumber(dataToSave.getGmcReferenceNumber()))
@@ -271,13 +283,14 @@ class DoctorUpsertElasticSearchServiceTest {
       updatedId = entry.getKey();
     }
 
-    assertEquals(savedFields.get("doctorFirstName"),
+    assertEquals(savedFields.get(DOCTOR_FIRST_NAME_KEY),
         mappedExistingViewGmcOnly.getDoctorFirstName());
-    assertEquals(savedFields.get("doctorLastName"), mappedExistingViewGmcOnly.getDoctorLastName());
-    assertEquals(savedFields.get("gmcReferenceNumber"),
+    assertEquals(savedFields.get(DOCTOR_LAST_NAME_KEY),
+        mappedExistingViewGmcOnly.getDoctorLastName());
+    assertEquals(savedFields.get(GMC_NUMBER_KEY),
         mappedExistingViewGmcOnly.getGmcReferenceNumber());
-    assertEquals("1a2b3c", updatedId);
-    assertFalse(savedFields.containsKey("tcsPersonId")); // Fields from TIS/TCS not updated
+    assertEquals(DOCUMENT_ID, updatedId);
+    assertFalse(savedFields.containsKey(TIS_ID_KEY)); // Fields from TIS/TCS not updated
   }
 
   @Test

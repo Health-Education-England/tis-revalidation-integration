@@ -50,19 +50,19 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 class GmcDoctorMessageListenerTest {
 
   private IndexSyncMessage message;
-  private final String gmcNumber = "101";
-  private final String firstName = "AAA";
-  private final String lastName = "BBB";
-  private final LocalDate submissionDate = LocalDate.now();
-  private final LocalDate dateAdded = LocalDate.now();
-  private final UnderNotice underNotice = UnderNotice.NO;
-  private final String sanction = "sanction";
-  private final RecommendationStatus recommendationStatus = RecommendationStatus.NOT_STARTED;
-  private final LocalDate lastUpdated = LocalDate.now();
-  private final String designatedBodyCode = "PQR";
-  private final String admin = "Reval Admin";
-  private final boolean existsInGmc = true;
-  private final String outcome = String.valueOf(RecommendationGmcOutcome.UNDER_REVIEW);
+  private static final String GMC_NUMBER = "101";
+  private static final String FIRST_NAME = "AAA";
+  private static final String LAST_NAME = "BBB";
+  private static final LocalDate SUBMISSION_DATE = LocalDate.now();
+  private static final LocalDate DATE_ADDED = LocalDate.now();
+  private static final UnderNotice UNDER_NOTICE = UnderNotice.NO;
+  private static final String SANCTION = "sanction";
+  private static final RecommendationStatus RECOMMENDATION_STATUS = RecommendationStatus.NOT_STARTED;
+  private static final LocalDate LAST_UPDATED = LocalDate.now();
+  private static final String DESIGNATED_BODY_CODE = "PQR";
+  private static final String ADMIN = "Reval Admin";
+  private static final boolean EXISTS_IN_GMC = true;
+  private static final String OUTCOME = String.valueOf(RecommendationGmcOutcome.UNDER_REVIEW);
 
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
@@ -80,23 +80,23 @@ class GmcDoctorMessageListenerTest {
         elasticsearchIndexServiceMock, mapper);
 
     DoctorsForDB doctor = DoctorsForDB.builder()
-        .gmcReferenceNumber(gmcNumber)
-        .doctorFirstName(firstName)
-        .doctorLastName(lastName)
-        .submissionDate(submissionDate)
-        .dateAdded(dateAdded)
-        .underNotice(underNotice)
-        .sanction(sanction)
-        .doctorStatus(recommendationStatus)
-        .lastUpdatedDate(lastUpdated)
-        .designatedBodyCode(designatedBodyCode)
-        .admin(admin)
-        .existsInGmc(existsInGmc)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(FIRST_NAME)
+        .doctorLastName(LAST_NAME)
+        .submissionDate(SUBMISSION_DATE)
+        .dateAdded(DATE_ADDED)
+        .underNotice(UNDER_NOTICE)
+        .sanction(SANCTION)
+        .doctorStatus(RECOMMENDATION_STATUS)
+        .lastUpdatedDate(LAST_UPDATED)
+        .designatedBodyCode(DESIGNATED_BODY_CODE)
+        .admin(ADMIN)
+        .existsInGmc(EXISTS_IN_GMC)
         .build();
 
     RevalidationSummaryDto summaryDto = RevalidationSummaryDto.builder()
         .doctor(doctor)
-        .gmcOutcome(outcome)
+        .gmcOutcome(OUTCOME)
         .build();
 
     message = new IndexSyncMessage();
@@ -110,12 +110,12 @@ class GmcDoctorMessageListenerTest {
     verify(doctorUpsertElasticSearchService).populateMasterIndex(payloadCaptor.capture());
     MasterDoctorView masterDoctorView = payloadCaptor.getAllValues().get(0).get(0);
 
-    assertThat(masterDoctorView.getGmcReferenceNumber(), is(gmcNumber));
-    assertThat(masterDoctorView.getDoctorFirstName(), is(firstName));
-    assertThat(masterDoctorView.getDoctorLastName(), is(lastName));
-    assertThat(masterDoctorView.getSubmissionDate(), is(submissionDate));
-    assertThat(masterDoctorView.getDesignatedBody(), is(designatedBodyCode));
-    assertThat(masterDoctorView.getExistsInGmc(), is(existsInGmc));
-    assertThat(masterDoctorView.getGmcStatus(), is(outcome));
+    assertThat(masterDoctorView.getGmcReferenceNumber(), is(GMC_NUMBER));
+    assertThat(masterDoctorView.getDoctorFirstName(), is(FIRST_NAME));
+    assertThat(masterDoctorView.getDoctorLastName(), is(LAST_NAME));
+    assertThat(masterDoctorView.getSubmissionDate(), is(SUBMISSION_DATE));
+    assertThat(masterDoctorView.getDesignatedBody(), is(DESIGNATED_BODY_CODE));
+    assertThat(masterDoctorView.getExistsInGmc(), is(EXISTS_IN_GMC));
+    assertThat(masterDoctorView.getGmcStatus(), is(OUTCOME));
   }
 }

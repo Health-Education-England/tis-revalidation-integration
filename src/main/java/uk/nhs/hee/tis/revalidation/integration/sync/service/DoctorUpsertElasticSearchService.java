@@ -164,8 +164,13 @@ public class DoctorUpsertElasticSearchService {
 
   private void updateMasterDoctorViews(Iterable<MasterDoctorView> existingRecords,
       MasterDoctorView dataToSave) {
-    existingRecords.forEach(currentDoctorView -> repository
-        .save(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)));
+    try {
+      existingRecords.forEach(currentDoctorView -> repository
+          .save(mapper.updateMasterDoctorView(dataToSave, currentDoctorView)));
+    } catch (Exception ex) {
+      log.info("Exception in `updateMasterDoctorViews` (GmcId: {}; PersonId: {}): ",
+          dataToSave.getGmcReferenceNumber(), dataToSave.getTcsPersonId(), ex);
+    }
   }
 
   private void addMasterDoctorViews(MasterDoctorView dataToSave) {

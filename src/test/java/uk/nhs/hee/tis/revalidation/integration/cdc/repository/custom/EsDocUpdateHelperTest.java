@@ -67,17 +67,17 @@ class EsDocUpdateHelperTest {
       "doctorLastName", "Brown",
       "lastConnectionDateTime", "2025-11-06T10:26:23.049"
   );
-  private final String gmcNumber = "101";
-  private final String firstName = "AAA";
-  private final String lastName = "BBB";
-  private final LocalDate submissionDate = LocalDate.now();
-  private final UnderNotice underNotice = UnderNotice.NO;
-  private final RecommendationStatus recommendationStatus = RecommendationStatus.NOT_STARTED;
-  private final LocalDate lastUpdated = LocalDate.now();
-  private final String designatedBodyCode = "PQR";
-  private final String admin = "Reval Admin";
-  private final boolean existsInGmc = true;
-  private final RecommendationGmcOutcome outcome = RecommendationGmcOutcome.UNDER_REVIEW;
+  private static final String GMC_NUMBER = "101";
+  private static final String FIRST_NAME = "AAA";
+  private static final String LAST_NAME = "BBB";
+  private static final LocalDate SUBMISSION_DATE = LocalDate.now();
+  private static final UnderNotice UNDER_NOTICE = UnderNotice.NO;
+  private static final RecommendationStatus RECOMMENDATION_STATUS = RecommendationStatus.NOT_STARTED;
+  private static final LocalDate LAST_UPDATED = LocalDate.now();
+  private static final String DESIGNATED_BODY_CODE = "PQR";
+  private static final String ADMIN = "Reval Admin";
+  private static final boolean EXISTS_IN_GMC = true;
+  private static final RecommendationGmcOutcome OUTCOME = RecommendationGmcOutcome.UNDER_REVIEW;
 
   @Mock
   private RestHighLevelClient highLevelClient;
@@ -187,17 +187,17 @@ class EsDocUpdateHelperTest {
   void shouldBulkUpdate() {
     Map<String, Object> map = new HashMap<>();
     // Map fields explicitly
-    map.put("doctorFirstName", firstName);
-    map.put("doctorLastName", lastName);
-    map.put("gmcReferenceNumber", gmcNumber);
-    map.put("submissionDate", submissionDate);
-    map.put("tisStatus", recommendationStatus);
-    map.put("designatedBody", designatedBodyCode);
-    map.put("admin", admin);
-    map.put("lastUpdatedDate", lastUpdated);
-    map.put("underNotice", underNotice);
-    map.put("existsInGmc", existsInGmc);
-    map.put("gmcStatus", outcome);
+    map.put("doctorFirstName", FIRST_NAME);
+    map.put("doctorLastName", LAST_NAME);
+    map.put("gmcReferenceNumber", GMC_NUMBER);
+    map.put("submissionDate", SUBMISSION_DATE);
+    map.put("tisStatus", RECOMMENDATION_STATUS);
+    map.put("designatedBody", DESIGNATED_BODY_CODE);
+    map.put("admin", ADMIN);
+    map.put("lastUpdatedDate", LAST_UPDATED);
+    map.put("underNotice", UNDER_NOTICE);
+    map.put("existsInGmc", EXISTS_IN_GMC);
+    map.put("gmcStatus", OUTCOME);
 
     Map<String, Map<String, Object>> mapById = new HashMap<>();
     mapById.put("123", map);
@@ -212,17 +212,17 @@ class EsDocUpdateHelperTest {
     assertEquals(1, bulkUpdateRequests.size());
 
     var bulkUpdate = bulkUpdateRequests.get(0).getDocument();
-    assertEquals(firstName, bulkUpdate.get("doctorFirstName"));
-    assertEquals(lastName, bulkUpdate.get("doctorLastName"));
-    assertEquals(gmcNumber, bulkUpdate.get("gmcReferenceNumber"));
-    assertEquals(submissionDate, bulkUpdate.get("submissionDate"));
-    assertEquals(recommendationStatus, bulkUpdate.get("tisStatus"));
-    assertEquals(designatedBodyCode, bulkUpdate.get("designatedBody"));
-    assertEquals(admin, bulkUpdate.get("admin"));
-    assertEquals(lastUpdated, bulkUpdate.get("lastUpdatedDate"));
-    assertEquals(underNotice, bulkUpdate.get("underNotice"));
-    assertEquals(existsInGmc, bulkUpdate.get("existsInGmc"));
-    assertEquals(outcome, bulkUpdate.get("gmcStatus"));
+    assertEquals(FIRST_NAME, bulkUpdate.get("doctorFirstName"));
+    assertEquals(LAST_NAME, bulkUpdate.get("doctorLastName"));
+    assertEquals(GMC_NUMBER, bulkUpdate.get("gmcReferenceNumber"));
+    assertEquals(SUBMISSION_DATE, bulkUpdate.get("submissionDate"));
+    assertEquals(RECOMMENDATION_STATUS, bulkUpdate.get("tisStatus"));
+    assertEquals(DESIGNATED_BODY_CODE, bulkUpdate.get("designatedBody"));
+    assertEquals(ADMIN, bulkUpdate.get("admin"));
+    assertEquals(LAST_UPDATED, bulkUpdate.get("lastUpdatedDate"));
+    assertEquals(UNDER_NOTICE, bulkUpdate.get("underNotice"));
+    assertEquals(EXISTS_IN_GMC, bulkUpdate.get("existsInGmc"));
+    assertEquals(OUTCOME, bulkUpdate.get("gmcStatus"));
   }
 
 }
