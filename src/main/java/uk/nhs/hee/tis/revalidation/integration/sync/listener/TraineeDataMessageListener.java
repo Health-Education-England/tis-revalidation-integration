@@ -56,7 +56,7 @@ public class TraineeDataMessageListener {
    * @param connectionInfo Trainee Connection Info
    */
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncdata}")
-  public void receiveMessage(final ConnectionInfoDto connectionInfo) throws Exception {
+  public void receiveMessage(final ConnectionInfoDto connectionInfo) {
     if (connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
       log.info("TCS sync completed. {} trainees in total. Starting GMC sync.", traineeCount);
       String gmcSyncStart = "gmcSyncStart";
