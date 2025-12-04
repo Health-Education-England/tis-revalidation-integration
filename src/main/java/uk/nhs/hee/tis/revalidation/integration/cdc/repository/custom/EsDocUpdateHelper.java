@@ -89,17 +89,18 @@ public class EsDocUpdateHelper {
     try {
       UpdateResponse response = highLevelClient.update(request, RequestOptions.DEFAULT);
 
-      if (response.getGetResult() == null || !response.getGetResult().isExists()) {
+      var getResult = response.getGetResult();
+      if (getResult == null || !getResult.isExists()) {
         throw new EsUpdateException(
             "Document not found after update. Index: " + index + ", ID: " + id);
       }
 
-      Map<String, Object> updatedMap = response.getGetResult().sourceAsMap();
+      Map<String, Object> updatedMap = getResult.sourceAsMap();
       if (updatedMap == null) {
         throw new EsUpdateException(
             "Updated document source is null. Index: " + index + ", ID: " + id);
       }
-
+      updatedMap.put("id", getResult.getId());
       return objectMapper.convertValue(updatedMap, clazz);
 
     } catch (IOException e) {

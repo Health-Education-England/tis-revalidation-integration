@@ -105,7 +105,8 @@ class EsDocUpdateHelperTest {
     // Mock GetResult
     var getResult = mock(GetResult.class);
     when(getResult.isExists()).thenReturn(true);
-    when(getResult.sourceAsMap()).thenReturn(UPDATES);
+    when(getResult.sourceAsMap()).thenReturn(new HashMap<>(UPDATES));
+    when(getResult.getId()).thenReturn(DOC_ID);
 
     // Mock UpdateResponse
     UpdateResponse updateResponse = mock(UpdateResponse.class);
@@ -127,6 +128,7 @@ class EsDocUpdateHelperTest {
     assertEquals(2025, result.getLastConnectionDateTime().getYear());
     assertEquals(11, result.getLastConnectionDateTime().getMonthValue());
     assertEquals(6, result.getLastConnectionDateTime().getDayOfMonth());
+    assertEquals(DOC_ID, result.getId());
 
     verify(highLevelClient).update(any(UpdateRequest.class), any(RequestOptions.class));
   }
@@ -225,5 +227,4 @@ class EsDocUpdateHelperTest {
     assertEquals(EXISTS_IN_GMC, bulkUpdate.get("existsInGmc"));
     assertEquals(OUTCOME, bulkUpdate.get("gmcStatus"));
   }
-
 }
