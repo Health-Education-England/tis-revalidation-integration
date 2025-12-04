@@ -81,9 +81,11 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
         }
 
         Map<String, Object> doc = mapper.doctorToEsDoc(entity);
-        MasterDoctorView updatedView = esDocUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
+        esDocUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
             existingDoctors.get(0).getId(), doc,
             MasterDoctorView.class);
+
+        MasterDoctorView updatedView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber()).get(0);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {

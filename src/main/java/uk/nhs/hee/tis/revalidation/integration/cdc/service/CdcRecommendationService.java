@@ -74,8 +74,10 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         if (entity.getOutcome() != null) {
           doc.put("gmcStatus", entity.getOutcome().getOutcome());
         }
-        MasterDoctorView updatedView = esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
+        esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
             masterDoctorView.getId(), doc, MasterDoctorView.class);
+
+        MasterDoctorView updatedView = repository.findByGmcReferenceNumber(entity.getGmcNumber()).get(0);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
