@@ -47,10 +47,10 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
   /**
    * Create a service.
    *
-   * @param repository The ElasticSearch repository with the index managed by the service
-   * @param esDocUpdateHelper the helper to update ES docs
+   * @param repository          The ElasticSearch repository with the index managed by the service
+   * @param esDocUpdateHelper   the helper to update ES docs
    * @param cdcMessagePublisher the publisher to publish MasterDoctorView update
-   * @param mapper a mapper for converting to/from the persisted composite view
+   * @param mapper              a mapper for converting to/from the persisted composite view
    */
   public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
       EsDocUpdateHelper esDocUpdateHelper, CdcMessagePublisher cdcMessagePublisher,
@@ -85,12 +85,13 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
             existingDoctors.get(0).getId(), doc,
             MasterDoctorView.class);
 
-        MasterDoctorView updatedView = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber()).get(0);
+        MasterDoctorView updatedView = repository.findByGmcReferenceNumber(
+            entity.getGmcReferenceNumber()).get(0);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
-          entity.getGmcReferenceNumber(), e.getMessage()),
+              entity.getGmcReferenceNumber(), e.getMessage()),
           e);
       throw e;
     }

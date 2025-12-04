@@ -77,7 +77,8 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
         esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
             masterDoctorView.getId(), doc, MasterDoctorView.class);
 
-        MasterDoctorView updatedView = repository.findByGmcReferenceNumber(entity.getGmcNumber()).get(0);
+        MasterDoctorView updatedView = repository.findByGmcReferenceNumber(entity.getGmcNumber())
+            .get(0);
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
