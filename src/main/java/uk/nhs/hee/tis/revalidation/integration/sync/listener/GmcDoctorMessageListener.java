@@ -43,9 +43,6 @@ public class GmcDoctorMessageListener {
   private final ElasticsearchIndexService elasticsearchIndexService;
   private final MasterDoctorViewMapper mapper;
 
-
-  private long doctorCount;
-
   /**
    * The listener to handle gmc doctor elasticsearch sync messages.
    *
@@ -69,9 +66,7 @@ public class GmcDoctorMessageListener {
   @RabbitListener(queues = "${app.rabbit.reval.queue.revalidationsummary.essync.integration}")
   public void getMessage(IndexSyncMessage message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("GMC sync completed. {} doctors processed in total. Reindexing Recommendations",
-          doctorCount);
-      doctorCount = 0;
+      log.info("GMC sync completed. Reindexing Recommendations");
       try {
         elasticsearchIndexService.resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
       } catch (Exception e) {
@@ -80,7 +75,6 @@ public class GmcDoctorMessageListener {
     } else {
       var docs = mapper.fromRevalidationSummaryDtos(message.getPayload());
       doctorUpsertElasticSearchService.populateMasterIndex(docs);
-      doctorCount += docs.size();
     }
   }
 }
