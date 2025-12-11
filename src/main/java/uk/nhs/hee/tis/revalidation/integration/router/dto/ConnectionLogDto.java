@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * A data class to handle connection log details.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
