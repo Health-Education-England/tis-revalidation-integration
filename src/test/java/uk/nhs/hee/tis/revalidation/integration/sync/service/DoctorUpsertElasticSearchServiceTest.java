@@ -33,8 +33,10 @@ import static org.mockito.Mockito.when;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.CURRENT_CONNECTIONS_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.DISCREPANCIES_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+import static uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService.ES_DATETIME_FORMATTER;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +55,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionLogDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -93,6 +96,7 @@ class DoctorUpsertElasticSearchServiceTest {
   private MasterDoctorView mappedView;
   private MasterDoctorView mappedNewViewGmcOnly;
   private MasterDoctorView mappedExistingViewGmcOnly;
+  private static final String UPDATED_BY = "User";
 
   private static final String GMC_NUMBER = "1111111";
   private static final String GMC_NUMBER_KEY = "gmcReferenceNumber";
@@ -105,6 +109,8 @@ class DoctorUpsertElasticSearchServiceTest {
   private static final String DOCTOR_LAST_NAME = "lastName";
   private static final String DOCTOR_LAST_NAME_KEY = "doctorLastName";
   private static final String DOCTOR_LAST_NAME_NEW = "lastName_new";
+  private static final LocalDateTime LAST_CONNECTION_DATETIME = LocalDateTime.now().minusDays(1);
+  private ConnectionLogDto connectionLogDto;
 
   @BeforeEach
   void setUp() {
@@ -140,6 +146,12 @@ class DoctorUpsertElasticSearchServiceTest {
         .gmcReferenceNumber(GMC_NUMBER)
         .doctorFirstName(DOCTOR_FIRST_NAME_NEW)
         .doctorLastName(DOCTOR_LAST_NAME_NEW)
+        .build();
+
+    connectionLogDto = ConnectionLogDto.builder()
+        .gmcId(GMC_NUMBER)
+        .updatedBy(UPDATED_BY)
+        .eventDateTime(LAST_CONNECTION_DATETIME)
         .build();
 
     // prepare existing record in ES Master
@@ -238,7 +250,7 @@ class DoctorUpsertElasticSearchServiceTest {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
     verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, CURRENT_CONNECTIONS_ALIAS,
-        DoctorUpsertElasticSearchService.ES_CURRENT_CONNECIONS_FILTER);
+        DoctorUpsertElasticSearchService.ES_CURRENT_CONNECTIONS_FILTER);
   }
 
   @Test
@@ -315,4 +327,47 @@ class DoctorUpsertElasticSearchServiceTest {
     verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
   }
 
+  @Test
+  void shouldBulkUpdateExistingDoctorsWithConnectionLogs() {
+    when(repository.findByGmcReferenceNumber(
+        mappedExistingViewGmcOnly.getGmcReferenceNumber())).thenReturn(
+        recordsAlreadyInEs);
+
+    service.populateMasterIndexByConnectionLogs(List.of(connectionLogDto));
+
+    verify(esDocUpdateHelper).bulkPartialUpdate(eq(MASTER_DOCTOR_INDEX),
+        bulkUpdateCaptor.capture());
+
+    Map<String, Object> savedFields = Map.of();
+    String updatedId = "";
+    for (var entry : bulkUpdateCaptor.getValue().entrySet()) {
+      savedFields = entry.getValue();
+      updatedId = entry.getKey();
+    }
+
+    assertEquals(savedFields.get("updatedBy"),
+        connectionLogDto.getUpdatedBy());
+    assertEquals(savedFields.get("lastConnectionDateTime"),
+        connectionLogDto.getEventDateTime().format(ES_DATETIME_FORMATTER));
+    assertEquals(DOCUMENT_ID, updatedId);
+    assertFalse(savedFields.containsKey(TIS_ID_KEY)); // Fields from TIS/TCS not updated
+    assertFalse(savedFields.containsKey(GMC_NUMBER_KEY)); // Fields from Recommendation not updated
+  }
+
+  @Test
+  void shouldNotBulkUpdateNewDoctorsWithConnectionLogsIfNoExistingDoctors() {
+    when(repository.findByGmcReferenceNumber(
+        mappedNewViewGmcOnly.getGmcReferenceNumber())).thenReturn(
+        List.of());
+
+    service.populateMasterIndexByConnectionLogs(List.of(connectionLogDto));
+
+    verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
+  }
+
+  @Test
+  void shouldHandleEmptyConnectionLogList() {
+    service.populateMasterIndexByConnectionLogs(Collections.emptyList());
+    verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
+  }
 }

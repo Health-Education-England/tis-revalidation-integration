@@ -21,16 +21,16 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
-
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
-import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 
 /**
  * Listener for handling ES rebuild gmc sync messages.
@@ -39,23 +39,27 @@ import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexSe
 @Service
 public class GmcDoctorMessageListener {
 
+  @Value("${app.rabbit.reval.exchange}")
+  private String revalExchange;
+
+  @Value("${app.rabbit.reval.routingKey.connectionlog.essyncstart}")
+  private String connectionLogSyncRoutingKey;
+
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
-  private final ElasticsearchIndexService elasticsearchIndexService;
   private final MasterDoctorViewMapper mapper;
+  private final RabbitTemplate rabbitTemplate;
 
   /**
    * The listener to handle gmc doctor elasticsearch sync messages.
    *
    * @param doctorUpsertElasticSearchService the service to upsert doctors to ES
-   * @param elasticsearchIndexService        the service to process elasticsearch indices
    * @param mapper                           the class mapping messages to documents
    */
   public GmcDoctorMessageListener(DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
-      ElasticsearchIndexService elasticsearchIndexService,
-      MasterDoctorViewMapper mapper) {
+      MasterDoctorViewMapper mapper, RabbitTemplate rabbitTemplate) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
-    this.elasticsearchIndexService = elasticsearchIndexService;
     this.mapper = mapper;
+    this.rabbitTemplate = rabbitTemplate;
   }
 
   /**
@@ -64,17 +68,15 @@ public class GmcDoctorMessageListener {
    * @param message the payload from the doctor sync queue including a flag for the end of the sync
    */
   @RabbitListener(queues = "${app.rabbit.reval.queue.revalidationsummary.essync.integration}")
-  public void getMessage(IndexSyncMessage message) {
+  public void getMessage(IndexSyncMessage<List<RevalidationSummaryDto>> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("GMC sync completed. Reindexing Recommendations");
-      try {
-        elasticsearchIndexService.resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
-      }
+      log.info("GMC sync completed. Starting ConnectionLog sync.");
+      String connectionLogSyncStart = "connectionLogSyncStart";
+      rabbitTemplate.convertAndSend(revalExchange, connectionLogSyncRoutingKey,
+          connectionLogSyncStart);
     } else {
-      var docs = mapper.fromRevalidationSummaryDtos(message.getPayload());
-      doctorUpsertElasticSearchService.populateMasterIndex(docs);
+      doctorUpsertElasticSearchService.populateMasterIndex(
+          mapper.fromRevalidationSummaryDtos(message.getPayload()));
     }
   }
 }

@@ -36,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.sync.listener.TraineeDataMessageListener;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -44,18 +43,16 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @ExtendWith(MockitoExtension.class)
 class TraineeDataMessageListenerTest {
 
+  private static final String GMC_SYNC_START = "gmcSyncStart";
   @InjectMocks
   private TraineeDataMessageListener traineeDataMessageListener;
-
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
-
   @Mock
   private RabbitTemplate rabbitTemplate;
-
   private ConnectionInfoDto connectionInfo;
   private MasterDoctorView masterDoctorView;
-  private Faker faker = new Faker();
+  private final Faker faker = new Faker();
   private Long tcsPersonId;
   private String gmcReferenceNumber;
   private String doctorFirstName;
@@ -70,8 +67,6 @@ class TraineeDataMessageListenerTest {
   private LocalDate programmeMembershipEndDate;
   private LocalDate curriculumEndDate;
   private Boolean syncEnd;
-  private static final String GMC_SYNC_START = "gmcSyncStart";
-
 
   @BeforeEach
   void setUp() {
