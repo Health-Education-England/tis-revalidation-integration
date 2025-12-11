@@ -86,7 +86,7 @@ app:
         masterdoctorview.updated: ${REVAL_RABBIT_MASTERDOCTORVIEW_UPDATED_ROUTING_KEY:reval.masterdoctorview.updated}
         recommendation.syncstart: ${REVAL_RABBIT_RECOMMENDATION_SYNCSTART_ROUTING_KEY:reval.recommendation.syncstart}
         connection.syncdata: ${REVAL_RABBIT_SYNCDATA_ROUTING_KEY:reval.connection.syncdata}
-        connectionlog.essyncstart: ${CONNECTIONLOG_ESSYNCSTART_ROUTING_KEY:reval.routingkey.connectionlog.essyncstart}
+        connectionlog.essyncstart: ${CONNECTION_LOG_ESSYNCSTART_ROUTING_KEY:reval.routingkey.connectionlog.essyncstart}
 
 logging:
   level:
