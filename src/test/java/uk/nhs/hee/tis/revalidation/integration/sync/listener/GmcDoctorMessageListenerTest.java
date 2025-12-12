@@ -24,6 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
@@ -43,13 +46,12 @@ import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMap
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
-import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 @ExtendWith(MockitoExtension.class)
 class GmcDoctorMessageListenerTest {
 
-  private IndexSyncMessage message;
+  private static final String CONNECTION_LOG_SYNC_START = "connectionLogSyncStart";
   private static final String GMC_NUMBER = "101";
   private static final String FIRST_NAME = "AAA";
   private static final String LAST_NAME = "BBB";
@@ -64,11 +66,12 @@ class GmcDoctorMessageListenerTest {
   private static final String ADMIN = "Reval Admin";
   private static final boolean EXISTS_IN_GMC = true;
   private static final String OUTCOME = String.valueOf(RecommendationGmcOutcome.UNDER_REVIEW);
+  private IndexSyncMessage<List<RevalidationSummaryDto>> message;
 
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   @Mock
-  private ElasticsearchIndexService elasticsearchIndexServiceMock;
+  private RabbitTemplate rabbitTemplate;
   private final MasterDoctorViewMapper mapper = new MasterDoctorViewMapperImpl();
   private GmcDoctorMessageListener gmcDoctorMessageListener;
 
@@ -78,7 +81,10 @@ class GmcDoctorMessageListenerTest {
   @BeforeEach
   void setUp() {
     gmcDoctorMessageListener = new GmcDoctorMessageListener(doctorUpsertElasticSearchService,
-        elasticsearchIndexServiceMock, mapper);
+        mapper, rabbitTemplate);
+
+    setField(gmcDoctorMessageListener, "revalExchange", "exchange");
+    setField(gmcDoctorMessageListener, "connectionLogSyncRoutingKey", "routingKey");
 
     DoctorsForDB doctor = DoctorsForDB.builder()
         .gmcReferenceNumber(GMC_NUMBER)
@@ -100,12 +106,12 @@ class GmcDoctorMessageListenerTest {
         .gmcOutcome(OUTCOME)
         .build();
 
-    message = new IndexSyncMessage();
+    message = new IndexSyncMessage<>();
     message.setPayload(List.of(summaryDto));
   }
 
   @Test
-  void testMessagesAreReceivedFromQueue() {
+  void shouldReceiveMessageFromQueueWhenSyncEndIsFalse() {
     gmcDoctorMessageListener.getMessage(message);
 
     verify(doctorUpsertElasticSearchService).populateMasterIndex(payloadCaptor.capture());
@@ -118,5 +124,21 @@ class GmcDoctorMessageListenerTest {
     assertThat(masterDoctorView.getDesignatedBody(), is(DESIGNATED_BODY_CODE));
     assertThat(masterDoctorView.getExistsInGmc(), is(EXISTS_IN_GMC));
     assertThat(masterDoctorView.getGmcStatus(), is(OUTCOME));
+
+    verifyNoInteractions(rabbitTemplate);
+  }
+
+  @Test
+  void shouldSendRabbitMqMessageWhenSyncEndIsTrue() throws Exception {
+    // given
+    IndexSyncMessage<List<RevalidationSummaryDto>> msg = new IndexSyncMessage<>();
+    msg.setSyncEnd(true);
+
+    // when
+    gmcDoctorMessageListener.getMessage(msg);
+
+    // then
+    verify(rabbitTemplate).convertAndSend("exchange", "routingKey", CONNECTION_LOG_SYNC_START);
+    verifyNoInteractions(doctorUpsertElasticSearchService);
   }
 }

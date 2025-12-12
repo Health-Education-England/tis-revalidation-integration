@@ -21,18 +21,16 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.message.payload;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.RevalidationSummaryDto;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class IndexSyncMessage {
-  private List<RevalidationSummaryDto> payload;
+public class IndexSyncMessage<T> {
+  private T payload;
   private Boolean syncEnd;
 }

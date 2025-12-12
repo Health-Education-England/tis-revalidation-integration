@@ -48,8 +48,6 @@ public class TraineeDataMessageListener {
   @Autowired
   private RabbitTemplate rabbitTemplate;
 
-  private long traineeCount;
-
   /**
    * Updates Master ElasticSearch index with data from connection sync data router.
    *
@@ -58,14 +56,12 @@ public class TraineeDataMessageListener {
   @RabbitListener(queues = "${app.rabbit.reval.queue.connection.syncdata}")
   public void receiveMessage(final ConnectionInfoDto connectionInfo) {
     if (connectionInfo.getSyncEnd() != null && connectionInfo.getSyncEnd()) {
-      log.info("TCS sync completed. {} trainees in total. Starting GMC sync.", traineeCount);
+      log.info("TCS sync completed. Starting GMC sync.");
       String gmcSyncStart = "gmcSyncStart";
       rabbitTemplate.convertAndSend(exchange, routingKey, gmcSyncStart);
-      traineeCount = 0;
     } else {
       var masterDoctorView = getMasterDoctorView(connectionInfo);
       doctorUpsertElasticSearchService.populateMasterIndex(masterDoctorView);
-      traineeCount++;
     }
   }
 
@@ -86,5 +82,4 @@ public class TraineeDataMessageListener {
         .placementGrade(connectionInfo.getPlacementGrade())
         .build();
   }
-
 }
