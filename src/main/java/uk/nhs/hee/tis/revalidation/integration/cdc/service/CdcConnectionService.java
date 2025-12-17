@@ -47,6 +47,7 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
   private static final String SUCCESSFUL_REQUEST_RESPONSE_CODE = "0";
+  private static final String UPDATED_BY_GMC = "Updated by GMC";
 
   private final EsDocUpdateHelper esUpdateHelper;
 
@@ -71,10 +72,14 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
   public void upsertEntity(ConnectionLog entity) {
     String gmcId = entity.getGmcId();
     final var repository = getRepository();
-    final String responseCode = entity.getResponseCode();
+    final boolean successfulResponse = entity.getResponseCode() != null
+        && entity.getResponseCode().equals(SUCCESSFUL_REQUEST_RESPONSE_CODE);
+    final boolean updatedByGmc =
+        entity.getUpdatedBy() != null && entity.getUpdatedBy().equals(UPDATED_BY_GMC);
 
-    if (!responseCode.equals(SUCCESSFUL_REQUEST_RESPONSE_CODE)) {
-      log.info("Discarding unsuccessful connection log, response code: {}", responseCode);
+    if (!updatedByGmc && !successfulResponse) {
+      log.info("Discarding unsuccessful connection log, response code: {}",
+          entity.getResponseCode());
       return;
     }
 

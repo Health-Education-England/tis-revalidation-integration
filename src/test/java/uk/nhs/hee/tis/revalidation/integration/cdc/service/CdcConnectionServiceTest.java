@@ -128,4 +128,15 @@ class CdcConnectionServiceTest {
     verify(esUpdateHelper, never()).partialUpdate(any(), any(), any(), any());
     verify(publisher, never()).publishCdcUpdate(any());
   }
+
+  @Test
+  void shouldNotDiscardExternalGmcConnectionLogs() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+
+    var newConnectionLog = CdcTestDataGenerator.getCdcGmcExternalConnectionCdcDocumentDto();
+    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
+
+    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class));
+  }
 }
