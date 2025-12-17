@@ -78,8 +78,8 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
         entity.getUpdatedBy() != null && entity.getUpdatedBy().equals(UPDATED_BY_GMC);
 
     if (!updatedByGmc && !successfulResponse) {
-      log.info("Discarding unsuccessful connection log, response code: {}",
-          entity.getResponseCode());
+      log.info("Discarding unsuccessful connection log for gmcId: {}, response code: {}",
+          entity.getGmcId(), entity.getResponseCode());
       return;
     }
 
