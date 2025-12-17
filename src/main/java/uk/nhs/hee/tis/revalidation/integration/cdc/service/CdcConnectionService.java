@@ -46,6 +46,8 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
   protected static final DateTimeFormatter ES_DATETIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
+  private static final String SUCCESSFUL_REQUEST_RESPONSE_CODE = "0";
+
   private final EsDocUpdateHelper esUpdateHelper;
 
   /**
@@ -69,11 +71,18 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
   public void upsertEntity(ConnectionLog entity) {
     String gmcId = entity.getGmcId();
     final var repository = getRepository();
+    final String responseCode = entity.getResponseCode();
+
+    if (!responseCode.equals(SUCCESSFUL_REQUEST_RESPONSE_CODE)) {
+      log.info("Discarding unsuccessful connection log, response code: {}", responseCode);
+      return;
+    }
+
     try {
       List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
       if (!masterDoctorViewList.isEmpty()) {
         if (masterDoctorViewList.size() > 1) {
-          log.error("Multiple doctors assigned to the same GMC number!");
+          log.error("Multiple doctors assigned to the same GMC number: {}", gmcId);
         }
         MasterDoctorView masterDoctorView = masterDoctorViewList.get(0);
 
@@ -89,9 +98,7 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
         publishUpdate(updatedView);
       }
     } catch (Exception e) {
-      log.error(String
-              .format("CDC error adding connection: %s, exception: %s", entity, e.getMessage()),
-          e);
+      log.error("CDC error adding connection: {}, exception: {}", entity, e.getMessage(), e);
       throw e;
     }
   }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionRequestType;
 
 /**
  * A data class to handle connection log details.
@@ -19,4 +20,8 @@ public class ConnectionLogDto {
   private String previousDesignatedBodyCode;
   private String updatedBy;
   private LocalDateTime eventDateTime;
+  private String gmcClientId;
+  private String reason;
+  private ConnectionRequestType requestType;
+  private String responseCode;
 }

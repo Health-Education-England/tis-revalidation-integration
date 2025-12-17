@@ -53,4 +53,8 @@ public class ConnectionLog {
   @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   private LocalDateTime requestTime;
+  private String gmcClientId;
+  private String reason;
+  private ConnectionRequestType requestType;
+  private String responseCode;
 }
