@@ -119,8 +119,10 @@ class CdcConnectionServiceTest {
   @Test
   void shouldDiscardUnsuccessfulConnectionLogs() {
     final ConnectionLog unsuccessfulConnection = CdcTestDataGenerator
-        .getCdcUnsuccessfulConnectionLogInsertCdcDocumentDto()
+        .getCdcUnsuccessfulConnectionCdcDocumentDto()
         .getFullDocument();
+
+    cdcConnectionService.upsertEntity(unsuccessfulConnection);
 
     verify(repository, never()).findByGmcReferenceNumber(any());
     verify(esUpdateHelper, never()).partialUpdate(any(), any(), any(), any());

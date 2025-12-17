@@ -165,8 +165,8 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
   public static CdcDocumentDto<Recommendation>
-  getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
-    Recommendation recommendation = Recommendation.builder()
+    getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
+      Recommendation recommendation = Recommendation.builder()
         .id("1")
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
         .recommendationType(RecommendationType.REVALIDATE)
@@ -175,7 +175,7 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
+      return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
   }
 
   /**
@@ -277,8 +277,7 @@ public class CdcTestDataGenerator {
    *
    * @return CdcDocumentDto CdcConnectionLog insert test instance
    */
-  public static CdcDocumentDto<ConnectionLog> getCdcUnsuccessfulConnectionLogInsertCdcDocumentDto()
-  {
+  public static CdcDocumentDto<ConnectionLog> getCdcUnsuccessfulConnectionCdcDocumentDto() {
     ConnectionLog connectionLog = ConnectionLog.builder()
         .id("1")
         .gmcId(GMC_REFERENCE_NUMBER_VAL)

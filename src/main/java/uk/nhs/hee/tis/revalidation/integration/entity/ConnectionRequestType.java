@@ -21,6 +21,9 @@
 
 package uk.nhs.hee.tis.revalidation.integration.entity;
 
+/**
+ *  Types of Connection request
+ */
 public enum ConnectionRequestType {
   ADD, REMOVE, HIDE, UNHIDE
 }
