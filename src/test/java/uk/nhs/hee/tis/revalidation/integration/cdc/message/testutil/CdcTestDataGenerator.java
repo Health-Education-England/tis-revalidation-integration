@@ -165,17 +165,17 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
   public static CdcDocumentDto<Recommendation>
-    getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
-      Recommendation recommendation = Recommendation.builder()
-        .id("1")
-        .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-        .recommendationType(RecommendationType.REVALIDATE)
-        .recommendationStatus(DRAFT)
-        .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-        .admin(ADMIN_VAL)
-        .build();
+      getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
+        Recommendation recommendation = Recommendation.builder()
+          .id("1")
+          .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+          .recommendationType(RecommendationType.REVALIDATE)
+          .recommendationStatus(DRAFT)
+          .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+          .admin(ADMIN_VAL)
+          .build();
 
-      return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
+    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
   }
 
   /**
