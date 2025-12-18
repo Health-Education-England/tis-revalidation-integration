@@ -45,6 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -113,5 +114,29 @@ class CdcConnectionServiceTest {
     assertEquals(newConnectionLog.getUpdatedBy(), partialUpdateDoc.get("updatedBy"));
     assertEquals(newConnectionLog.getRequestTime().format(ES_DATETIME_FORMATTER),
         partialUpdateDoc.get("lastConnectionDateTime"));
+  }
+
+  @Test
+  void shouldDiscardUnsuccessfulConnectionLogs() {
+    final ConnectionLog unsuccessfulConnection = CdcTestDataGenerator
+        .getCdcUnsuccessfulConnectionCdcDocumentDto()
+        .getFullDocument();
+
+    cdcConnectionService.upsertEntity(unsuccessfulConnection);
+
+    verify(repository, never()).findByGmcReferenceNumber(any());
+    verify(esUpdateHelper, never()).partialUpdate(any(), any(), any(), any());
+    verify(publisher, never()).publishCdcUpdate(any());
+  }
+
+  @Test
+  void shouldNotDiscardExternalGmcConnectionLogs() {
+    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+
+    var newConnectionLog = CdcTestDataGenerator.getCdcGmcExternalConnectionCdcDocumentDto();
+    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
+
+    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
+        anyMap(), eq(MasterDoctorView.class));
   }
 }

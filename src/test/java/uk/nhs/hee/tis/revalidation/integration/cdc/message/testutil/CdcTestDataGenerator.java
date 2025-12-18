@@ -60,6 +60,9 @@ public class CdcTestDataGenerator {
   public static final String PROGRAMME_TYPE_VAL = "prog-type";
   public static final String PROGRAMME_OWNER_VAL = "squad";
   public static final String C_I = "ci";
+  private static final String SUCCESSFUL_REQUEST_RESPONSE_CODE = "0";
+  private static final String INTERNAL_ERROR_RESPONSE_CODE = "98";
+  private static final String UPDATED_BY_GMC = "Updated by GMC";
 
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -164,14 +167,14 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<Recommendation>
       getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
-    Recommendation recommendation = Recommendation.builder()
-        .id("1")
-        .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-        .recommendationType(RecommendationType.REVALIDATE)
-        .recommendationStatus(DRAFT)
-        .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-        .admin(ADMIN_VAL)
-        .build();
+        Recommendation recommendation = Recommendation.builder()
+          .id("1")
+          .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+          .recommendationType(RecommendationType.REVALIDATE)
+          .recommendationStatus(DRAFT)
+          .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+          .admin(ADMIN_VAL)
+          .build();
 
     return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
   }
@@ -264,6 +267,40 @@ public class CdcTestDataGenerator {
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .requestTime(LocalDateTime.now())
         .updatedBy(ADMIN_VAL)
+        .responseCode(SUCCESSFUL_REQUEST_RESPONSE_CODE)
+        .build();
+
+    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
+  }
+
+  /**
+   * Get a test instance of an insert CdcConnectionLog CdcDocumentDto for a failed connection.
+   *
+   * @return CdcDocumentDto CdcConnectionLog insert test instance
+   */
+  public static CdcDocumentDto<ConnectionLog> getCdcUnsuccessfulConnectionCdcDocumentDto() {
+    ConnectionLog connectionLog = ConnectionLog.builder()
+        .id("1")
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
+        .requestTime(LocalDateTime.now())
+        .updatedBy(ADMIN_VAL)
+        .responseCode(INTERNAL_ERROR_RESPONSE_CODE)
+        .build();
+
+    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
+  }
+
+  /**
+   * Get a test instance of an insert CdcConnectionLog CdcDocumentDto for an external connection.
+   *
+   * @return CdcDocumentDto CdcConnectionLog insert test instance
+   */
+  public static CdcDocumentDto<ConnectionLog> getCdcGmcExternalConnectionCdcDocumentDto() {
+    ConnectionLog connectionLog = ConnectionLog.builder()
+        .id("1")
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
+        .requestTime(LocalDateTime.now())
+        .updatedBy(UPDATED_BY_GMC)
         .build();
 
     return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
