@@ -61,5 +61,6 @@ public final class EsConstant {
 
     public static final String DISCREPANCIES_ALIAS = "discrepancies";
     public static final String CURRENT_CONNECTIONS_ALIAS = "current_connections";
+    public static final String RECOMMENDATION_ALIAS = "recommendations";
   }
 }
