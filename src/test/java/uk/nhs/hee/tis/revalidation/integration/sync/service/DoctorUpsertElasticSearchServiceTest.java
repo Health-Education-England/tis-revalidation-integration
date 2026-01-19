@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.CURRENT_CONNECTIONS_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.DISCREPANCIES_ALIAS;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.RECOMMENDATION_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 import static uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService.ES_DATETIME_FORMATTER;
 
@@ -259,6 +260,13 @@ class DoctorUpsertElasticSearchServiceTest {
     service.clearMasterDoctorIndex();
     verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, DISCREPANCIES_ALIAS,
         DoctorUpsertElasticSearchService.ES_DISCREPANCIES_FILTER);
+  }
+
+  @Test
+  void shouldAddRecommendationsAliasToMasterDoctorIndex() throws IOException {
+    when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
+    service.clearMasterDoctorIndex();
+    verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, RECOMMENDATION_ALIAS);
   }
 
   @Test

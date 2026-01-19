@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.CURRENT_CONNECTIONS_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.DISCREPANCIES_ALIAS;
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Aliases.RECOMMENDATION_ALIAS;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import java.io.IOException;
@@ -290,6 +291,7 @@ public class DoctorUpsertElasticSearchService {
           ES_CURRENT_CONNECTIONS_FILTER);
       elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, DISCREPANCIES_ALIAS,
           ES_DISCREPANCIES_FILTER);
+      elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, RECOMMENDATION_ALIAS);
     } catch (IOException e) {
       log.error("Could not add alias to masterDoctorIndex after create, please do it manually.",
           e);
