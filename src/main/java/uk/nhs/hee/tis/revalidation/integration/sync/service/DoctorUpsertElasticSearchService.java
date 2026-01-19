@@ -60,12 +60,6 @@ public class DoctorUpsertElasticSearchService {
                }
              }
           """;
-  protected static final String ES_RECOMMENDATION_FILTER =
-      """
-              "terms": {
-                    "underNotice.keyword": ["YES", "NO"]
-                  }
-          """;
   private final MasterDoctorElasticSearchRepository repository;
   private final MasterDoctorViewMapper mapper;
   private final ElasticsearchOperations elasticSearchOperations;
@@ -297,8 +291,7 @@ public class DoctorUpsertElasticSearchService {
           ES_CURRENT_CONNECTIONS_FILTER);
       elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, DISCREPANCIES_ALIAS,
           ES_DISCREPANCIES_FILTER);
-      elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, RECOMMENDATION_ALIAS,
-          ES_RECOMMENDATION_FILTER);
+      elasticsearchIndexHelper.addAlias(MASTER_DOCTOR_INDEX, RECOMMENDATION_ALIAS);
     } catch (IOException e) {
       log.error("Could not add alias to masterDoctorIndex after create, please do it manually.",
           e);

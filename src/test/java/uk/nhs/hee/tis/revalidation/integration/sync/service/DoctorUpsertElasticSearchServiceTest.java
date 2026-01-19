@@ -266,8 +266,7 @@ class DoctorUpsertElasticSearchServiceTest {
   void shouldAddRecommendationsAliasToMasterDoctorIndex() throws IOException {
     when(elasticsearchOperations.indexOps((IndexCoordinates) any())).thenReturn(indexOperations);
     service.clearMasterDoctorIndex();
-    verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, RECOMMENDATION_ALIAS,
-        DoctorUpsertElasticSearchService.ES_RECOMMENDATION_FILTER);
+    verify(elasticsearchIndexHelper).addAlias(MASTER_DOCTOR_INDEX, RECOMMENDATION_ALIAS);
   }
 
   @Test
