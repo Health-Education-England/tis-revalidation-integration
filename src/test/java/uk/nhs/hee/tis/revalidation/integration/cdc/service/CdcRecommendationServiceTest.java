@@ -21,9 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
@@ -91,18 +89,6 @@ class CdcRecommendationServiceTest {
   }
 
   @Test
-  void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        anyMap(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
-
-    var newRecommendation = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
-
-    verify(publisher).publishCdcUpdate(masterDoctorView);
-  }
-
-  @Test
   void shouldAllowNullOutcomes() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
@@ -110,9 +96,7 @@ class CdcRecommendationServiceTest {
 
     var newRecommendation = CdcTestDataGenerator
         .getCdcRecommendationInsertCdcDocumentDtoNullOutcome();
-    cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument());
-
-    verify(publisher).publishCdcUpdate(masterDoctorViewCaptor.capture());
-    assertThat(masterDoctorViewCaptor.getValue().getGmcStatus(), is(nullValue()));
+    assertDoesNotThrow(
+        () -> cdcRecommendationService.upsertEntity(newRecommendation.getFullDocument()));
   }
 }

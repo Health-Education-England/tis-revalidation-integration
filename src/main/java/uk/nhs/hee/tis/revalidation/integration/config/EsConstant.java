@@ -45,7 +45,6 @@ public final class EsConstant {
     }
 
     public static final String MASTER_DOCTOR_INDEX = "masterdoctorindex";
-    public static final String RECOMMENDATION_INDEX = "recommendationindex";
   }
 
   /**

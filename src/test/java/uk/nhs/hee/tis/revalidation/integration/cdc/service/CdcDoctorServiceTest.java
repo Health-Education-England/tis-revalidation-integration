@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -131,17 +130,5 @@ class CdcDoctorServiceTest {
         esUpdateDocCaptor.capture(), eq(MasterDoctorView.class));
 
     assertNull(esUpdateDocCaptor.getValue().get("designatedBody"));
-  }
-
-  @Test
-  void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        anyMap(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
-
-    DoctorsForDB newDoctor = CdcTestDataGenerator.getCdcDoctor();
-    cdcDoctorService.upsertEntity(newDoctor);
-
-    verify(publisher).publishCdcUpdate(masterDoctorView);
   }
 }

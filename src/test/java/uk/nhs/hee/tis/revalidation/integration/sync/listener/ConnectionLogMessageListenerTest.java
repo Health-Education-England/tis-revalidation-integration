@@ -22,12 +22,8 @@
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -55,7 +51,7 @@ class ConnectionLogMessageListenerTest {
   private ConnectionLogMessageListener listener;
 
   @Test
-  void shouldTriggerIndexResyncWhenSyncEndIsTrue() throws Exception {
+  void shouldTriggerIndexResyncWhenSyncEndIsTrue() {
     // given
     IndexSyncMessage<List<ConnectionLogDto>> msg = new IndexSyncMessage<>();
     msg.setSyncEnd(true);
@@ -64,7 +60,6 @@ class ConnectionLogMessageListenerTest {
     listener.receiveConnectionLogMessage(msg);
 
     // then
-    verify(elasticsearchIndexService).resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
     verifyNoInteractions(doctorUpsertElasticSearchService);
   }
 
@@ -84,22 +79,5 @@ class ConnectionLogMessageListenerTest {
         payloadArgCaptor.capture());
     verifyNoInteractions(elasticsearchIndexService);
     assertEquals(payload, payloadArgCaptor.getValue());
-  }
-
-  @Test
-  void shouldHandleExceptionInResync() throws Exception {
-    // given
-    IndexSyncMessage<List<ConnectionLogDto>> msg = new IndexSyncMessage<>();
-    msg.setSyncEnd(true);
-
-    doThrow(new RuntimeException("resync failed"))
-        .when(elasticsearchIndexService)
-        .resync(anyString(), anyString());
-
-    // when
-    listener.receiveConnectionLogMessage(msg);
-
-    // then
-    verify(elasticsearchIndexService).resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
   }
 }

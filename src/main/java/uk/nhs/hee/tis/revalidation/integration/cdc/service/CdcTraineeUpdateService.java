@@ -58,18 +58,13 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     List<MasterDoctorView> viewsToRemove = repository.findByTcsPersonId(receivedTcsId);
     // If the ES document is not present, ignore the change
     if (!viewsToRemove.isEmpty()) {
-      viewsToRemove.forEach(viewToRemove -> {
-        MasterDoctorView returnedView = detachTisInfo(viewToRemove);
-        // propagate this update to recommendation index
-        publishUpdate(returnedView);
-      });
+      viewsToRemove.forEach(this::detachTisInfo);
     }
   }
 
   /**
    * If gmc DBC is null (doctor is not connected with GMC), remove the record; if gmc DBC is not
-   * null, detach TIS info.
-   * If the ES doc is deleted, publish a MasterDoctorView with only doc id;
+   * null, detach TIS info. If the ES doc is deleted, publish a MasterDoctorView with only doc id;
    * otherwise, publish the updated view.
    *
    * @param viewToRemove view to remove TIS info
@@ -106,10 +101,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
     List<MasterDoctorView> viewsToRemoveTisInfo =
         repository.findByTcsPersonIdAndGmcReferenceNumberNot(receivedTcsId,
             receivedGmcReferenceNumber);
-    viewsToRemoveTisInfo.forEach(view -> {
-      MasterDoctorView viewTisInfoRemoved = detachTisInfo(view);
-      publishUpdate(viewTisInfoRemoved);
-    });
+    viewsToRemoveTisInfo.forEach(this::detachTisInfo);
   }
 
   /**
@@ -150,11 +142,9 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
             receivedGmcReferenceNumber);
       }
 
-      existingViews.forEach(view -> {
-        final var updatedView = repository
-            .save(mapper.updateMasterDoctorView(receivedDto, view));
-        publishUpdate(updatedView);
-      });
+      existingViews.forEach(view ->
+          repository.save(mapper.updateMasterDoctorView(receivedDto, view))
+      );
 
       detachTisInfoIfGmcNumberNotMatch(receivedDto);
     }

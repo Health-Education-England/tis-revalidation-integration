@@ -21,9 +21,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.RECOMMENDATION_INDEX;
-
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -41,19 +38,15 @@ import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexSe
 public class ConnectionLogMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
-  private final ElasticsearchIndexService elasticsearchIndexService;
 
   /**
    * Constructor for the ConnectionLogMessageListener.
    *
    * @param doctorUpsertElasticSearchService the service to upsert doctors in Elasticsearch
-   * @param elasticsearchIndexService        the service to manage Elasticsearch indices
    */
   public ConnectionLogMessageListener(
-      DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
-      ElasticsearchIndexService elasticsearchIndexService) {
+      DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
-    this.elasticsearchIndexService = elasticsearchIndexService;
   }
 
   /**
@@ -64,12 +57,7 @@ public class ConnectionLogMessageListener {
   @RabbitListener(queues = "${app.rabbit.reval.queue.connectionlog.essyncdata}")
   public void receiveConnectionLogMessage(IndexSyncMessage<List<ConnectionLogDto>> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("ConnectionLogs ES sync completed. Reindexing Recommendations.");
-      try {
-        elasticsearchIndexService.resync(MASTER_DOCTOR_INDEX, RECOMMENDATION_INDEX);
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
-      }
+      log.info("ConnectionLogs ES sync completed.");
     } else {
       doctorUpsertElasticSearchService.populateMasterIndexByConnectionLogs(message.getPayload());
     }
