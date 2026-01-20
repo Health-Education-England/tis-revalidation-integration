@@ -54,7 +54,6 @@ class RabbitCdcMessagePublisherTest {
         .build();
     setField(rabbitCdcMessagePublisher, "routingKey", routingKey);
     setField(rabbitCdcMessagePublisher, "exchange", exchange);
-
   }
 
   @Test
@@ -63,5 +62,4 @@ class RabbitCdcMessagePublisherTest {
 
     verify(rabbitTemplate).convertAndSend(exchange, routingKey, masterDoctorView);
   }
-
 }

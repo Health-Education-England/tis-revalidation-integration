@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -223,20 +222,6 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedEntity.getCurriculumEndDate(), nullValue());
     assertThat(savedEntity.getMembershipType(), nullValue());
     assertThat(savedEntity.getPlacementGrade(), nullValue());
-  }
-
-  @Test
-  void shouldPublishUpdateForGmcNumber() {
-    MasterDoctorView view2 = CdcTestDataGenerator.getTestMasterDoctorView();
-    traineeUpdate.setGmcReferenceNumber(gmcRefereneNumber);
-    when(repository.findByGmcReferenceNumber(gmcRefereneNumber))
-        .thenReturn(List.of(masterDoctorView, view2));
-    MasterDoctorView updatedView = new MasterDoctorView();
-    when(repository.save(any())).thenReturn(updatedView);
-
-    cdcTraineeUpdateService.upsertEntity(traineeUpdate);
-
-    verify(publisher, times(2)).publishCdcUpdate(updatedView);
   }
 
   @Test

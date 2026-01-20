@@ -72,8 +72,7 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
     final var existingDoctors = repository.findByGmcReferenceNumber(entity.getGmcReferenceNumber());
     try {
       if (existingDoctors.isEmpty()) {
-        var newView = repository.save(mapper.doctorToMasterView(entity));
-        publishUpdate(newView);
+        repository.save(mapper.doctorToMasterView(entity));
       } else {
         if (existingDoctors.size() > 1) {
           log.error("Multiple doctors assigned to the same GMC number: {}",
@@ -81,10 +80,9 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
         }
 
         Map<String, Object> doc = mapper.doctorToEsDoc(entity);
-        MasterDoctorView updatedView = esDocUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
+        esDocUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
             existingDoctors.get(0).getId(), doc,
             MasterDoctorView.class);
-        publishUpdate(updatedView);
       }
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",

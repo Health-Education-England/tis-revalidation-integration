@@ -89,18 +89,6 @@ class CdcConnectionServiceTest {
   }
 
   @Test
-  void shouldPublishUpdates() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
-    when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        anyMap(), eq(MasterDoctorView.class))).thenReturn(masterDoctorView);
-
-    var newConnectionLog = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto();
-    cdcConnectionService.upsertEntity(newConnectionLog.getFullDocument());
-
-    verify(publisher).publishCdcUpdate(masterDoctorView);
-  }
-
-  @Test
   void shouldProvideCorrectConnectionLogValue() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
     when(esUpdateHelper.partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
