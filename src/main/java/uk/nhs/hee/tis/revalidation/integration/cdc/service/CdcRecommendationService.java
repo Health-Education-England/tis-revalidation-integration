@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
@@ -45,10 +44,9 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
    */
   public CdcRecommendationService(
       MasterDoctorElasticSearchRepository repository,
-      EsDocUpdateHelper esUpdateHelper,
-      CdcMessagePublisher cdcMessagePublisher
+      EsDocUpdateHelper esUpdateHelper
   ) {
-    super(repository, cdcMessagePublisher);
+    super(repository);
     this.esUpdateHelper = esUpdateHelper;
   }
 
