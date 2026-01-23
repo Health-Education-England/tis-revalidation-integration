@@ -25,7 +25,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -40,8 +39,8 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
    * Service responsible for updating the Trainee composite fields used for searching.
    */
   protected CdcTraineeUpdateService(MasterDoctorElasticSearchRepository repository,
-      CdcMessagePublisher cdcMessagePublisher, MasterDoctorViewMapper mapper) {
-    super(repository, cdcMessagePublisher);
+      MasterDoctorViewMapper mapper) {
+    super(repository);
     this.mapper = mapper;
   }
 

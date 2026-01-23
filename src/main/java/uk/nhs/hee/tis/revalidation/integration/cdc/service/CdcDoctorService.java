@@ -26,7 +26,6 @@ import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
@@ -49,13 +48,12 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
    *
    * @param repository The ElasticSearch repository with the index managed by the service
    * @param esDocUpdateHelper the helper to update ES docs
-   * @param cdcMessagePublisher the publisher to publish MasterDoctorView update
    * @param mapper a mapper for converting to/from the persisted composite view
    */
   public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
-      EsDocUpdateHelper esDocUpdateHelper, CdcMessagePublisher cdcMessagePublisher,
+      EsDocUpdateHelper esDocUpdateHelper,
       MasterDoctorViewMapper mapper) {
-    super(repository, cdcMessagePublisher);
+    super(repository);
     this.esDocUpdateHelper = esDocUpdateHelper;
     this.mapper = mapper;
   }
