@@ -26,8 +26,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.apache.camel.component.aws.xray.TraceAnnotatedTracingStrategy;
 import org.apache.camel.component.aws.xray.XRayTracer;
 import org.junit.jupiter.api.Test;
@@ -36,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AwsConfig.class})
@@ -45,13 +45,13 @@ class AwsConfigTest {
   ApplicationContext ctx;
 
   @Test
-  void testAmazonSqsAsync() {
-    assertThat(ctx.getBean(AmazonSQSAsync.class), notNullValue());
+  void testSqsAsyncClientBeanCreated() {
+    assertThat(ctx.getBean(SqsAsyncClient.class), notNullValue());
   }
 
   @Test
-  void testQueueMessagingTemplate() {
-    assertThat(ctx.getBean(QueueMessagingTemplate.class), notNullValue());
+  void testSqsTemplateBeanCreated() {
+    assertThat(ctx.getBean(SqsTemplate.class), notNullValue());
   }
 
   @Test

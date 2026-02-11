@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 import com.github.javafaker.Faker;
 import java.time.LocalDate;
 import java.util.Collections;
-import org.elasticsearch.common.collect.List;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

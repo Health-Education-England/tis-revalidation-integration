@@ -1,7 +1,7 @@
 plugins {
   id "java"
-  id "org.springframework.boot" version "2.5.6"
-  id "io.spring.dependency-management" version "1.0.11.RELEASE"
+  id "org.springframework.boot" version "3.5.10"
+  id "io.spring.dependency-management" version "1.1.7"
 
   // Code quality plugins
   id "checkstyle"
@@ -11,14 +11,18 @@ plugins {
 
 group = "uk.nhs.hee.tis.revalidation"
 version = "0.10.0"
-sourceCompatibility = "17"
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 
 configurations {
   compileOnly {
     extendsFrom annotationProcessor
   }
 }
-
 
 repositories {
   mavenCentral()
@@ -29,19 +33,33 @@ repositories {
       username "aws"
       password System.env.CODEARTIFACT_AUTH_TOKEN
     }
+    content {
+      includeGroup "com.transformuk.hee"
+      includeGroupByRegex "uk\\.nhs\\.hee(\\..*)?"
+    }
   }
+}
+
+ext {
+  camelVersion = "4.14.4"
+  cloudAwsVersion = "3.4.1"
+  sentryVersion = "8.31.0"
+  mapstructVersion = "1.6.3"
 }
 
 dependencies {
   // Spring Boot starters
   implementation "org.springframework.boot:spring-boot-starter-actuator"
   implementation "org.springframework.boot:spring-boot-starter-web"
+  implementation "org.springframework.boot:spring-boot-starter-amqp"
+  implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch"
+
   testImplementation("org.springframework.boot:spring-boot-starter-test") {
     exclude group: "org.junit.vintage", module: "junit-vintage-engine"
   }
 
   // Apache Camel
-  implementation platform('org.apache.camel.springboot:camel-spring-boot-bom:3.20.5')
+  implementation platform("org.apache.camel.springboot:camel-spring-boot-bom:${camelVersion}")
   implementation "org.apache.camel.springboot:camel-spring-boot-starter"
   implementation "org.apache.camel.springboot:camel-http-starter"
   implementation "org.apache.camel.springboot:camel-servlet-starter"
@@ -53,37 +71,28 @@ dependencies {
   annotationProcessor "org.projectlombok:lombok"
 
   // MapStruct
-  implementation "org.mapstruct:mapstruct:1.4.2.Final"
-  annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
-  testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
+  implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+  annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+  testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-  // Sentry reporting
-  ext.sentryVersion = "5.4.1"
-  implementation "io.sentry:sentry-spring-boot-starter:$sentryVersion"
-  implementation "io.sentry:sentry-logback:$sentryVersion"
+  // Sentry
+  implementation "io.sentry:sentry-spring-boot-starter:${sentryVersion}"
+  implementation "io.sentry:sentry-logback:${sentryVersion}"
 
   // Keycloak
   implementation "com.transformuk.hee:keycloak-client:3.0.0"
 
-  //RabbitMQ
-  implementation "org.springframework.boot:spring-boot-starter-amqp"
+  implementation "io.awspring.cloud:spring-cloud-aws-starter-sqs:${cloudAwsVersion}"
 
-  // AWS cloud
-  ext.cloudVersion = "2.3.2"
-  implementation "io.awspring.cloud:spring-cloud-starter-aws:$cloudVersion"
-  implementation "io.awspring.cloud:spring-cloud-starter-aws-messaging:$cloudVersion"
-
-  // Elastic Search
-  implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch"
-
-  // Java Persistence
-  implementation "javax.persistence:javax.persistence-api:2.2"
-
-  // Jackson Json
-  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0"
+  // Jakarta Persistence API replaces javax.persistence
+  implementation "jakarta.persistence:jakarta.persistence-api:3.1.0"
 
   // Faker
-  implementation "com.github.javafaker:javafaker:1.0.2"
+  implementation ("com.github.javafaker:javafaker:1.0.2")
+  {
+    exclude group: "org.yaml", module: "snakeyaml"
+  }
+  implementation("org.yaml:snakeyaml:2.4")
 
   // MongoDB
   ext.mongoDriverVersion = "4.5.1"
@@ -98,8 +107,8 @@ checkstyle {
 
 jacocoTestReport {
   reports {
-    html.enabled true
-    xml.enabled true
+    html.required = true
+    xml.required = true
   }
 }
 
@@ -109,7 +118,6 @@ sonarqube {
     property "sonar.login", System.getenv("SONAR_TOKEN")
     property "sonar.organization", "health-education-england"
     property "sonar.projectKey", "Health-Education-England_tis-revalidation-integration"
-
     property "sonar.java.checkstyle.reportPaths",
       "build/reports/checkstyle/main.xml,build/reports/checkstyle/test.xml"
   }

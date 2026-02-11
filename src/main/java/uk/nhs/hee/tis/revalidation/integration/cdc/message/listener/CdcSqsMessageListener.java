@@ -23,7 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.awspring.cloud.messaging.listener.annotation.SqsListener;
+import io.awspring.cloud.sqs.annotation.SqsListener;
 import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +63,7 @@ public class CdcSqsMessageListener {
       CdcDoctorMessageHandler cdcDoctorMessageHandler,
       CdcConnectionMessageHandler cdcConnectionMessageHandler,
       ObjectMapper mapper) {
+
     this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
     this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
     this.cdcConnectionMessageHandler = cdcConnectionMessageHandler;
@@ -78,10 +79,11 @@ public class CdcSqsMessageListener {
   public void getRecommendationMessage(String message) throws IOException {
     try {
       CdcDocumentDto<Recommendation> cdcDocument =
-          mapper.readValue(message, new TypeReference<>() {});
+          mapper.readValue(message, new TypeReference<CdcDocumentDto<Recommendation>>() {
+          });
       cdcRecommendationMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
-      log.error(e.getMessage(), e);
+      log.error("Operation not supported while handling recommendation CDC message", e);
     }
   }
 
@@ -94,10 +96,11 @@ public class CdcSqsMessageListener {
   public void getDoctorMessage(String message) throws IOException {
     try {
       CdcDocumentDto<DoctorsForDB> cdcDocument =
-          mapper.readValue(message, new TypeReference<>() {});
+          mapper.readValue(message, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {
+          });
       cdcDoctorMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
-      log.error(e.getMessage(), e);
+      log.error("Operation not supported while handling doctor CDC message", e);
     }
   }
 
@@ -110,10 +113,11 @@ public class CdcSqsMessageListener {
   public void getConnectionMessage(String message) throws IOException {
     try {
       CdcDocumentDto<ConnectionLog> cdcDocument =
-          mapper.readValue(message, new TypeReference<>() {});
+          mapper.readValue(message, new TypeReference<CdcDocumentDto<ConnectionLog>>() {
+          });
       cdcConnectionMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
-      log.error(e.getMessage(), e);
+      log.error("Operation not supported while handling connection log CDC message", e);
     }
   }
 }

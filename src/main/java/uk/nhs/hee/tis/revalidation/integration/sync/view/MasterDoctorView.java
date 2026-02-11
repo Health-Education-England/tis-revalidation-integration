@@ -24,27 +24,25 @@ package uk.nhs.hee.tis.revalidation.integration.sync.view;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.elasticsearch.common.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.lang.Nullable;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 
 /**
- * A data class to handle main elastic search document.
+ * A data class to handle main Elasticsearch document.
  */
 @NoArgsConstructor
 @AllArgsConstructor
@@ -55,56 +53,75 @@ import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
 public class MasterDoctorView {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
   private String id;
+
   private Long tcsPersonId;
+
   @Field(type = FieldType.Text, fielddata = true)
   private String gmcReferenceNumber;
+
   @Field(type = FieldType.Text, fielddata = true)
   private String doctorFirstName;
+
   @Field(type = FieldType.Text, fielddata = true)
   private String doctorLastName;
+
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date, pattern = "uuuu-MM-dd")
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate submissionDate;
+
   @Field(type = FieldType.Text, fielddata = true)
   private String programmeName;
+
   private String membershipType;
+
   @Nullable
   private String designatedBody;
+
   private String gmcStatus;
+
   private RecommendationStatus tisStatus;
+
   private String admin;
+
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @Field(type = FieldType.Date, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate lastUpdatedDate;
+
   private UnderNotice underNotice;
+
   @Nullable
   private String tcsDesignatedBody;
+
   private String programmeOwner;
+
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @Field(type = FieldType.Date, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate curriculumEndDate;
+
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @Field(type = FieldType.Date, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate membershipStartDate;
+
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @Field(type = FieldType.Date, pattern = "uuuu-MM-dd")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate membershipEndDate;
 
   @Nullable
   private String placementGrade;
+
   @Nullable
   private Boolean existsInGmc;
+
   private String updatedBy;
+
   @Nullable
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
+  @Field(type = FieldType.Date, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime lastConnectionDateTime;
 }

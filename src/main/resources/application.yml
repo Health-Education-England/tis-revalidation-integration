@@ -100,7 +100,7 @@ sentry:
 cloud:
   aws:
     end-point:
-      cdc.doctor: ${SQS_CDC_DOCTOR_QUEUE:}
-      cdc.recommendation: ${SQS_CDC_RECOMMENDATION_QUEUE:}
-      cdc.connectionlog: ${SQS_CDC_CONNECTION_QUEUE:}
+      cdc.doctor: ${SQS_CDC_DOCTOR_QUEUE:a}
+      cdc.recommendation: ${SQS_CDC_RECOMMENDATION_QUEUE:b}
+      cdc.connectionlog: ${SQS_CDC_CONNECTION_QUEUE:c}
 

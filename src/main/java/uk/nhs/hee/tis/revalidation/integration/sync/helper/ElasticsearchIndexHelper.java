@@ -21,43 +21,33 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.helper;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.Time;
+import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
+import co.elastic.clients.elasticsearch.indices.GetMappingResponse;
+import co.elastic.clients.transport.endpoints.BooleanResponse;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.SocketTimeoutException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.config.RequestConfig;
-import org.elasticsearch.ResourceAlreadyExistsException;
-import org.elasticsearch.ResourceNotFoundException;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
-import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.DeleteAliasRequest;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.client.indices.GetIndexResponse;
-import org.elasticsearch.client.indices.GetMappingsRequest;
-import org.elasticsearch.client.indices.GetMappingsResponse;
-import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.reindex.ReindexRequest;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class ElasticsearchIndexHelper {
 
-  private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()
-      .setConnectTimeout(5000)
-      .setSocketTimeout(120000)
-      .build();
+  private final ElasticsearchClient esClient;
 
-  RestHighLevelClient highLevelClient;
-
-  public ElasticsearchIndexHelper(RestHighLevelClient highLevelClient) {
-    this.highLevelClient = highLevelClient;
+  public ElasticsearchIndexHelper(ElasticsearchClient esClient) {
+    this.esClient = esClient;
   }
 
   /**
@@ -68,8 +58,7 @@ public class ElasticsearchIndexHelper {
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public GetIndexResponse getIndices(String indexName) throws IOException {
-    GetIndexRequest getIndexRequest = new GetIndexRequest(indexName);
-    return highLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+    return esClient.indices().get(g -> g.index(indexName));
   }
 
   /**
@@ -80,19 +69,23 @@ public class ElasticsearchIndexHelper {
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public void reindex(String sourceIndex, String targetIndex) throws IOException {
-    log.info("Reindexing elastic search index: {} to index: {}.", sourceIndex, targetIndex);
-    ReindexRequest request = new ReindexRequest()
-        .setSourceIndices(sourceIndex)
-        .setDestIndex(targetIndex)
-        .setTimeout(TimeValue.timeValueMinutes(10))
-        .setRefresh(true);
-    RequestOptions options = RequestOptions.DEFAULT.toBuilder().setRequestConfig(REQUEST_CONFIG)
-        .build();
+    log.info("Reindexing elasticsearch index: {} -> {}.", sourceIndex, targetIndex);
+
     try {
-      highLevelClient.reindex(request, options);
+      esClient.reindex(r -> r
+          .source(s -> s.index(sourceIndex))
+          .dest(d -> d.index(targetIndex))
+          .refresh(true)
+          .timeout(Time.of(t -> t.time("10m")))
+      );
     } catch (SocketTimeoutException e) {
-      log.error(String.format("Reindexing from index: %s to index: %s needs more wait time."
-          + "Please consider increasing the SocketTimeout.", sourceIndex, targetIndex), e);
+      log.error(
+          "Reindexing from index: {} to index: {} timed out. Consider increasing client timeouts.",
+          sourceIndex, targetIndex, e);
+      throw e;
+    } catch (ElasticsearchException e) {
+      log.error("Elasticsearch reindex failed: {} -> {}. {}", sourceIndex, targetIndex,
+          e.getMessage(), e);
       throw e;
     }
   }
@@ -102,30 +95,62 @@ public class ElasticsearchIndexHelper {
    *
    * @param targetIndex The elasticsearch index to be deleted
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
-   * @throws ResourceNotFoundException when the index does not exist
    */
-  public void deleteIndex(String targetIndex) throws IOException, ResourceNotFoundException {
-    log.info("Deleting elastic search index: {}", targetIndex);
+  public void deleteIndex(String targetIndex) throws IOException {
+    log.info("Deleting elasticsearch index: {}", targetIndex);
 
-    DeleteIndexRequest request = new DeleteIndexRequest(targetIndex);
-    highLevelClient.indices().delete(request, RequestOptions.DEFAULT);
+    try {
+      esClient.indices().delete(d -> d.index(targetIndex));
+    } catch (ElasticsearchException e) {
+      if (isIndexNotFound(e)) {
+        throw new NoSuchIndexException("Index not found: " + targetIndex, e);
+      }
+      throw e;
+    }
   }
 
   /**
    * Create an elasticsearch index with custom field mappings and default settings.
    *
    * @param indexName The name of the elasticsearch index to be created
-   * @param mapping   the desired mapping object
+   * @param mappingSource   the desired mapping object
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
-   * @throws ResourceAlreadyExistsException when the index name already exists
    */
-  public void createIndex(String indexName, MappingMetadata mapping)
-      throws IOException, ResourceAlreadyExistsException {
-    log.info("Creating elastic search index: {} with custom mapping.", indexName);
+  public CreateIndexResponse createIndex(String indexName, Map<String, Object> mappingSource)
+      throws IOException {
 
-    CreateIndexRequest request = new CreateIndexRequest(indexName)
-        .mapping(mapping.getSourceAsMap());
-    highLevelClient.indices().create(request, RequestOptions.DEFAULT);
+    log.info("Creating elasticsearch index: {} with custom mapping (map).", indexName);
+
+    try {
+      return esClient.indices().create(c -> c
+          .index(indexName)
+          .mappings(m -> m.withJson(new StringReader(toJson(mappingSource))))
+      );
+    } catch (ElasticsearchException e) {
+      if (isAlreadyExists(e)) {
+        throw new IllegalStateException("Index already exists: " + indexName, e);
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Create index directly from TypeMapping.
+   */
+  public CreateIndexResponse createIndex(String indexName, TypeMapping mapping) throws IOException {
+    log.info("Creating elasticsearch index: {} with custom mapping (TypeMapping).", indexName);
+
+    try {
+      return esClient.indices().create(c -> c
+          .index(indexName)
+          .mappings(mapping)
+      );
+    } catch (ElasticsearchException e) {
+      if (isAlreadyExists(e)) {
+        throw new IllegalStateException("Index already exists: " + indexName, e);
+      }
+      throw e;
+    }
   }
 
   /**
@@ -136,8 +161,8 @@ public class ElasticsearchIndexHelper {
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public boolean aliasExists(String alias) throws IOException {
-    GetAliasesRequest request = new GetAliasesRequest(alias);
-    return highLevelClient.indices().existsAlias(request, RequestOptions.DEFAULT);
+    BooleanResponse resp = esClient.indices().existsAlias(e -> e.name(alias));
+    return resp.value();
   }
 
   /**
@@ -160,19 +185,22 @@ public class ElasticsearchIndexHelper {
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
   public void addAlias(String indexName, String aliasName, String filter) throws IOException {
-    log.info("Adding alias: {} to elastic search index: {}.", aliasName, indexName);
+    log.info("Adding alias: {} to elasticsearch index: {}.", aliasName, indexName);
 
-    IndicesAliasesRequest request = new IndicesAliasesRequest();
-    AliasActions aliasAction =
-        new AliasActions(AliasActions.Type.ADD)
-            .index(indexName)
-            .alias(aliasName);
-    if (StringUtils.isNotEmpty(filter)) {
-      aliasAction.filter(filter);
+    try {
+      esClient.indices().updateAliases(u -> u.actions(a -> {
+        if (StringUtils.isNotBlank(filter)) {
+          Query filterQuery = new Query.Builder()
+              .withJson(new StringReader(filter))
+              .build();
+          return a.add(add -> add.index(indexName).alias(aliasName).filter(filterQuery));
+        }
+        return a.add(add -> add.index(indexName).alias(aliasName));
+      }));
+    } catch (ElasticsearchException e) {
+      log.error("Failed to add alias {} to index {}: {}", aliasName, indexName, e.getMessage(), e);
+      throw e;
     }
-    request.addAliasAction(aliasAction);
-
-    highLevelClient.indices().updateAliases(request, RequestOptions.DEFAULT);
   }
 
   /**
@@ -181,14 +209,18 @@ public class ElasticsearchIndexHelper {
    * @param indexName index name to delete alias from
    * @param aliasName alias to be deleted
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
-   * @throws ResourceNotFoundException when the alias does not exist
    */
-  public void deleteAlias(String indexName, String aliasName)
-      throws IOException, ResourceNotFoundException {
-    log.info("Deleting alias: {} from elastic search index: {}.", aliasName, indexName);
+  public void deleteAlias(String indexName, String aliasName) throws IOException {
+    log.info("Deleting alias: {} from elasticsearch index: {}.", aliasName, indexName);
 
-    DeleteAliasRequest request = new DeleteAliasRequest(indexName, aliasName);
-    highLevelClient.indices().deleteAlias(request, RequestOptions.DEFAULT);
+    try {
+      esClient.indices().deleteAlias(d -> d.index(indexName).name(aliasName));
+    } catch (ElasticsearchException e) {
+      if (isIndexNotFound(e)) {
+        throw new NoSuchIndexException("Index not found: " + indexName, e);
+      }
+      throw e;
+    }
   }
 
   /**
@@ -198,10 +230,25 @@ public class ElasticsearchIndexHelper {
    * @return MappingMetadata for the specific index
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    */
-  public MappingMetadata getMapping(String indexName) throws IOException {
-    GetMappingsRequest request = new GetMappingsRequest();
-    GetMappingsResponse getMappingsResponse =
-        highLevelClient.indices().getMapping(request, RequestOptions.DEFAULT);
-    return getMappingsResponse.mappings().get(indexName);
+  public TypeMapping getMapping(String indexName) throws IOException {
+    GetMappingResponse response = esClient.indices().getMapping(g -> g.index(indexName));
+    var indexMapping = response.result().get(indexName);
+    return indexMapping != null ? indexMapping.mappings() : null;
+  }
+
+  private String toJson(Map<String, Object> map) {
+    try {
+      return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(map);
+    } catch (Exception e) {
+      throw new DataAccessResourceFailureException("Failed to serialize mapping to JSON", e);
+    }
+  }
+
+  private boolean isIndexNotFound(ElasticsearchException e) {
+    return e.getMessage() != null && e.getMessage().contains("index_not_found_exception");
+  }
+
+  private boolean isAlreadyExists(ElasticsearchException e) {
+    return e.getMessage() != null && e.getMessage().contains("resource_already_exists_exception");
   }
 }

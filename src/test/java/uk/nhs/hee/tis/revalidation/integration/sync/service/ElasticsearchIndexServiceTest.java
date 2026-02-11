@@ -26,28 +26,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
+import co.elastic.clients.elasticsearch.indices.IndexState;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.assertj.core.util.Lists;
-import org.elasticsearch.ResourceAlreadyExistsException;
-import org.elasticsearch.ResourceNotFoundException;
-import org.elasticsearch.client.indices.GetIndexResponse;
-import org.elasticsearch.cluster.metadata.AliasMetadata;
-import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.common.settings.Settings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,6 +55,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,173 +72,186 @@ class ElasticsearchIndexServiceTest {
 
   @Captor
   ArgumentCaptor<String> stringArgCaptor;
+
   @Mock
   private ElasticsearchIndexHelper elasticsearchIndexHelperMock;
+
   @Mock
   private GetIndexResponse getIndexResponseMock;
+
+  @Mock
+  private TypeMapping mappingMock;
+
   @Spy
   @InjectMocks
   private ElasticsearchIndexService elasticsearchIndexService;
-  @Mock
-  private Settings settingsMock1;
-  @Mock
-  private Settings settingsMock2;
-  @Mock
-  private Settings settingsMock3;
-  @Mock
-  private MappingMetadata mappingMock;
-  @Mock
-  private AliasMetadata aliasMetadataMock1;
-  @Mock
-  private AliasMetadata aliasMetadataMock2;
 
   @Test
   void shouldDeleteBackupIndices() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(BACKUP_ALIAS)).thenReturn(getIndexResponseMock);
-    when(settingsMock1.get("index.creation_date")).thenReturn("1669854215258");
-    when(settingsMock2.get("index.creation_date")).thenReturn("1670455701379");
-    when(settingsMock3.get("index.creation_date")).thenReturn("1670456912113");
-    Map<String, Settings> settingsMap = new HashMap<>();
-    settingsMap.put(BACKUP_INDEX_1, settingsMock1);
-    settingsMap.put(BACKUP_INDEX_2, settingsMock2);
-    settingsMap.put(BACKUP_INDEX_3, settingsMock3);
-    when(getIndexResponseMock.getSettings()).thenReturn(settingsMap);
-    when(getIndexResponseMock.getIndices()).thenReturn(
-        new String[]{BACKUP_INDEX_1, BACKUP_INDEX_2, BACKUP_INDEX_3});
+
+    // Build result map: 3 indices with creation_date values; keep latest (largest)
+    Map<String, IndexState> states = new HashMap<>();
+    states.put(BACKUP_INDEX_1, indexStateWithCreationDate("1669854215258"));
+    states.put(BACKUP_INDEX_2, indexStateWithCreationDate("1670455701379"));
+    states.put(BACKUP_INDEX_3, indexStateWithCreationDate("1670456912113")); // latest
+    when(getIndexResponseMock.result()).thenReturn(states);
 
     elasticsearchIndexService.deleteBackupIndicesExceptLatest(BACKUP_ALIAS);
 
     verify(elasticsearchIndexHelperMock, times(2)).deleteIndex(stringArgCaptor.capture());
-    List<String> deletedIndices = stringArgCaptor.getAllValues();
-    assertThat("Deleted unexpected indices.", deletedIndices,
-        hasItems(BACKUP_INDEX_1, BACKUP_INDEX_2));
+    List<String> deleted = stringArgCaptor.getAllValues();
+
+    assertThat("Deleted unexpected indices.", deleted, hasItems(BACKUP_INDEX_1, BACKUP_INDEX_2));
   }
 
   @Test
   void shouldNotDeleteBackupIndicesWhenCreationDatesAreNull() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(BACKUP_ALIAS)).thenReturn(getIndexResponseMock);
-    when(settingsMock1.get("index.creation_date")).thenReturn(null);
-    when(settingsMock2.get("index.creation_date")).thenReturn(null);
-    when(settingsMock3.get("index.creation_date")).thenReturn(null);
-    Map<String, Settings> settingsMap = new HashMap<>();
-    settingsMap.put(BACKUP_INDEX_1, settingsMock1);
-    settingsMap.put(BACKUP_INDEX_2, settingsMock2);
-    settingsMap.put(BACKUP_INDEX_3, settingsMock3);
-    when(getIndexResponseMock.getSettings()).thenReturn(settingsMap);
-    when(getIndexResponseMock.getIndices()).thenReturn(
-        new String[]{BACKUP_INDEX_1, BACKUP_INDEX_2, BACKUP_INDEX_3});
+
+    Map<String, IndexState> states = new HashMap<>();
+    states.put(BACKUP_INDEX_1, indexStateWithNullCreationDate());
+    states.put(BACKUP_INDEX_2, indexStateWithNullCreationDate());
+    states.put(BACKUP_INDEX_3, indexStateWithNullCreationDate());
+    when(getIndexResponseMock.result()).thenReturn(states);
 
     elasticsearchIndexService.deleteBackupIndicesExceptLatest(BACKUP_ALIAS);
 
-    verify(elasticsearchIndexHelperMock, never()).deleteIndex(stringArgCaptor.capture());
+    verify(elasticsearchIndexHelperMock, never()).deleteIndex(anyString());
   }
 
   @Test
   void shouldNotDeleteBackupIndicesWhenOnlyOneIndex() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(BACKUP_ALIAS)).thenReturn(getIndexResponseMock);
-    when(getIndexResponseMock.getIndices()).thenReturn(new String[]{BACKUP_INDEX_1});
+
+    Map<String, IndexState> states = new HashMap<>();
+    states.put(BACKUP_INDEX_1, mock(IndexState.class)); // no stubbing needed
+    when(getIndexResponseMock.result()).thenReturn(states);
 
     elasticsearchIndexService.deleteBackupIndicesExceptLatest(BACKUP_ALIAS);
 
-    verify(elasticsearchIndexHelperMock, never()).deleteIndex(stringArgCaptor.capture());
+    verify(elasticsearchIndexHelperMock, never()).deleteIndex(anyString());
   }
 
   @Test
   void shouldNotDeleteBackupIndicesWhenOneHasCreationDateOthersNot() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(BACKUP_ALIAS)).thenReturn(getIndexResponseMock);
-    when(settingsMock1.get("index.creation_date")).thenReturn("1669854215258");
-    when(settingsMock2.get("index.creation_date")).thenReturn(null);
-    when(settingsMock3.get("index.creation_date")).thenReturn(null);
-    Map<String, Settings> settingsMap = new HashMap<>();
-    settingsMap.put(BACKUP_INDEX_1, settingsMock1);
-    settingsMap.put(BACKUP_INDEX_2, settingsMock2);
-    settingsMap.put(BACKUP_INDEX_3, settingsMock3);
-    when(getIndexResponseMock.getSettings()).thenReturn(settingsMap);
-    when(getIndexResponseMock.getIndices()).thenReturn(
-        new String[]{BACKUP_INDEX_1, BACKUP_INDEX_2, BACKUP_INDEX_3});
+
+    Map<String, IndexState> states = new HashMap<>();
+    states.put(BACKUP_INDEX_1, indexStateWithCreationDate("1669854215258"));
+    states.put(BACKUP_INDEX_2, indexStateWithNullCreationDate());
+    states.put(BACKUP_INDEX_3, indexStateWithNullCreationDate());
+    when(getIndexResponseMock.result()).thenReturn(states);
 
     elasticsearchIndexService.deleteBackupIndicesExceptLatest(BACKUP_ALIAS);
 
-    verify(elasticsearchIndexHelperMock, never()).deleteIndex(stringArgCaptor.capture());
+    // Only one index has creationDate -> it's "latest" among those with creationDate -> no deletions.
+    verify(elasticsearchIndexHelperMock, never()).deleteIndex(anyString());
   }
 
   @Test
   void shouldTransferOldIndexNameToAlias() throws Exception {
-    when(elasticsearchIndexHelperMock.getIndices(ALIAS)).thenReturn(getIndexResponseMock);
-    Map<String, MappingMetadata> mappingsMap = new HashMap<>();
-    mappingsMap.put(ALIAS, mappingMock);
-    when(getIndexResponseMock.getMappings()).thenReturn(mappingsMap);
+    when(elasticsearchIndexHelperMock.getMapping(ALIAS)).thenReturn(mappingMock);
 
     String returnedBackupName = elasticsearchIndexService.transferOldIndexNameToAlias(ALIAS);
 
-    verify(elasticsearchIndexHelperMock).createIndex(stringArgCaptor.capture(), eq(mappingMock));
-    String oldIndexBackupName = stringArgCaptor.getValue();
-    assertEquals(oldIndexBackupName, returnedBackupName);
-    verify(elasticsearchIndexHelperMock).reindex(ALIAS, oldIndexBackupName);
+    verify(elasticsearchIndexHelperMock).createIndex(stringArgCaptor.capture(),
+        org.mockito.ArgumentMatchers.eq(mappingMock));
+    String backupIndexName = stringArgCaptor.getValue();
+
+    assertEquals(backupIndexName, returnedBackupName);
+    verify(elasticsearchIndexHelperMock).reindex(ALIAS, backupIndexName);
+
     String backupAlias = elasticsearchIndexService.getBackupAlias(ALIAS);
-    verify(elasticsearchIndexHelperMock).addAlias(oldIndexBackupName, backupAlias);
+    verify(elasticsearchIndexHelperMock).addAlias(backupIndexName, backupAlias);
     verify(elasticsearchIndexHelperMock).deleteIndex(ALIAS);
-    verify(elasticsearchIndexHelperMock).addAlias(oldIndexBackupName, ALIAS);
+    verify(elasticsearchIndexHelperMock).addAlias(backupIndexName, ALIAS);
   }
 
   @Test
   void shouldThrowExceptionWhenNoMappingFoundForTransferOldIndexNameToAlias() throws Exception {
-    when(elasticsearchIndexHelperMock.getIndices(ALIAS)).thenReturn(getIndexResponseMock);
-    when(getIndexResponseMock.getMappings()).thenReturn(new HashMap<>());
+    when(elasticsearchIndexHelperMock.getMapping(ALIAS)).thenReturn(null);
 
-    assertThrows(ResourceNotFoundException.class,
+    assertThrows(NoSuchIndexException.class,
         () -> elasticsearchIndexService.transferOldIndexNameToAlias(ALIAS));
-    verify(elasticsearchIndexHelperMock, never()).createIndex(anyString(), any());
+
+    verify(elasticsearchIndexHelperMock, never()).createIndex(anyString(),
+        org.mockito.ArgumentMatchers.any(TypeMapping.class));
   }
 
   @Test
   void shouldThrowExceptionWhenNoIndexFoundForMarkCurrentIndexAsBackup() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(ALIAS)).thenReturn(getIndexResponseMock);
-    when(getIndexResponseMock.getAliases()).thenReturn(new HashMap<>());
+    when(getIndexResponseMock.result()).thenReturn(new HashMap<>());
 
     assertThrows(NoSuchElementException.class,
         () -> elasticsearchIndexService.markCurrentIndexAsBackup(ALIAS));
+
     verify(elasticsearchIndexHelperMock, never()).addAlias(anyString(), anyString());
   }
 
   @Test
   void shouldThrowExceptionWhenMultipleIndicesFoundForMarkCurrentIndexAsBackup() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(ALIAS)).thenReturn(getIndexResponseMock);
-    Map<String, List<AliasMetadata>> aliasMap = new HashMap<>();
-    aliasMap.put("index1", Lists.list(aliasMetadataMock1));
-    aliasMap.put("index2", Lists.list(aliasMetadataMock2));
-    when(getIndexResponseMock.getAliases()).thenReturn(aliasMap);
+
+    Map<String, IndexState> states = new HashMap<>();
+    states.put("index1", mock(IndexState.class));
+    states.put("index2", mock(IndexState.class));
+    when(getIndexResponseMock.result()).thenReturn(states);
 
     assertThrows(IllegalStateException.class,
         () -> elasticsearchIndexService.markCurrentIndexAsBackup(ALIAS));
+
     verify(elasticsearchIndexHelperMock, never()).addAlias(anyString(), anyString());
   }
 
   @Test
   void shouldMarkCurrentIndexAsBackup() throws Exception {
     when(elasticsearchIndexHelperMock.getIndices(ALIAS)).thenReturn(getIndexResponseMock);
-    Map<String, List<AliasMetadata>> aliasMap = new HashMap<>();
-    aliasMap.put("index1", Lists.list(aliasMetadataMock1));
-    when(getIndexResponseMock.getAliases()).thenReturn(aliasMap);
+
+    Map<String, IndexState> states = new HashMap<>();
+    states.put("index1", mock(IndexState.class)); // no stubbing needed
+    when(getIndexResponseMock.result()).thenReturn(states);
 
     String oldIndexName = elasticsearchIndexService.markCurrentIndexAsBackup(ALIAS);
-    verify(elasticsearchIndexHelperMock).addAlias(eq(oldIndexName), anyString());
+
+    assertEquals("index1", oldIndexName);
+
+    ArgumentCaptor<String> indexCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> aliasCaptor = ArgumentCaptor.forClass(String.class);
+
+    verify(elasticsearchIndexHelperMock).addAlias(indexCaptor.capture(), aliasCaptor.capture());
+
+    assertEquals("index1", indexCaptor.getValue());
+    assertEquals(elasticsearchIndexService.getBackupAlias(ALIAS), aliasCaptor.getValue());
   }
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
   void shouldReindexWhetherAliasExists(boolean aliasExists) throws Exception {
     when(elasticsearchIndexHelperMock.aliasExists(TARGET_ALIAS)).thenReturn(aliasExists);
-    doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService).markCurrentIndexAsBackup(TARGET_ALIAS);
-    doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService)
-        .transferOldIndexNameToAlias(TARGET_ALIAS);
+
+    lenient().doReturn(OLD_INDEX_NAME)
+        .when(elasticsearchIndexService).markCurrentIndexAsBackup(TARGET_ALIAS);
+
+    lenient().doReturn(OLD_INDEX_NAME)
+        .when(elasticsearchIndexService).transferOldIndexNameToAlias(TARGET_ALIAS);
+
     when(elasticsearchIndexHelperMock.getMapping(OLD_INDEX_NAME)).thenReturn(mappingMock);
-    doNothing().when(elasticsearchIndexService).deleteBackupIndicesExceptLatest(TARGET_ALIAS);
+
+    String backupAlias = elasticsearchIndexService.getBackupAlias(TARGET_ALIAS);
+    doNothing().when(elasticsearchIndexService).deleteBackupIndicesExceptLatest(backupAlias);
 
     elasticsearchIndexService.resync(SOURCE_INDEX_NAME, TARGET_ALIAS);
 
-    verify(elasticsearchIndexHelperMock).createIndex(stringArgCaptor.capture(), eq(mappingMock));
-    String newTargetIndexName = stringArgCaptor.getValue();
+    ArgumentCaptor<String> newIndexCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<TypeMapping> mappingCaptor = ArgumentCaptor.forClass(TypeMapping.class);
+
+    verify(elasticsearchIndexHelperMock).createIndex(newIndexCaptor.capture(),
+        mappingCaptor.capture());
+    String newTargetIndexName = newIndexCaptor.getValue();
+    assertEquals(mappingMock, mappingCaptor.getValue());
+
     verify(elasticsearchIndexHelperMock).reindex(SOURCE_INDEX_NAME, newTargetIndexName);
     verify(elasticsearchIndexHelperMock).addAlias(newTargetIndexName, TARGET_ALIAS);
     verify(elasticsearchIndexHelperMock).deleteAlias(OLD_INDEX_NAME, TARGET_ALIAS);
@@ -250,9 +261,10 @@ class ElasticsearchIndexServiceTest {
   void shouldThrowErrorWhenMappingNotFoundForOldIndexWhenReindex() throws Exception {
     when(elasticsearchIndexHelperMock.aliasExists(TARGET_ALIAS)).thenReturn(true);
     doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService).markCurrentIndexAsBackup(TARGET_ALIAS);
+
     when(elasticsearchIndexHelperMock.getMapping(OLD_INDEX_NAME)).thenReturn(null);
 
-    assertThrows(ResourceNotFoundException.class,
+    assertThrows(NoSuchIndexException.class,
         () -> elasticsearchIndexService.resync(SOURCE_INDEX_NAME, TARGET_ALIAS));
   }
 
@@ -262,10 +274,14 @@ class ElasticsearchIndexServiceTest {
     doReturn(OLD_INDEX_NAME).when(elasticsearchIndexService).markCurrentIndexAsBackup(TARGET_ALIAS);
     when(elasticsearchIndexHelperMock.getMapping(OLD_INDEX_NAME)).thenReturn(mappingMock);
 
-    doThrow(ResourceAlreadyExistsException.class).when(elasticsearchIndexHelperMock)
-        .createIndex(anyString(), any());
+    // helper.createIndex throws IllegalStateException when already exists (per your helper)
+    doThrow(new IllegalStateException("resource_already_exists_exception"))
+        .when(elasticsearchIndexHelperMock)
+        .createIndex(anyString(), org.mockito.ArgumentMatchers.any(TypeMapping.class));
+
     String backupAlias = elasticsearchIndexService.getBackupAlias(TARGET_ALIAS);
-    doThrow(Exception.class).when(elasticsearchIndexService)
+    doThrow(new Exception("delete backups failed"))
+        .when(elasticsearchIndexService)
         .deleteBackupIndicesExceptLatest(backupAlias);
 
     assertDoesNotThrow(() -> elasticsearchIndexService.resync(SOURCE_INDEX_NAME, TARGET_ALIAS));
@@ -275,5 +291,18 @@ class ElasticsearchIndexServiceTest {
   void shouldGetBackupAliasAsExpected() {
     String backupAlias = elasticsearchIndexService.getBackupAlias("index");
     assertEquals("index_backup", backupAlias);
+  }
+
+  private IndexState indexStateWithCreationDate(String creationDate) {
+    // Deep stub so we can call: state.settings().index().creationDate().toString()
+    IndexState state = mock(IndexState.class, RETURNS_DEEP_STUBS);
+    when(state.settings().index().creationDate()).thenReturn(Long.valueOf(creationDate));
+    return state;
+  }
+
+  private IndexState indexStateWithNullCreationDate() {
+    IndexState state = mock(IndexState.class, RETURNS_DEEP_STUBS);
+    when(state.settings().index().creationDate()).thenReturn(null);
+    return state;
   }
 }

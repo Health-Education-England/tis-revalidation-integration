@@ -21,27 +21,27 @@
 
 package uk.nhs.hee.tis.revalidation.integration.config;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
-import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.apache.camel.component.aws.xray.TraceAnnotatedTracingStrategy;
 import org.apache.camel.component.aws.xray.XRayTracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 
 @Configuration
 public class AwsConfig {
 
-  @Bean
-  public QueueMessagingTemplate queueMessagingTemplate(AmazonSQSAsync amazonSqsAsync) {
-    return new QueueMessagingTemplate(amazonSqsAsync);
-  }
-
   @Primary
   @Bean
-  public AmazonSQSAsync amazonSqsAsync() {
-    return AmazonSQSAsyncClientBuilder.defaultClient();
+  public SqsAsyncClient sqsClient() {
+    return SqsAsyncClient.builder().build();
+  }
+
+  @Bean
+  public SqsTemplate sqsTemplate(SqsAsyncClient sqsAsyncClient) {
+    return SqsTemplate.builder()
+        .sqsAsyncClient(sqsAsyncClient).build();
   }
 
   /**

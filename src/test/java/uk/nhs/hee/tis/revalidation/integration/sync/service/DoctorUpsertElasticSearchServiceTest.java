@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.elasticsearch.index.IndexNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +51,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -161,13 +161,13 @@ class DoctorUpsertElasticSearchServiceTest {
 
   @Test
   void shouldIgnoreNotFoundOnDeleteButThrowIndexNotFoundAfterCreate() {
-    IndexNotFoundException expectedException = new IndexNotFoundException("expected");
+    NoSuchIndexException expectedException = new NoSuchIndexException("expected");
     when(elasticsearchOperations.indexOps((IndexCoordinates) any()))
-        .thenThrow(new IndexNotFoundException("Index"))
+        .thenThrow(new NoSuchIndexException("Index"))
         .thenReturn(indexOperations)
         .thenThrow(expectedException);
 
-    var actual = assertThrows(IndexNotFoundException.class, () -> service.clearMasterDoctorIndex());
+    var actual = assertThrows(NoSuchIndexException.class, () -> service.clearMasterDoctorIndex());
 
     assertEquals(expectedException, actual);
     verify(elasticsearchOperations, times(3)).indexOps((IndexCoordinates) any());

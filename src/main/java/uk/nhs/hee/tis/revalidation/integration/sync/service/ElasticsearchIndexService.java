@@ -21,21 +21,19 @@
 
 package uk.nhs.hee.tis.revalidation.integration.sync.service;
 
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
+import co.elastic.clients.elasticsearch.indices.IndexState;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.AbstractMap;
 import java.util.Comparator;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.ResourceAlreadyExistsException;
-import org.elasticsearch.ResourceNotFoundException;
-import org.elasticsearch.client.indices.GetIndexResponse;
-import org.elasticsearch.cluster.metadata.MappingMetadata;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
 
@@ -46,7 +44,7 @@ public class ElasticsearchIndexService {
   private static final String ALIAS_BACKUP_SUFFIX = "_backup";
   private static final String INDEX_DATETIME_PATTERN = "yyyyMMddHHmmss";
 
-  ElasticsearchIndexHelper elasticsearchIndexHelper;
+  private final ElasticsearchIndexHelper elasticsearchIndexHelper;
 
   public ElasticsearchIndexService(ElasticsearchIndexHelper elasticsearchIndexHelper) {
     this.elasticsearchIndexHelper = elasticsearchIndexHelper;
@@ -59,105 +57,116 @@ public class ElasticsearchIndexService {
   /**
    * Delete historical backups but retain the latest one.
    *
+   * Backup indices are discovered by querying the backup alias (alias points to indices).
    * @param backupAlias the alias the backup indices marked with
    * @throws Exception any exceptions
    */
   protected void deleteBackupIndicesExceptLatest(String backupAlias) throws Exception {
     log.info("Start deleting old backup indices for alias: {}", backupAlias);
+
     GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(backupAlias);
-    String[] indices = getIndexResponse.getIndices();
-    if (indices.length <= 1) {
+    Map<String, IndexState> states = getIndexResponse.result();
+
+    if (states == null || states.size() <= 1) {
       return;
     }
 
-    // partition the settings map to 2 parts by checking if creation date is empty
-    var settingsMapSplit = getIndexResponse.getSettings().entrySet()
-        .stream().collect(
-            Collectors.partitioningBy(
-                e -> StringUtils.isNotEmpty(e.getValue().get("index.creation_date"))));
+    // Identify indices with/without creation_date and keep latest by creation_date
+    var indicesWithCreationDate = states.entrySet().stream()
+        .filter(e -> StringUtils.isNotBlank(getCreationDate(e.getValue())))
+        .toList();
 
-    var indicesWithoutCreationDate = settingsMapSplit.get(false).stream().collect(
-        Collectors.mapping(Entry::getKey, Collectors.toList()));
+    var indicesWithoutCreationDate = states.entrySet().stream()
+        .filter(e -> StringUtils.isBlank(getCreationDate(e.getValue())))
+        .map(Map.Entry::getKey)
+        .toList();
 
-    var indicesWithCreationDate = settingsMapSplit.get(true).stream().collect(
-        Collectors.mapping(Entry::getKey, Collectors.toList()));
-
-    // Log all the indices when their creation date is empty
     if (!indicesWithoutCreationDate.isEmpty()) {
-      log.warn("Indices do not have a valid creation date setting: {}. "
-              + "Please consider deleting them manually.",
+      log.warn("Indices do not have a valid creation date setting: {}. Please consider deleting them manually.",
           indicesWithoutCreationDate);
     }
 
-    // Deal with deletion when their creation date is not empty
-    var latestBackupIndex = settingsMapSplit.get(true).stream()
-        .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(),
-            Long.valueOf(e.getValue().get("index.creation_date"))))
-        .max(Comparator.comparing(Entry::getValue));
+    var latestBackupIndexOpt = indicesWithCreationDate.stream()
+        .max(Comparator.comparingLong(e -> Long.parseLong(getCreationDate(e.getValue()))));
 
-    if (latestBackupIndex.isPresent()) {
-      String latestBackupIndexName = latestBackupIndex.get().getKey();
-      // Only handle indices whose creation_date is not empty
-      for (String index : indicesWithCreationDate) {
-        if (!index.equals(latestBackupIndexName)) {
-          elasticsearchIndexHelper.deleteIndex(index);
-        }
+    if (latestBackupIndexOpt.isEmpty()) {
+      return;
+    }
+
+    String latestBackupIndexName = latestBackupIndexOpt.get().getKey();
+
+    for (var entry : indicesWithCreationDate) {
+      String indexName = entry.getKey();
+      if (!indexName.equals(latestBackupIndexName)) {
+        elasticsearchIndexHelper.deleteIndex(indexName);
       }
     }
   }
 
   /**
-   * Index name and alias can not be the same. To use an existing index name as an alias, we need to
-   * reindex the index to another name, and delete it, then set alias back to it.
+   * Index name and alias cannot be the same. If an index exists with the same name as the alias we want,
+   * we reindex it to a new "backup" index name, delete the old index, then re-add alias to the backup.
    *
+   * @return the created backup index name
    * @param alias this is the existing index name as well as the alias we want to use.
    * @throws IOException for any connection timeout, or socket timeout, or other IO exceptions
    * @throws ElasticsearchException for any Elasticsearch exceptions
    */
-  protected String transferOldIndexNameToAlias(String alias) throws IOException,
-      ElasticsearchException {
+  protected String transferOldIndexNameToAlias(String alias) throws IOException, ElasticsearchException {
     String oldIndexName = alias;
-    GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(oldIndexName);
-    MappingMetadata mapping = getIndexResponse.getMappings().get(oldIndexName);
+
+    // Get mapping of the existing old index
+    TypeMapping mapping = elasticsearchIndexHelper.getMapping(oldIndexName);
+    if (mapping == null) {
+      throw new NoSuchIndexException("ES mapping for old index \"" + oldIndexName + "\" is not found.");
+    }
+
     String oldIndexBackupName = alias + "_"
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern(INDEX_DATETIME_PATTERN));
-    if (mapping == null) {
-      throw new ResourceNotFoundException(
-          String.format("ES mapping for old index \"%s\" is not found.", oldIndexName));
-    }
+
+    // Create backup index with same mapping
     elasticsearchIndexHelper.createIndex(oldIndexBackupName, mapping);
+
+    // Reindex old -> backup
     elasticsearchIndexHelper.reindex(oldIndexName, oldIndexBackupName);
+
+    // Mark backup alias on the new backup index
     elasticsearchIndexHelper.addAlias(oldIndexBackupName, getBackupAlias(alias));
+
+    // Delete the original index that conflicts with alias name
     elasticsearchIndexHelper.deleteIndex(oldIndexName);
+
+    // Add the alias name pointing to the backup index
     elasticsearchIndexHelper.addAlias(oldIndexBackupName, alias);
+
     return oldIndexBackupName;
   }
 
   /**
-   * Set backup alias to the current index.
+   * Set backup alias to the current index behind an alias.
    *
    * @param alias the alias the current index marked with
-   * @return the old index name which marked with the alias
+   * @return the old index name behind the alias
    * @throws IOException any IOExceptions
    */
   protected String markCurrentIndexAsBackup(String alias) throws IOException {
     GetIndexResponse getIndexResponse = elasticsearchIndexHelper.getIndices(alias);
-    var indexMap = getIndexResponse.getAliases();
 
-    if (indexMap.isEmpty()) {
-      throw new NoSuchElementException(
-          String.format("The index with alias: %s does not exist.", alias));
-    } else if (indexMap.size() > 1) {
-      throw new IllegalStateException(
-          String.format("Multiple indices are found for alias: %s.", alias));
+    Map<String, IndexState> states = getIndexResponse.result();
+    if (states == null || states.isEmpty()) {
+      throw new NoSuchElementException("The index with alias: " + alias + " does not exist.");
     }
-    String oldIndexName = getIndexResponse.getAliases().keySet().iterator().next();
+    if (states.size() > 1) {
+      throw new IllegalStateException("Multiple indices are found for alias: " + alias + ".");
+    }
+
+    String oldIndexName = states.keySet().iterator().next();
     elasticsearchIndexHelper.addAlias(oldIndexName, getBackupAlias(alias));
     return oldIndexName;
   }
 
   /**
-   * reindex from an index to another (known as alias).
+   * Reindex from an index to another (known as alias).
    *
    * @param sourceIndexName the index name to reindex from
    * @param targetAlias the alias of index to reindex to
@@ -171,35 +180,54 @@ public class ElasticsearchIndexService {
     if (aliasExists) {
       oldIndexName = markCurrentIndexAsBackup(targetAlias);
     } else {
-      // and make the name of existing index available for being set as alias
+      // make the name of existing index available for being set as alias
       oldIndexName = transferOldIndexNameToAlias(targetAlias);
     }
 
-    MappingMetadata mapping = elasticsearchIndexHelper.getMapping(oldIndexName);
+    // Use mapping from the old index (the index currently behind alias)
+    TypeMapping mapping = elasticsearchIndexHelper.getMapping(oldIndexName);
     if (mapping == null) {
-      throw new ResourceNotFoundException(
-          String.format("ES mapping for old index \"%s\" is not found.", oldIndexName));
+      throw new NoSuchIndexException("ES mapping for old index \"" + oldIndexName + "\" is not found.");
     }
-    String newTargetIndexName =
-        targetAlias + "_" + LocalDateTime.now()
-            .format(DateTimeFormatter.ofPattern(INDEX_DATETIME_PATTERN));
+
+    String newTargetIndexName = targetAlias + "_"
+        + LocalDateTime.now().format(DateTimeFormatter.ofPattern(INDEX_DATETIME_PATTERN));
+
     try {
       elasticsearchIndexHelper.createIndex(newTargetIndexName, mapping);
-    } catch (ResourceAlreadyExistsException e) {
-      log.warn(String.format("Creating an existing elastic search index: %s. Skipped.",
-          newTargetIndexName), e);
+    } catch (IllegalStateException e) {
+      // in our helper, createIndex throws IllegalStateException for "already exists"
+      log.warn("Creating an existing elasticsearch index: {}. Skipped.", newTargetIndexName, e);
     }
+
     elasticsearchIndexHelper.reindex(sourceIndexName, newTargetIndexName);
+
+    // Point the alias to the new index
     elasticsearchIndexHelper.addAlias(newTargetIndexName, targetAlias);
 
+    // Delete old backup indices (keep latest)
     String backupAlias = getBackupAlias(targetAlias);
     try {
       deleteBackupIndicesExceptLatest(backupAlias);
     } catch (Exception e) {
-      log.warn(String.format("Deleting old backup indices for alias: {}. skipped."
-          + "Please delete unnecessary backups manually.", backupAlias), e);
+      log.warn("Deleting old backup indices for alias: {} skipped. Please delete unnecessary backups manually.",
+          backupAlias, e);
     }
+
     // Finally, remove the alias from the old index
     elasticsearchIndexHelper.deleteAlias(oldIndexName, targetAlias);
+  }
+
+  private String getCreationDate(IndexState state) {
+    if (state == null || state.settings() == null || state.settings().index() == null) {
+      return null;
+    }
+    // settings.index().creationDate() may be present depending on client version/serialization.
+    // If null, we return null and treat as missing.
+    try {
+      return state.settings().index().creationDate().toString();
+    } catch (Exception ignored) {
+      return null;
+    }
   }
 }

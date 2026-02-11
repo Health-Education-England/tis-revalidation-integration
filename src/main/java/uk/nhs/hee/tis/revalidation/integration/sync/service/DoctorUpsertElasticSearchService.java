@@ -33,8 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.common.util.iterable.Iterables;
-import org.elasticsearch.index.IndexNotFoundException;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
@@ -86,9 +85,10 @@ public class DoctorUpsertElasticSearchService {
     // find trainee record from Exception ES index
     Iterable<MasterDoctorView> existingRecords = findMasterDoctorRecordByGmcNumberPersonId(
         masterDoctorDocumentToSave);
+    boolean isExisting = existingRecords != null && existingRecords.iterator().hasNext();
 
     // if doctor already exists in ES index, then update the existing record
-    if (Iterables.size(existingRecords) > 0) {
+    if (isExisting) {
       updateMasterDoctorViews(existingRecords, masterDoctorDocumentToSave);
     }
     // otherwise, add a new record
@@ -273,7 +273,7 @@ public class DoctorUpsertElasticSearchService {
     log.info("deleting masterdoctorindex elastic search index");
     try {
       elasticSearchOperations.indexOps(IndexCoordinates.of(MASTER_DOCTOR_INDEX)).delete();
-    } catch (IndexNotFoundException e) {
+    } catch (NoSuchIndexException e) {
       log.info("Could not delete an index that does not exist, continuing");
     }
   }
