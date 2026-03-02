@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,38 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.router.processor;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedDoctorsAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeSummaryDto {
+@Component
+public class MergeEnrichedDoctorsIntoSummaryProcessor implements Processor {
 
-  private long countTotal;
-  private long countUnderNotice;
-  private long totalPages;
-  private long totalResults;
-  private List<TraineeInfoDto> traineeInfo;
+  public static final String SUMMARY = "summary";
 
-  @JsonProperty("recommendationInfo")
-  @JsonAlias({"traineeInfo", "recommendationInfo"})
-  public List<TraineeInfoDto> getTraineeInfo() {
-    return traineeInfo;
-  }
+  @Override
+  public void process(Exchange exchange) {
+    TraineeSummaryDto summary = exchange.getProperty(SUMMARY, TraineeSummaryDto.class);
 
-  @JsonProperty("recommendationInfo")
-  public void setTraineeInfo(List<TraineeInfoDto> traineeInfo) {
-    this.traineeInfo = traineeInfo;
+    @SuppressWarnings("unchecked")
+    List<TraineeInfoDto> enriched =
+        (List<TraineeInfoDto>) exchange.getProperty(
+            EnrichedDoctorsAggregationStrategy.ENRICHED_DOCTORS);
+
+    summary.setTraineeInfo(enriched);
+
+    exchange.getMessage().setBody(summary, TraineeSummaryDto.class);
   }
 }
