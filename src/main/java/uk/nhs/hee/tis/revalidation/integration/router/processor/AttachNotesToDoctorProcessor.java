@@ -27,6 +27,9 @@ import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
 
+/**
+ * Custom logic class for doctor notes enrichment.
+ */
 @Component
 public class AttachNotesToDoctorProcessor implements Processor {
 

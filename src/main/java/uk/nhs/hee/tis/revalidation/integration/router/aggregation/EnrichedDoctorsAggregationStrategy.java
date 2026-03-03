@@ -28,6 +28,9 @@ import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 
+/**
+ * Aggregation strategy class for doctor notes enrichment.
+ */
 @Component
 public class EnrichedDoctorsAggregationStrategy implements AggregationStrategy {
 

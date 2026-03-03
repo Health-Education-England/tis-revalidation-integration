@@ -26,6 +26,12 @@ import java.util.concurrent.Executors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for thread pool executors used by Camel routes.
+ *
+ * <p>This executor is used for parallel processing of doctor notes enrichment.
+ * The pool size is intentionally limited to prevent overwhelming downstream services.</p>
+ */
 @Configuration
 public class ThreadPoolConfig {
 

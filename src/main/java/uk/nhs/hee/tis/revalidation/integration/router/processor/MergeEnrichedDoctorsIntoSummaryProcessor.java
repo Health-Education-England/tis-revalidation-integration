@@ -29,6 +29,9 @@ import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedDoctor
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 
+/**
+ * Merging logic class for doctor notes enrichment.
+ */
 @Component
 public class MergeEnrichedDoctorsIntoSummaryProcessor implements Processor {
 
