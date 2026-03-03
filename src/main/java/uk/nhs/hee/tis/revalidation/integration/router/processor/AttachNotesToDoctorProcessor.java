@@ -33,17 +33,13 @@ public class AttachNotesToDoctorProcessor implements Processor {
   @Override
   public void process(Exchange exchange) {
     TraineeInfoDto doctor = exchange.getProperty("doctor", TraineeInfoDto.class);
-    String gmcId = exchange.getMessage().getHeader("gmcId", String.class);
 
-    TraineeNotesDto notes = exchange.getMessage().getBody(TraineeNotesDto.class);
+    TraineeNotesDto traineeNotesDto = exchange.getMessage().getBody(TraineeNotesDto.class);
 
-    if (notes == null) {
-      notes = new TraineeNotesDto();
-      notes.setGmcId(gmcId);
-      notes.setNotes(null);
-    }
-
-    doctor.setTraineeNotesDto(notes);
+    boolean notes =
+        traineeNotesDto != null && traineeNotesDto.getNotes() != null && !traineeNotesDto.getNotes()
+            .isEmpty();
+    doctor.setNotes(notes);
 
     exchange.getMessage().setBody(doctor, TraineeInfoDto.class);
   }

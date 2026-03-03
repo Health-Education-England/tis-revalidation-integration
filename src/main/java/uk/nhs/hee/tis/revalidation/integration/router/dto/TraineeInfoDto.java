@@ -45,5 +45,5 @@ public class TraineeInfoDto {
   private String designatedBody;
   private LocalDate dateAdded;
   private String connectionStatus;
-  private TraineeNotesDto traineeNotesDto;
+  private Boolean notes;
 }
