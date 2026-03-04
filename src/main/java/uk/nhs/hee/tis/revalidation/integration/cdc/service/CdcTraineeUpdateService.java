@@ -23,6 +23,7 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
@@ -147,5 +148,10 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
 
       detachTisInfoIfGmcNumberNotMatch(receivedDto);
     }
+  }
+
+  @Override
+  public void deleteEntity(ConnectionInfoDto entity) {
+    throw new NotImplementedException();
   }
 }

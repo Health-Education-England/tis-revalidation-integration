@@ -39,6 +39,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionLogDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
@@ -132,8 +133,8 @@ public class DoctorUpsertElasticSearchService {
   }
 
   /**
-   * Populate the masterdoctorindex in bulk by updating multiple MasterDoctorViews from
-   * connection log data.
+   * Populate the masterdoctorindex in bulk by updating multiple MasterDoctorViews from connection
+   * log data.
    *
    * @param connectionDtos ConnectionLogDtos to update
    */
@@ -155,6 +156,59 @@ public class DoctorUpsertElasticSearchService {
       esDocUpdateHelper.bulkPartialUpdate(MASTER_DOCTOR_INDEX, updates);
     }
   }
+
+  /**
+   * Populate the masterdoctorindex in bulk by updating multiple MasterDoctorViews from hidden
+   * discrepancy data.
+   *
+   * @param hiddenDiscrepancies Hidden Discrepancies to update
+   */
+  public void populateMasterIndexByHiddenDiscrepancies(
+      List<HiddenDiscrepancy> hiddenDiscrepancies) {
+    hiddenDiscrepancies.forEach(hiddenDiscrepancy -> {
+      Map<String, Map<String, Object>> updates = new HashMap<>();
+      String gmcReferenceNumber = hiddenDiscrepancy.getGmcReferenceNumber();
+      var existing = repository.findByGmcReferenceNumber(gmcReferenceNumber);
+      if (existing.size() > 1) {
+        log.warn(
+            "Multiple doctors found for gmcID: {} while syncing ES hidden discrepancy records,"
+                + " no hidden discrepancy records will be saved.",
+            gmcReferenceNumber);
+      } else if (existing.size() == 1) {
+        var masterDoctorView = existing.get(0);
+        List<HiddenDiscrepancy> hiddenDiscrepancyList = new ArrayList<>();
+
+        if (masterDoctorView.getHiddenDiscrepancies() != null) {
+          hiddenDiscrepancyList.addAll(masterDoctorView.getHiddenDiscrepancies());
+        }
+
+        boolean alreadyHidden = hiddenDiscrepancyList.stream().anyMatch(h ->
+            h.getHiddenForDesignatedBodyCode()
+                .equals(hiddenDiscrepancy.getHiddenForDesignatedBodyCode()));
+
+        if (alreadyHidden) {
+          log.info(
+              "gmcReferenceNumber: {} already has a hidden discrepancy for designated body: {}",
+              hiddenDiscrepancy.getGmcReferenceNumber(),
+              hiddenDiscrepancy.getHiddenForDesignatedBodyCode());
+          return;
+        } else {
+          hiddenDiscrepancyList.add(hiddenDiscrepancy);
+        }
+
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("hiddenDiscrepancies", hiddenDiscrepancyList);
+
+        updates.put(existing.get(0).getId(), doc);
+      }
+
+      if (!updates.isEmpty()) {
+        log.info("Updating {} master doctor records with hidden discrepancy data", updates.size());
+        esDocUpdateHelper.bulkPartialUpdate(MASTER_DOCTOR_INDEX, updates);
+      }
+    });
+  }
+
 
   private List<MasterDoctorView> findMasterDoctorRecordByGmcNumberPersonId(
       MasterDoctorView dataToSave) {
