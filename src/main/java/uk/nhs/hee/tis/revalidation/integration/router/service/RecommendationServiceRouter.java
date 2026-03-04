@@ -157,7 +157,7 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
         .endChoice()
         .otherwise()
-        .setBody(constant(null))
+        .setBody(constant((Object) null))
         .end()
         .process(attachNotesToDoctorProcessor)
         .end()
