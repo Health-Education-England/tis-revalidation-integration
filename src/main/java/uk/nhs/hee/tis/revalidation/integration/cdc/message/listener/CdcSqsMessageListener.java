@@ -31,14 +31,15 @@ import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcHiddenDiscrepancyMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 /**
  * A class to listen all the log messages.
- *
  */
 @Slf4j
 @Component
@@ -47,6 +48,7 @@ public class CdcSqsMessageListener {
   private final CdcRecommendationMessageHandler cdcRecommendationMessageHandler;
   private final CdcDoctorMessageHandler cdcDoctorMessageHandler;
   private final CdcConnectionMessageHandler cdcConnectionMessageHandler;
+  private final CdcHiddenDiscrepancyMessageHandler cdcHiddenDiscrepancyMessageHandler;
   private final ObjectMapper mapper;
 
   /**
@@ -62,10 +64,12 @@ public class CdcSqsMessageListener {
       CdcRecommendationMessageHandler cdcRecommendationMessageHandler,
       CdcDoctorMessageHandler cdcDoctorMessageHandler,
       CdcConnectionMessageHandler cdcConnectionMessageHandler,
+      CdcHiddenDiscrepancyMessageHandler cdcHiddenDiscrepancyMessageHandler,
       ObjectMapper mapper) {
     this.cdcRecommendationMessageHandler = cdcRecommendationMessageHandler;
     this.cdcDoctorMessageHandler = cdcDoctorMessageHandler;
     this.cdcConnectionMessageHandler = cdcConnectionMessageHandler;
+    this.cdcHiddenDiscrepancyMessageHandler = cdcHiddenDiscrepancyMessageHandler;
     this.mapper = mapper;
   }
 
@@ -78,7 +82,8 @@ public class CdcSqsMessageListener {
   public void getRecommendationMessage(String message) throws IOException {
     try {
       CdcDocumentDto<Recommendation> cdcDocument =
-          mapper.readValue(message, new TypeReference<>() {});
+          mapper.readValue(message, new TypeReference<>() {
+          });
       cdcRecommendationMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
@@ -94,7 +99,8 @@ public class CdcSqsMessageListener {
   public void getDoctorMessage(String message) throws IOException {
     try {
       CdcDocumentDto<DoctorsForDB> cdcDocument =
-          mapper.readValue(message, new TypeReference<>() {});
+          mapper.readValue(message, new TypeReference<>() {
+          });
       cdcDoctorMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
@@ -110,8 +116,26 @@ public class CdcSqsMessageListener {
   public void getConnectionMessage(String message) throws IOException {
     try {
       CdcDocumentDto<ConnectionLog> cdcDocument =
-          mapper.readValue(message, new TypeReference<>() {});
+          mapper.readValue(message, new TypeReference<>() {
+          });
       cdcConnectionMessageHandler.handleMessage(cdcDocument);
+    } catch (OperationNotSupportedException e) {
+      log.error(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Get hidden discrepancy cdc message which is a json string.
+   *
+   * @param message containing change data for a hiddenDiscrepancy
+   */
+  @SqsListener("${cloud.aws.end-point.cdc.hiddendiscrepancy}")
+  public void getHiddenDiscrepancyMessage(String message) throws IOException {
+    try {
+      CdcDocumentDto<HiddenDiscrepancy> cdcDocument =
+          mapper.readValue(message, new TypeReference<>() {
+          });
+      cdcHiddenDiscrepancyMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
     }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2025 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,56 +24,43 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionLogDto;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 
 /**
- * Listener for connection log messages from RabbitMQ to sync data into Elasticsearch.
+ * Listener for hidden discrepancy messages from RabbitMQ to sync data into Elasticsearch.
  */
 @Slf4j
 @Service
-public class ConnectionLogMessageListener {
-
-  @Value("${app.rabbit.reval.exchange}")
-  private String revalExchange;
-
-  @Value("${app.rabbit.reval.routingKey.hiddendiscrepancies.essyncstart}")
-  private String hiddenDiscrepanciesSyncRoutingKey;
+public class HiddenDiscrepancyMessageListener {
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
 
-  private final RabbitTemplate rabbitTemplate;
-
   /**
-   * Constructor for the ConnectionLogMessageListener.
+   * Constructor for the HiddenDiscrepancyMessageListener.
    *
    * @param doctorUpsertElasticSearchService the service to upsert doctors in Elasticsearch
    */
-  public ConnectionLogMessageListener(
-      DoctorUpsertElasticSearchService doctorUpsertElasticSearchService,
-      RabbitTemplate rabbitTemplate) {
+  public HiddenDiscrepancyMessageListener(
+      DoctorUpsertElasticSearchService doctorUpsertElasticSearchService) {
     this.doctorUpsertElasticSearchService = doctorUpsertElasticSearchService;
-    this.rabbitTemplate = rabbitTemplate;
   }
 
   /**
-   * Receives connection log messages from RabbitMQ and processes them for Elasticsearch sync.
+   * Receives hidden discrepancy messages from RabbitMQ and processes them for Elasticsearch sync.
    *
-   * @param message the index sync message containing connection log data
+   * @param message the index sync message containing hiddenDiscrepancy data
    */
-  @RabbitListener(queues = "${app.rabbit.reval.queue.connectionlog.essyncdata}")
-  public void receiveConnectionLogMessage(IndexSyncMessage<List<ConnectionLogDto>> message) {
+  @RabbitListener(queues = "${app.rabbit.reval.queue.hiddendiscrepancy.essyncdata}")
+  public void receiveConnectionLogMessage(
+      IndexSyncMessage<List<HiddenDiscrepancy>> message) {
     if (message.getSyncEnd() != null && message.getSyncEnd()) {
-      log.info("ConnectionLogs ES sync completed. Starting hidden discrepancies sync.");
-      String hiddenDiscrepancySyncStart = "hiddenDiscrepancySyncStart";
-      rabbitTemplate.convertAndSend(revalExchange, hiddenDiscrepanciesSyncRoutingKey,
-          hiddenDiscrepancySyncStart);
+      log.info("Hidden Discrepancies ES sync completed.");
     } else {
-      doctorUpsertElasticSearchService.populateMasterIndexByConnectionLogs(message.getPayload());
+      doctorUpsertElasticSearchService.populateMasterIndexByHiddenDiscrepancies(
+          message.getPayload());
     }
   }
 }

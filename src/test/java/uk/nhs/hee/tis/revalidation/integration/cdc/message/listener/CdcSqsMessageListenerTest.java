@@ -36,10 +36,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcHiddenDiscrepancyMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +59,9 @@ class CdcSqsMessageListenerTest {
   @Mock
   CdcConnectionMessageHandler cdcConnectionMessageHandler;
 
+  @Mock
+  CdcHiddenDiscrepancyMessageHandler cdcHiddenDiscrepancyMessageHandler;
+
   @Spy
   ObjectMapper objectMapper;
 
@@ -69,7 +74,8 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getDoctorMessage(testMessage);
 
     verify(cdcDoctorMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {})
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {
+        })
     );
   }
 
@@ -82,7 +88,8 @@ class CdcSqsMessageListenerTest {
     cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
     verify(cdcRecommendationMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {})
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {
+        })
     );
   }
 
@@ -96,6 +103,34 @@ class CdcSqsMessageListenerTest {
 
     verify(cdcConnectionMessageHandler).handleMessage(
         objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<ConnectionLog>>() {
+        })
+    );
+  }
+
+  @Test
+  void shouldPassHiddenDiscrepancyInsertMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException, IOException {
+    var testMessage = objectMapper.writeValueAsString(
+        CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto()
+    );
+    cdcSqsMessageListener.getHiddenDiscrepancyMessage(testMessage);
+
+    verify(cdcHiddenDiscrepancyMessageHandler).handleMessage(
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<HiddenDiscrepancy>>() {
+        })
+    );
+  }
+
+  @Test
+  void shouldPassHiddenDiscrepancyDeleteMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException, IOException {
+    var testMessage = objectMapper.writeValueAsString(
+        CdcTestDataGenerator.getCdcHiddenDiscrepancyDeleteCdcDocumentDto()
+    );
+    cdcSqsMessageListener.getHiddenDiscrepancyMessage(testMessage);
+
+    verify(cdcHiddenDiscrepancyMessageHandler).handleMessage(
+        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<HiddenDiscrepancy>>() {
         })
     );
   }

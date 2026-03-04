@@ -25,6 +25,7 @@ import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.
 
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
@@ -46,9 +47,9 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
   /**
    * Create a service.
    *
-   * @param repository The ElasticSearch repository with the index managed by the service
+   * @param repository        The ElasticSearch repository with the index managed by the service
    * @param esDocUpdateHelper the helper to update ES docs
-   * @param mapper a mapper for converting to/from the persisted composite view
+   * @param mapper            a mapper for converting to/from the persisted composite view
    */
   public CdcDoctorService(MasterDoctorElasticSearchRepository repository,
       EsDocUpdateHelper esDocUpdateHelper,
@@ -84,9 +85,14 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
       }
     } catch (Exception e) {
       log.error(String.format("Failed to insert new record for gmcId: %s, error: %s",
-          entity.getGmcReferenceNumber(), e.getMessage()),
+              entity.getGmcReferenceNumber(), e.getMessage()),
           e);
       throw e;
     }
+  }
+
+  @Override
+  public void deleteEntity(DoctorsForDB entity) {
+    throw new NotImplementedException();
   }
 }

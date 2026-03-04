@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 import com.github.javafaker.Faker;
 import java.time.LocalDate;
 import java.util.Collections;
+import org.apache.commons.lang3.NotImplementedException;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -240,5 +242,11 @@ class CdcTraineeUpdateServiceTest {
     assertThat(savedEntity.getCurriculumEndDate(), nullValue());
     assertThat(savedEntity.getMembershipType(), nullValue());
     assertThat(savedEntity.getPlacementGrade(), nullValue());
+  }
+
+  @Test
+  void shouldThrowNotImplementedExceptionOnDeleteEntityCall() {
+    assertThrows(NotImplementedException.class,
+        () -> cdcTraineeUpdateService.deleteEntity(traineeUpdate));
   }
 }
