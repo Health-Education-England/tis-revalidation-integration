@@ -62,6 +62,9 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private final AttachNotesToDoctorProcessor attachNotesToDoctorProcessor;
   private final MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor;
 
+  /**
+   * Constructor of RecommendationServiceRouter.
+   */
   public RecommendationServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor,
       KeycloakBean keycloakBean,
       DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy,
