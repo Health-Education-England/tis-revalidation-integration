@@ -30,7 +30,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.http.base.HttpOperationFailedException;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -42,49 +41,41 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandlerProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.AttachNotesToDoctorProcessor;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedDoctorsIntoSummaryProcessor;
-
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
 
-  private final ExecutorService notesExecutor;
   @Value("${service.core.url}")
   private String coreServiceUrl;
-
-
-  @Autowired
-  private GmcIdProcessorBean gmcIdProcessorBean;
-
-  @Autowired
-  private KeycloakBean keycloakBean;
-
-  @Autowired
-  private DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
-
-  @Autowired
-  private EnrichedDoctorsAggregationStrategy enrichedDoctorsAggregationStrategy;
-
-
-  @Autowired
-  private ExceptionHandlerProcessor exceptionHandlerProcessor;
-
-  @Autowired
-  private AttachNotesToDoctorProcessor attachNotesToDoctorProcessor;
-  @Autowired
-  private MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor;
-
-
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
-
   @Value("${service.recommendation.url}")
   private String serviceUrl;
 
-  public RecommendationServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor) {
+  private final ExecutorService notesExecutor;
+  private final KeycloakBean keycloakBean;
+  private final DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
+  private final EnrichedDoctorsAggregationStrategy enrichedDoctorsAggregationStrategy;
+  private final ExceptionHandlerProcessor exceptionHandlerProcessor;
+  private final AttachNotesToDoctorProcessor attachNotesToDoctorProcessor;
+  private final MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor;
+
+  public RecommendationServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor,
+      KeycloakBean keycloakBean,
+      DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy,
+      EnrichedDoctorsAggregationStrategy enrichedDoctorsAggregationStrategy,
+      ExceptionHandlerProcessor exceptionHandlerProcessor,
+      AttachNotesToDoctorProcessor attachNotesToDoctorProcessor,
+      MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor) {
     this.notesExecutor = notesExecutor;
+    this.keycloakBean = keycloakBean;
+    this.doctorRecommendationAggregationStrategy = doctorRecommendationAggregationStrategy;
+    this.enrichedDoctorsAggregationStrategy = enrichedDoctorsAggregationStrategy;
+    this.exceptionHandlerProcessor = exceptionHandlerProcessor;
+    this.attachNotesToDoctorProcessor = attachNotesToDoctorProcessor;
+    this.mergeEnrichedDoctorsIntoSummaryProcessor = mergeEnrichedDoctorsIntoSummaryProcessor;
   }
 
   @Override
