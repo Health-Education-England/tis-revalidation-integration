@@ -56,6 +56,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionLogDto;
 import uk.nhs.hee.tis.revalidation.integration.router.mapper.MasterDoctorViewMapper;
 import uk.nhs.hee.tis.revalidation.integration.sync.helper.ElasticsearchIndexHelper;
@@ -92,6 +93,8 @@ class DoctorUpsertElasticSearchServiceTest {
   private ArgumentCaptor<List<MasterDoctorView>> updateListCaptor;
   @InjectMocks
   private DoctorUpsertElasticSearchService service;
+  @Mock
+  private MasterDoctorView masterDoctorViewMock;
   private MasterDoctorView currentDoctorView;
   private MasterDoctorView dataToSave;
   private MasterDoctorView mappedView;
@@ -110,8 +113,12 @@ class DoctorUpsertElasticSearchServiceTest {
   private static final String DOCTOR_LAST_NAME = "lastName";
   private static final String DOCTOR_LAST_NAME_KEY = "doctorLastName";
   private static final String DOCTOR_LAST_NAME_NEW = "lastName_new";
+  private static final String DESIGNATED_BODY_CODE_1 = "1111111";
+  private static final String DESIGNATED_BODY_CODE_2 = "2222222";
   private static final LocalDateTime LAST_CONNECTION_DATETIME = LocalDateTime.now().minusDays(1);
   private ConnectionLogDto connectionLogDto;
+  HiddenDiscrepancy hiddenDiscrepancy1;
+  HiddenDiscrepancy hiddenDiscrepancy2;
 
   @BeforeEach
   void setUp() {
@@ -153,6 +160,21 @@ class DoctorUpsertElasticSearchServiceTest {
         .gmcId(GMC_NUMBER)
         .updatedBy(UPDATED_BY)
         .eventDateTime(LAST_CONNECTION_DATETIME)
+        .build();
+
+    hiddenDiscrepancy1 = HiddenDiscrepancy.builder()
+        .gmcReferenceNumber(GMC_NUMBER)
+        .hiddenDateTime(LocalDateTime.now())
+        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_1)
+        .reason("reason1")
+        .hiddenBy(UPDATED_BY)
+        .build();
+    hiddenDiscrepancy2 = HiddenDiscrepancy.builder()
+        .gmcReferenceNumber(GMC_NUMBER)
+        .hiddenDateTime(LocalDateTime.now())
+        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_2)
+        .reason("reason2")
+        .hiddenBy(UPDATED_BY)
         .build();
 
     // prepare existing record in ES Master
@@ -376,6 +398,69 @@ class DoctorUpsertElasticSearchServiceTest {
   @Test
   void shouldHandleEmptyConnectionLogList() {
     service.populateMasterIndexByConnectionLogs(Collections.emptyList());
+    verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
+  }
+
+  @Test
+  void shouldBulkUpdateExistingDoctorsWithHiddenDiscrepancies() {
+    when(repository.findByGmcReferenceNumber(GMC_NUMBER)).thenReturn(
+        List.of(masterDoctorViewMock));
+    when(masterDoctorViewMock.getId()).thenReturn(GMC_NUMBER);
+    when(masterDoctorViewMock.getGmcReferenceNumber()).thenReturn(GMC_NUMBER);
+    when(masterDoctorViewMock.getHiddenDiscrepancies())
+        .thenReturn(null, List.of(hiddenDiscrepancy1));
+
+    service.populateMasterIndexByHiddenDiscrepancies(
+        List.of(hiddenDiscrepancy1, hiddenDiscrepancy2));
+
+    verify(esDocUpdateHelper, times(2)).bulkPartialUpdate(eq(MASTER_DOCTOR_INDEX),
+        bulkUpdateCaptor.capture());
+
+    Map<String, Object> savedFields1 = Map.of();
+    Map<String, Object> savedFields2 = Map.of();
+    String updatedId1 = "";
+    String updatedId2 = "";
+
+    var result1 = bulkUpdateCaptor.getAllValues().get(0);
+    var result2 = bulkUpdateCaptor.getAllValues().get(1);
+
+    for (var entry : result1.entrySet()) {
+      savedFields1 = entry.getValue();
+      updatedId1 = entry.getKey();
+    }
+
+    for (var entry : result2.entrySet()) {
+      savedFields2 = entry.getValue();
+      updatedId2 = entry.getKey();
+    }
+
+    assertEquals(List.of(hiddenDiscrepancy1), savedFields1.get("hiddenDiscrepancies"));
+    assertEquals(updatedId1, DOCUMENT_ID);
+    assertFalse(savedFields1.containsKey(TIS_ID_KEY)); // Fields from TIS/TCS not updated
+    assertFalse(savedFields1.containsKey(GMC_NUMBER_KEY)); // Fields from Recommendation not updated
+
+    assertEquals(List.of(hiddenDiscrepancy1, hiddenDiscrepancy2),
+        savedFields2.get("hiddenDiscrepancies"));
+    assertEquals(updatedId2, DOCUMENT_ID);
+    assertFalse(savedFields2.containsKey(TIS_ID_KEY)); // Fields from TIS/TCS not updated
+    assertFalse(savedFields2.containsKey(GMC_NUMBER_KEY)); // Fields from Recommendation not updated
+  }
+
+  @Test
+  void shouldNotBulkUpdateNewDoctorsWithHiddenDiscrepanciesIfNoExistingDoctors() {
+    when(repository.findByGmcReferenceNumber(
+        mappedNewViewGmcOnly.getGmcReferenceNumber())).thenReturn(
+        List.of());
+
+    service.populateMasterIndexByHiddenDiscrepancies(
+        List.of(hiddenDiscrepancy1, hiddenDiscrepancy2));
+
+    verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
+  }
+
+  @Test
+  void shouldHandleEmptyHiddenDiscrepanciesList() {
+    service.populateMasterIndexByHiddenDiscrepancies(Collections.emptyList());
     verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
   }
 }
