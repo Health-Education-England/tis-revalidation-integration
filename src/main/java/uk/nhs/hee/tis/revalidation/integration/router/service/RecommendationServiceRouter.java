@@ -148,7 +148,8 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .setBody(constant((Object) null))
         .otherwise()
         .log(
-            "Unexpected notes response for gmcId=${header.gmcId}, status=${header.CamelHttpResponseCode}")
+            "Unexpected notes response for gmcId=${header.gmcId}, "
+                + "status=${header.CamelHttpResponseCode}")
         .setBody(constant((Object) null))
         .end()
         .process(attachNotesToDoctorProcessor)
