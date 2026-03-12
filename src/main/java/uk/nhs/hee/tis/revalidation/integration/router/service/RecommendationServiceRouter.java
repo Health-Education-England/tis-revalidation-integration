@@ -47,13 +47,6 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedDoc
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
 
-  @Value("${service.core.url}")
-  private String coreServiceUrl;
-  @Value("${service.tcs.url}")
-  private String tcsServiceUrl;
-  @Value("${service.recommendation.url}")
-  private String serviceUrl;
-
   private final ExecutorService notesExecutor;
   private final KeycloakBean keycloakBean;
   private final DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
@@ -61,6 +54,12 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private final ExceptionHandlerProcessor exceptionHandlerProcessor;
   private final AttachNotesToDoctorProcessor attachNotesToDoctorProcessor;
   private final MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor;
+  @Value("${service.core.url}")
+  private String coreServiceUrl;
+  @Value("${service.tcs.url}")
+  private String tcsServiceUrl;
+  @Value("${service.recommendation.url}")
+  private String serviceUrl;
 
   /**
    * Constructor of RecommendationServiceRouter.
@@ -143,13 +142,14 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .to("direct:traineenotes-get")
         .choice()
         .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(200))
-          .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
+        .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
         .endChoice()
         .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(404))
-          .setBody(constant((Object) null))
+        .setBody(constant((Object) null))
         .otherwise()
-          .log("Unexpected notes response for gmcId=${header.gmcId}, status=${header.CamelHttpResponseCode}")
-          .setBody(constant((Object) null))
+        .log(
+            "Unexpected notes response for gmcId=${header.gmcId}, status=${header.CamelHttpResponseCode}")
+        .setBody(constant((Object) null))
         .end()
         .process(attachNotesToDoctorProcessor)
         .end()
