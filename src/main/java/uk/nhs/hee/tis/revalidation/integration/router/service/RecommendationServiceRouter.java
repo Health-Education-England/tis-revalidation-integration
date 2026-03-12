@@ -140,18 +140,16 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .stopOnException(false)
         .setProperty("doctor", body())
         .setHeader("gmcId", simple("${exchangeProperty.doctor.gmcReferenceNumber}"))
-        .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-        .toD(coreServiceUrl + "/api/trainee/${header.gmcId}/notes"
-            + "?bridgeEndpoint=true"
-            + "&throwExceptionOnFailure=false"
-            + "&connectTimeout=1500"
-            + "&socketTimeout=2500")
+        .to("direct:traineenotes-get")
         .choice()
         .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(200))
-        .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
+          .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
         .endChoice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(404))
+          .setBody(constant((Object) null))
         .otherwise()
-        .setBody(constant((Object) null))
+          .log("Unexpected notes response for gmcId=${header.gmcId}, status=${header.CamelHttpResponseCode}")
+          .setBody(constant((Object) null))
         .end()
         .process(attachNotesToDoctorProcessor)
         .end()
