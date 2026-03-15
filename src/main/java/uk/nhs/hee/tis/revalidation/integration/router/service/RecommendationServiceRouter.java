@@ -25,40 +25,58 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GE
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.http.base.HttpOperationFailedException;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorRecommendationAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedDoctorsAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeSummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.exception.ExceptionHandlerProcessor;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.AttachNotesToDoctorProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedDoctorsIntoSummaryProcessor;
 
 @Component
 public class RecommendationServiceRouter extends RouteBuilder {
 
-  @Autowired
-  private GmcIdProcessorBean gmcIdProcessorBean;
-
-  @Autowired
-  private KeycloakBean keycloakBean;
-
-  @Autowired
-  private DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
-
-  @Autowired
-  private ExceptionHandlerProcessor exceptionHandlerProcessor;
-
+  private final ExecutorService notesExecutor;
+  private final KeycloakBean keycloakBean;
+  private final DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy;
+  private final EnrichedDoctorsAggregationStrategy enrichedDoctorsAggregationStrategy;
+  private final ExceptionHandlerProcessor exceptionHandlerProcessor;
+  private final AttachNotesToDoctorProcessor attachNotesToDoctorProcessor;
+  private final MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor;
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
-
   @Value("${service.recommendation.url}")
   private String serviceUrl;
+
+  /**
+   * Constructor of RecommendationServiceRouter.
+   */
+  public RecommendationServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor,
+      KeycloakBean keycloakBean,
+      DoctorRecommendationAggregationStrategy doctorRecommendationAggregationStrategy,
+      EnrichedDoctorsAggregationStrategy enrichedDoctorsAggregationStrategy,
+      ExceptionHandlerProcessor exceptionHandlerProcessor,
+      AttachNotesToDoctorProcessor attachNotesToDoctorProcessor,
+      MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor) {
+    this.notesExecutor = notesExecutor;
+    this.keycloakBean = keycloakBean;
+    this.doctorRecommendationAggregationStrategy = doctorRecommendationAggregationStrategy;
+    this.enrichedDoctorsAggregationStrategy = enrichedDoctorsAggregationStrategy;
+    this.exceptionHandlerProcessor = exceptionHandlerProcessor;
+    this.attachNotesToDoctorProcessor = attachNotesToDoctorProcessor;
+    this.mergeEnrichedDoctorsIntoSummaryProcessor = mergeEnrichedDoctorsIntoSummaryProcessor;
+  }
 
   @Override
   public void configure() {
@@ -108,9 +126,34 @@ public class RecommendationServiceRouter extends RouteBuilder {
 
     from("direct:recommendation-summary")
         .to(serviceUrl + "/api/v1/doctors?bridgeEndpoint=true")
-        .transform(
-            body().regexReplaceAll("\\\"traineeInfo\\\"\\s?\\:", "\\\"recommendationInfo\\\" \\:"))
-        .unmarshal().json(JsonLibrary.Jackson);
+        .unmarshal().json(JsonLibrary.Jackson, TraineeSummaryDto.class)
+        .to("direct:enrich-page-with-notes");
+
+    from("direct:enrich-page-with-notes")
+        .setProperty("summary", body())
+        .split(simple("${exchangeProperty.summary.traineeInfo}"))
+        .executorService(notesExecutor)
+        .stopOnException(false)
+        .setProperty("doctor", body())
+        .setHeader("gmcId", simple("${exchangeProperty.doctor.gmcReferenceNumber}"))
+        .to("direct:traineenotes-get")
+        .choice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(200))
+        .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
+        .endChoice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(404))
+        .setBody(constant((Object) null))
+        .otherwise()
+        .log(
+            "Unexpected notes response for gmcId=${header.gmcId}, "
+                + "status=${header.CamelHttpResponseCode}")
+        .setBody(constant((Object) null))
+        .end()
+        .process(attachNotesToDoctorProcessor)
+        .end()
+        .aggregate(constant(true), enrichedDoctorsAggregationStrategy)
+        .completionPredicate(exchangeProperty(Exchange.SPLIT_COMPLETE).isEqualTo(true))
+        .process(mergeEnrichedDoctorsIntoSummaryProcessor);
 
     from("direct:doctors-autocomplete")
         .to(serviceUrl + "/api/v1/doctors/autocomplete?bridgeEndpoint=true");

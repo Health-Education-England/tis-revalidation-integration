@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,31 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeInfoDto {
+/**
+ * Configuration class for thread pool executors used by Camel routes.
+ *
+ * <p>This executor is used for parallel processing of doctor notes enrichment.
+ * The pool size is intentionally limited to prevent overwhelming downstream services.</p>
+ */
+@Configuration
+public class ThreadPoolConfig {
 
-  private String gmcReferenceNumber;
-  private String doctorFirstName;
-  private String doctorLastName;
-  private LocalDate submissionDate;
-  private String doctorStatus;
-  private String admin;
-  private LocalDate lastUpdatedDate;
-  private String designatedBody;
-  private LocalDate dateAdded;
-  private String connectionStatus;
-  private Boolean notes;
+  @Bean(name = "notesExecutor")
+  public ExecutorService notesExecutor() {
+    return Executors.newFixedThreadPool(10);
+  }
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,31 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeInfoDto {
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
 
-  private String gmcReferenceNumber;
-  private String doctorFirstName;
-  private String doctorLastName;
-  private LocalDate submissionDate;
-  private String doctorStatus;
-  private String admin;
-  private LocalDate lastUpdatedDate;
-  private String designatedBody;
-  private LocalDate dateAdded;
-  private String connectionStatus;
-  private Boolean notes;
+class ThreadPoolConfigTest {
+
+  @Test
+  void notesExecutorShouldExecuteTasks() throws Exception {
+    ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig();
+    ExecutorService executorService = threadPoolConfig.notesExecutor();
+
+    CountDownLatch latch = new CountDownLatch(1);
+    executorService.submit(latch::countDown);
+
+    assertTrue(latch.await(2, TimeUnit.SECONDS));
+    executorService.shutdownNow();
+  }
 }
