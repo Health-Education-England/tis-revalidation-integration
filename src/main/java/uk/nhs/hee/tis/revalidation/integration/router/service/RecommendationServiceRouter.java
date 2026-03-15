@@ -54,8 +54,6 @@ public class RecommendationServiceRouter extends RouteBuilder {
   private final ExceptionHandlerProcessor exceptionHandlerProcessor;
   private final AttachNotesToDoctorProcessor attachNotesToDoctorProcessor;
   private final MergeEnrichedDoctorsIntoSummaryProcessor mergeEnrichedDoctorsIntoSummaryProcessor;
-  @Value("${service.core.url}")
-  private String coreServiceUrl;
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
   @Value("${service.recommendation.url}")
@@ -134,7 +132,6 @@ public class RecommendationServiceRouter extends RouteBuilder {
     from("direct:enrich-page-with-notes")
         .setProperty("summary", body())
         .split(simple("${exchangeProperty.summary.traineeInfo}"))
-        .parallelProcessing()
         .executorService(notesExecutor)
         .stopOnException(false)
         .setProperty("doctor", body())

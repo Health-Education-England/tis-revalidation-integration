@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2026 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,19 +39,19 @@ import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesInfoDto;
 class AttachNotesToDoctorProcessorTest {
 
   private Exchange exchange;
+  private TraineeInfoDto doctor;
 
   @BeforeEach
   void setup() {
     CamelContext context = new DefaultCamelContext();
+    doctor = new TraineeInfoDto();
+    doctor.setGmcReferenceNumber("123");
     exchange = new DefaultExchange(context);
+    exchange.setProperty("doctor", doctor);
   }
 
   @Test
   void shouldSetNotesFalseWhenBodyIsNull() {
-    TraineeInfoDto doctor = new TraineeInfoDto();
-    doctor.setGmcReferenceNumber("123");
-
-    exchange.setProperty("doctor", doctor);
     exchange.getMessage().setHeader("gmcId", "123");
     exchange.getMessage().setBody(null);
 
@@ -65,14 +65,10 @@ class AttachNotesToDoctorProcessorTest {
 
   @Test
   void shouldSetNotesFalseWhenNotesListNull() {
-    TraineeInfoDto doctor = new TraineeInfoDto();
-    doctor.setGmcReferenceNumber("123");
-
     TraineeNotesDto notesDto = new TraineeNotesDto();
     notesDto.setGmcId("123");
     notesDto.setNotes(null);
 
-    exchange.setProperty("doctor", doctor);
     exchange.getMessage().setBody(notesDto);
 
     AttachNotesToDoctorProcessor testObj = new AttachNotesToDoctorProcessor();
@@ -84,14 +80,10 @@ class AttachNotesToDoctorProcessorTest {
 
   @Test
   void shouldSetNotesFalseWhenNotesListEmpty() {
-    TraineeInfoDto doctor = new TraineeInfoDto();
-    doctor.setGmcReferenceNumber("123");
-
     TraineeNotesDto notesDto = new TraineeNotesDto();
     notesDto.setGmcId("123");
     notesDto.setNotes(List.of());
 
-    exchange.setProperty("doctor", doctor);
     exchange.getMessage().setBody(notesDto);
 
     AttachNotesToDoctorProcessor testObj = new AttachNotesToDoctorProcessor();
@@ -103,15 +95,11 @@ class AttachNotesToDoctorProcessorTest {
 
   @Test
   void shouldSetNotesTrueWhenNotesListHasItems() {
-    TraineeInfoDto doctor = new TraineeInfoDto();
-    doctor.setGmcReferenceNumber("123");
-
     TraineeNotesInfoDto note = new TraineeNotesInfoDto();
     TraineeNotesDto notesDto = new TraineeNotesDto();
     notesDto.setGmcId("123");
     notesDto.setNotes(List.of(note));
 
-    exchange.setProperty("doctor", doctor);
     exchange.getMessage().setBody(notesDto);
 
     AttachNotesToDoctorProcessor testObj = new AttachNotesToDoctorProcessor();
