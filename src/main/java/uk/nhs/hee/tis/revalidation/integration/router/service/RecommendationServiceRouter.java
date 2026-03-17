@@ -133,7 +133,6 @@ public class RecommendationServiceRouter extends RouteBuilder {
         .setProperty("summary", body())
         .split(simple("${exchangeProperty.summary.traineeInfo}"))
         .executorService(notesExecutor)
-        .stopOnException(false)
         .setProperty("doctor", body())
         .setHeader("gmcId", simple("${exchangeProperty.doctor.gmcReferenceNumber}"))
         .to("direct:traineenotes-get")
