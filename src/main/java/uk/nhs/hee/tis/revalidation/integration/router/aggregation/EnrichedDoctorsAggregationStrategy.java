@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2020 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,38 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.router.dto;
+package uk.nhs.hee.tis.revalidation.integration.router.aggregation;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.camel.AggregationStrategy;
+import org.apache.camel.Exchange;
+import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeInfoDto;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class TraineeSummaryDto {
+/**
+ * Aggregation strategy class for doctor notes enrichment.
+ */
+@Component
+public class EnrichedDoctorsAggregationStrategy implements AggregationStrategy {
 
-  private long countTotal;
-  private long countUnderNotice;
-  private long totalPages;
-  private long totalResults;
-  private List<TraineeInfoDto> traineeInfo;
+  public static final String ENRICHED_DOCTORS = "enrichedDoctors";
 
-  @JsonProperty("recommendationInfo")
-  @JsonAlias({"traineeInfo", "recommendationInfo"})
-  public List<TraineeInfoDto> getTraineeInfo() {
-    return traineeInfo;
-  }
+  @Override
+  public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
+    TraineeInfoDto doctor = newExchange.getMessage().getBody(TraineeInfoDto.class);
 
-  @JsonProperty("recommendationInfo")
-  public void setTraineeInfo(List<TraineeInfoDto> traineeInfo) {
-    this.traineeInfo = traineeInfo;
+    if (oldExchange == null) {
+      List<TraineeInfoDto> list = new ArrayList<>();
+      list.add(doctor);
+
+      newExchange.setProperty(ENRICHED_DOCTORS, list);
+      return newExchange;
+    }
+
+    @SuppressWarnings("unchecked")
+    List<TraineeInfoDto> list =
+        (List<TraineeInfoDto>) oldExchange.getProperty(ENRICHED_DOCTORS);
+
+    list.add(doctor);
+    return oldExchange;
   }
 }
