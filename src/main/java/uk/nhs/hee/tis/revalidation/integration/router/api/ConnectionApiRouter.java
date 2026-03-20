@@ -49,7 +49,7 @@ public class ConnectionApiRouter extends RouteBuilder {
         .to("direct:connection-exception-log-today")
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
-        .post("/hide").bindingMode(RestBindingMode.off).to("direct:connection-hide")
-        .post("/unhide").bindingMode(RestBindingMode.off).to("direct:connection-unhide");
+        .post("/discrepancies/hidden").bindingMode(RestBindingMode.off)
+        .to("direct:connection-discrepancies-hide");
   }
 }

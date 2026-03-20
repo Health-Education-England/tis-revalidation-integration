@@ -49,8 +49,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
-  private static final String API_CONNECTION_HIDE = "/api/connections/hide?bridgeEndpoint=true";
-  private static final String API_CONNECTION_UNHIDE = "/api/connections/unhide?bridgeEndpoint=true";
+  private static final String API_DISCREPANCY_HIDE =
+      "/api/connections/discrepancies/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
@@ -192,17 +192,11 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_CONNECTION_REMOVE);
 
-    // Hide connection
-    from("direct:connection-hide")
+    // Hide discrepancy
+    from("direct:connection-discrepancies-hide")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_CONNECTION_HIDE);
-
-    // Unhide connection
-    from("direct:connection-unhide")
-        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
-        .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_CONNECTION_UNHIDE);
+        .toD(serviceUrlConnection + API_DISCREPANCY_HIDE);
 
     // Connection Exception Logs
     from("direct:connection-exception-log-today")
