@@ -42,7 +42,7 @@ class MergeEnrichedConnectionsIntoSummaryProcessorTest {
   @Test
   void shouldMergeEnrichedConnectionsIntoConnectionSummary() {
     CamelContext context = new DefaultCamelContext();
-    Exchange exchange = new DefaultExchange(context);
+    final Exchange exchange = new DefaultExchange(context);
 
     ConnectionSummaryDto summary = new ConnectionSummaryDto();
     summary.setCountTotal(2);

@@ -46,7 +46,7 @@ class EnrichedConnectionsAggregationStrategyTest {
   void shouldAggregateConnectionToExistingList() {
     CamelContext context = new DefaultCamelContext();
 
-    Exchange oldExchange = new DefaultExchange(context);
+    final Exchange oldExchange = new DefaultExchange(context);
     ConnectionInfoDto firstConnection = new ConnectionInfoDto();
     firstConnection.setGmcReferenceNumber("12345");
     firstConnection.setDoctorFirstName("John");
@@ -56,7 +56,7 @@ class EnrichedConnectionsAggregationStrategyTest {
         EnrichedConnectionsAggregationStrategy.ENRICHED_CONNECTIONS,
         new java.util.ArrayList<>(List.of(firstConnection)));
 
-    Exchange newExchange = new DefaultExchange(context);
+    final Exchange newExchange = new DefaultExchange(context);
     ConnectionInfoDto secondConnection = new ConnectionInfoDto();
     secondConnection.setGmcReferenceNumber("12346");
     secondConnection.setDoctorFirstName("Jane");

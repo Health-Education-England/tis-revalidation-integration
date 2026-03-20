@@ -36,7 +36,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionExceptionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionHiddenAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedConnectionsAggregationStrategy;
@@ -51,6 +50,7 @@ import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedCon
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
 
+  public static final String GMC_IDS_HEADER = "gmcIds";
   private static final String API_CONNECTION =
       "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
@@ -79,18 +79,16 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTIONLOG_TODAY =
       "/api/exceptionLog/today?bridgeEndpoint=true";
-
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
-  public static final String GMC_IDS_HEADER = "gmcIds";
   private final ExecutorService notesExecutor;
-  private KeycloakBean keycloakBean;
   private final EnrichedConnectionsAggregationStrategy enrichedConnectionsAggregationStrategy;
   private final AttachNotesToConnectionProcessor attachNotesToConnectionProcessor;
-  private final MergeEnrichedConnectionsIntoSummaryProcessor mergeEnrichedConnectionsIntoSummaryProcessor;
-  private GmcIdProcessorBean gmcIdProcessorBean;
-  private DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
-  private ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
-  private ConnectionExceptionAggregationStrategy connectionExceptionAggregationStrategy;
+  private final MergeEnrichedConnectionsIntoSummaryProcessor
+      mergeEnrichedConnectionsIntoSummaryProcessor;
+  private final KeycloakBean keycloakBean;
+  private final GmcIdProcessorBean gmcIdProcessorBean;
+  private final DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
+  private final ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
@@ -104,13 +102,15 @@ public class ConnectionServiceRouter extends RouteBuilder {
   @Value("${service.connection.url}")
   private String serviceUrlConnection;
 
+  /**
+   * Constructor of ConnectionServiceRouter.
+   */
   public ConnectionServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor,
       KeycloakBean keycloakBean,
       GmcIdProcessorBean gmcIdProcessorBean,
       DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy,
       ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy,
       EnrichedConnectionsAggregationStrategy enrichedConnectionsAggregationStrategy,
-      ConnectionExceptionAggregationStrategy connectionExceptionAggregationStrategy,
       AttachNotesToConnectionProcessor attachNotesToConnectionProcessor,
       MergeEnrichedConnectionsIntoSummaryProcessor mergeEnrichedConnectionsIntoSummaryProcessor) {
     this.notesExecutor = notesExecutor;
@@ -119,9 +119,9 @@ public class ConnectionServiceRouter extends RouteBuilder {
     this.doctorConnectionAggregationStrategy = doctorConnectionAggregationStrategy;
     this.enrichedConnectionsAggregationStrategy = enrichedConnectionsAggregationStrategy;
     this.connectionHiddenAggregationStrategy = connectionHiddenAggregationStrategy;
-    this.connectionExceptionAggregationStrategy = connectionExceptionAggregationStrategy;
     this.attachNotesToConnectionProcessor = attachNotesToConnectionProcessor;
-    this.mergeEnrichedConnectionsIntoSummaryProcessor = mergeEnrichedConnectionsIntoSummaryProcessor;
+    this.mergeEnrichedConnectionsIntoSummaryProcessor =
+        mergeEnrichedConnectionsIntoSummaryProcessor;
   }
 
   @Override
