@@ -25,26 +25,32 @@ import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GE
 import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionExceptionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionHiddenAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedConnectionsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.AttachNotesToConnectionProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
+import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedConnectionsIntoSummaryProcessor;
 
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
 
+  public static final String GMC_IDS_HEADER = "gmcIds";
   private static final String API_CONNECTION =
       "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
@@ -73,24 +79,16 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTIONLOG_TODAY =
       "/api/exceptionLog/today?bridgeEndpoint=true";
-
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
-  public static final String GMC_IDS_HEADER = "gmcIds";
-
-  @Autowired
-  private KeycloakBean keycloakBean;
-
-  @Autowired
-  private GmcIdProcessorBean gmcIdProcessorBean;
-
-  @Autowired
-  private DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
-
-  @Autowired
-  private ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
-
-  @Autowired
-  private ConnectionExceptionAggregationStrategy connectionExceptionAggregationStrategy;
+  private final ExecutorService notesExecutor;
+  private final EnrichedConnectionsAggregationStrategy enrichedConnectionsAggregationStrategy;
+  private final AttachNotesToConnectionProcessor attachNotesToConnectionProcessor;
+  private final MergeEnrichedConnectionsIntoSummaryProcessor
+      mergeEnrichedConnectionsIntoSummaryProcessor;
+  private final KeycloakBean keycloakBean;
+  private final GmcIdProcessorBean gmcIdProcessorBean;
+  private final DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
+  private final ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
@@ -103,6 +101,28 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Value("${service.connection.url}")
   private String serviceUrlConnection;
+
+  /**
+   * Constructor of ConnectionServiceRouter.
+   */
+  public ConnectionServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor,
+      KeycloakBean keycloakBean,
+      GmcIdProcessorBean gmcIdProcessorBean,
+      DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy,
+      ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy,
+      EnrichedConnectionsAggregationStrategy enrichedConnectionsAggregationStrategy,
+      AttachNotesToConnectionProcessor attachNotesToConnectionProcessor,
+      MergeEnrichedConnectionsIntoSummaryProcessor mergeEnrichedConnectionsIntoSummaryProcessor) {
+    this.notesExecutor = notesExecutor;
+    this.keycloakBean = keycloakBean;
+    this.gmcIdProcessorBean = gmcIdProcessorBean;
+    this.doctorConnectionAggregationStrategy = doctorConnectionAggregationStrategy;
+    this.enrichedConnectionsAggregationStrategy = enrichedConnectionsAggregationStrategy;
+    this.connectionHiddenAggregationStrategy = connectionHiddenAggregationStrategy;
+    this.attachNotesToConnectionProcessor = attachNotesToConnectionProcessor;
+    this.mergeEnrichedConnectionsIntoSummaryProcessor =
+        mergeEnrichedConnectionsIntoSummaryProcessor;
+  }
 
   @Override
   public void configure() {
@@ -138,7 +158,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
     // Connection summary page - Connected queue tab
     from("direct:connection-connected-summary")
         .to(serviceUrlConnection + API_CONNECTION_CONNECTED)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .unmarshal().json(JsonLibrary.Jackson, ConnectionSummaryDto.class)
+        .to("direct:enrich-connected-summary-with-notes");
 
     // Disconnection summary page - Disconnected queue tab
     from("direct:connection-disconnected-summary")
@@ -202,5 +223,31 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:connection-exception-log-today")
         .toD(serviceUrlConnection + API_CONNECTION_EXCEPTIONLOG_TODAY)
         .unmarshal().json(JsonLibrary.Jackson);
+
+    // Enrich connected summary with notes
+    from("direct:enrich-connected-summary-with-notes")
+        .setProperty("connected_summary", body())
+        .split(simple("${exchangeProperty.connected_summary.connections}"))
+        .executorService(notesExecutor)
+        .setProperty("connection", body())
+        .setHeader("gmcId", simple("${exchangeProperty.connection.gmcReferenceNumber}"))
+        .to("direct:traineenotes-get")
+        .choice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(200))
+        .unmarshal().json(JsonLibrary.Jackson, TraineeNotesDto.class)
+        .endChoice()
+        .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(404))
+        .setBody(constant((Object) null))
+        .otherwise()
+        .log(
+            "Unexpected notes response for gmcId=${header.gmcId}, "
+                + "status=${header.CamelHttpResponseCode}")
+        .setBody(constant((Object) null))
+        .end()
+        .process(attachNotesToConnectionProcessor)
+        .end()
+        .aggregate(constant(true), enrichedConnectionsAggregationStrategy)
+        .completionPredicate(exchangeProperty(Exchange.SPLIT_COMPLETE).isEqualTo(true))
+        .process(mergeEnrichedConnectionsIntoSummaryProcessor);
   }
 }

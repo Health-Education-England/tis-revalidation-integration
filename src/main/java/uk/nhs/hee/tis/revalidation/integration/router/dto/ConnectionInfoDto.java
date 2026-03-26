@@ -66,4 +66,5 @@ public class ConnectionInfoDto {
   String placementGrade;
   @Nullable
   Boolean syncEnd;
+  private Boolean notes;
 }
