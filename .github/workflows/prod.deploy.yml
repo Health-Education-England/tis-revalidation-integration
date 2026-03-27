@@ -25,13 +25,20 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Verify image exists in ECR
+        run: |
+          aws ecr describe-images \
+            --repository-name ${{ github.event.repository.name }} \
+            --image-ids imageTag=${{ github.sha }} \
+            || (echo "Image for commit ${{ github.sha }} not found in ECR. Has the CI/CD pipeline completed?" && exit 1)
+
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .aws/task-definition-prod.json
           container-name: ${{ github.event.repository.name }}
-          image: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:stable
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
         id: ecs-deploy
