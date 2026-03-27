@@ -31,7 +31,7 @@ jobs:
         with:
           task-definition: .aws/task-definition-prod.json
           container-name: ${{ github.event.repository.name }}
-          image: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:stable
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
         id: ecs-deploy
