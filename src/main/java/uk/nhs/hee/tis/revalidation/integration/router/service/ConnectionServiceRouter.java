@@ -128,99 +128,99 @@ public class ConnectionServiceRouter extends RouteBuilder {
   public void configure() {
 
     // Connection summary page - All, Connected, Disconnected tab
-    from("direct:connection-summary")
+    from("direct:connection-summary").routeId("connection-summary")
         .to("direct:connection-hidden-manually")
         .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "getHiddenGmcIds")
         .to("direct:v1-doctors-all-unhidden")
         .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "process")
         .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
-    from("direct:connection-hidden-manually")
+    from("direct:connection-hidden-manually").routeId("connection-hidden-manually")
         .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
-    from("direct:v1-doctors-all-unhidden")
+    from("direct:v1-doctors-all-unhidden").routeId("v1-doctors-all-unhidden")
         .toD(recommendationServiceUrl + API_CONNECTION_DOCTOR_UNHIDDEN)
         .streamCaching()
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
-    from("direct:tcs-connection")
+    from("direct:tcs-connection").routeId("tcs-connection")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(tcsServiceUrl + API_CONNECTION)
         .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     // Connection summary page - exception queue tab
-    from("direct:connection-exception-summary")
+    from("direct:connection-exception-summary").routeId("connection-exception-summary")
         .to(serviceUrlConnection + API_CONNECTION_EXCEPTION)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Discrepancies queue tab
-    from("direct:connection-discrepancies-summary")
+    from("direct:connection-discrepancies-summary").routeId("connection-discrepancies-summary")
         .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Connected queue tab
-    from("direct:connection-connected-summary")
+    from("direct:connection-connected-summary").routeId("connection-connected-summary")
         .to(serviceUrlConnection + API_CONNECTION_CONNECTED)
         .unmarshal().json(JsonLibrary.Jackson, ConnectionSummaryDto.class)
         .to("direct:enrich-connected-summary-with-notes");
 
     // Disconnection summary page - Disconnected queue tab
-    from("direct:connection-disconnected-summary")
+    from("direct:connection-disconnected-summary").routeId("connection-disconnected-summary")
         .to(serviceUrlConnection + API_CONNECTION_DISCONNECTED)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection summary page - Hidden tab
-    from("direct:connection-hidden")
+    from("direct:connection-hidden").routeId("connection-hidden")
         .to("direct:connection-hidden-gmcIds")
         .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "getHiddenGmcIds")
         .to("direct:v1-doctors-by-ids")
         .enrich("direct:connection-tcs-hidden", connectionHiddenAggregationStrategy);
-    from("direct:connection-hidden-gmcIds")
+    from("direct:connection-hidden-gmcIds").routeId("connection-hidden-gmcIds")
         .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
-    from("direct:connection-tcs-hidden")
+    from("direct:connection-tcs-hidden").routeId("connection-tcs-hidden")
         .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
         .toD(tcsServiceUrl + API_CONNECTION_TCS_HIDDEN)
         .unmarshal().json(JsonLibrary.Jackson);
 
-    from("direct:v1-doctors-by-ids")
+    from("direct:v1-doctors-by-ids").routeId("v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
         .unmarshal().json(JsonLibrary.Jackson);
 
     // TODO: Change to use tis-revalidation-core when deployed.
-    from("direct:v1-doctors")
+    from("direct:v1-doctors").routeId("v1-doctors")
         .to(recommendationServiceUrl + "/api/v1/doctors?bridgeEndpoint=true")
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Connection Details page
-    from("direct:connection-gmc-id-aggregation")
+    from("direct:connection-gmc-id-aggregation").routeId("connection-gmc-id-aggregation")
         .multicast(AGGREGATOR)
         .parallelProcessing()
         .to("direct:doctor-designated-body")
         .to("direct:connection-history");
-    from("direct:doctor-designated-body")
+    from("direct:doctor-designated-body").routeId("doctor-designated-body")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
         .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
-    from("direct:connection-history")
+    from("direct:connection-history").routeId("connection-history")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
         .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
 
     // Add connection
-    from("direct:connection-add")
+    from("direct:connection-add").routeId("connection-add")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_CONNECTION_ADD);
 
     // Remove connection
-    from("direct:connection-remove")
+    from("direct:connection-remove").routeId("connection-remove")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_CONNECTION_REMOVE);
 
     // Hide discrepancy
-    from("direct:connection-discrepancies-hide")
+    from("direct:connection-discrepancies-hide").routeId("connection-discrepancies-hide")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_DISCREPANCY_HIDE);
 
     // Connection Exception Logs
-    from("direct:connection-exception-log-today")
+    from("direct:connection-exception-log-today").routeId("connection-exception-log-today")
         .toD(serviceUrlConnection + API_CONNECTION_EXCEPTIONLOG_TODAY)
         .unmarshal().json(JsonLibrary.Jackson);
 
