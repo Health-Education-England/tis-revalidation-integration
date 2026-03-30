@@ -1,0 +1,17 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-cd:
+    name: Build and deploy
+    uses: health-education-england/.github/.github/workflows/ci-cd-gradle.yml@main
+    with:
+      cluster-prefix: revalidation
+      use-codeartifact: true
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+      reject-pat: ${{ secrets.PAT_REJECT_APPROVALS }}
