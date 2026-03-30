@@ -39,11 +39,17 @@ public class TraineeInfoDto {
   private String doctorFirstName;
   private String doctorLastName;
   private LocalDate submissionDate;
+  private LocalDate dateAdded;
+  private String underNotice;
+  private String sanction;
   private String doctorStatus;
+  private String gmcOutcome;
   private String admin;
   private LocalDate lastUpdatedDate;
   private String designatedBody;
-  private LocalDate dateAdded;
   private String connectionStatus;
+  private String programmeName;
+  private String programmeMembershipType;
+  private LocalDate curriculumEndDate;
   private Boolean notes;
 }
