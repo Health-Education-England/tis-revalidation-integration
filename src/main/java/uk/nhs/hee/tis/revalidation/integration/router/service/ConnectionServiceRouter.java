@@ -153,7 +153,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
     // Connection summary page - Discrepancies queue tab
     from("direct:connection-discrepancies-summary")
         .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .unmarshal().json(JsonLibrary.Jackson, ConnectionSummaryDto.class)
+        .to("direct:enrich-connected-summary-with-notes");
 
     // Connection summary page - Connected queue tab
     from("direct:connection-connected-summary")
