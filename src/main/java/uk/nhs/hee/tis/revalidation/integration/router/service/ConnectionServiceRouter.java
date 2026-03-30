@@ -79,6 +79,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTIONLOG_TODAY =
       "/api/exceptionLog/today?bridgeEndpoint=true";
+  private static final String ENRICH_CONNECTED_SUMMARY_WITH_NOTES =
+      "direct:enrich-connected-summary-with-notes";
   private static final AggregationStrategy AGGREGATOR = new JsonStringAggregationStrategy();
   private final ExecutorService notesExecutor;
   private final EnrichedConnectionsAggregationStrategy enrichedConnectionsAggregationStrategy;
@@ -154,13 +156,13 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:connection-discrepancies-summary")
         .to(serviceUrlConnection + API_CONNECTION_DISCREPANCIES)
         .unmarshal().json(JsonLibrary.Jackson, ConnectionSummaryDto.class)
-        .to("direct:enrich-connected-summary-with-notes");
+        .to(ENRICH_CONNECTED_SUMMARY_WITH_NOTES);
 
     // Connection summary page - Connected queue tab
     from("direct:connection-connected-summary")
         .to(serviceUrlConnection + API_CONNECTION_CONNECTED)
         .unmarshal().json(JsonLibrary.Jackson, ConnectionSummaryDto.class)
-        .to("direct:enrich-connected-summary-with-notes");
+        .to(ENRICH_CONNECTED_SUMMARY_WITH_NOTES);
 
     // Disconnection summary page - Disconnected queue tab
     from("direct:connection-disconnected-summary")
@@ -226,7 +228,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .unmarshal().json(JsonLibrary.Jackson);
 
     // Enrich connected summary with notes
-    from("direct:enrich-connected-summary-with-notes")
+    from(ENRICH_CONNECTED_SUMMARY_WITH_NOTES)
         .setProperty("connected_summary", body())
         .split(simple("${exchangeProperty.connected_summary.connections}"))
         .executorService(notesExecutor)
