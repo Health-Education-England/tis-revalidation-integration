@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -53,12 +54,15 @@ public class ConnectionInfoDto {
   String designatedBody;
   String tcsDesignatedBody;
   String programmeOwner;
+  String connectionStatus;
+  String dataSource;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate programmeMembershipStartDate;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate programmeMembershipEndDate;
+  String exceptionReason;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
   LocalDate curriculumEndDate;
@@ -66,5 +70,7 @@ public class ConnectionInfoDto {
   String placementGrade;
   @Nullable
   Boolean syncEnd;
+  String updatedBy;
+  LocalDateTime lastConnectionDateTime;
   private Boolean notes;
 }
