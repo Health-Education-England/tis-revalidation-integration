@@ -46,7 +46,7 @@ public class HiddenDiscrepancy {
 
   @Id
   private String id;
-  private String gmcReferenceNumber;
+  private String gmcId;
   private String hiddenForDesignatedBodyCode;
   @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)

@@ -163,14 +163,14 @@ class DoctorUpsertElasticSearchServiceTest {
         .build();
 
     hiddenDiscrepancy1 = HiddenDiscrepancy.builder()
-        .gmcReferenceNumber(GMC_NUMBER)
+        .gmcId(GMC_NUMBER)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_1)
         .reason("reason1")
         .hiddenBy(UPDATED_BY)
         .build();
     hiddenDiscrepancy2 = HiddenDiscrepancy.builder()
-        .gmcReferenceNumber(GMC_NUMBER)
+        .gmcId(GMC_NUMBER)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_2)
         .reason("reason2")

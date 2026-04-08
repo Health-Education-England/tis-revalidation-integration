@@ -365,7 +365,7 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<HiddenDiscrepancy> getCdcHiddenDiscrepancyInsertCdcDocumentDto() {
     HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
         .id("1")
-        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenBy(ADMIN_VAL)
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL)
@@ -384,7 +384,7 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<HiddenDiscrepancy> getSecondHiddenDiscrepancyInsertCdcDocumentDto() {
     HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
         .id("2")
-        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenBy(ADMIN_VAL)
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL + "2")
@@ -403,7 +403,7 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<HiddenDiscrepancy> getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
     HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
         .id("2")
-        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenBy(ADMIN_VAL)
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL)

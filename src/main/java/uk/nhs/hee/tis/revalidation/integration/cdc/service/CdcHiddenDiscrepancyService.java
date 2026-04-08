@@ -23,7 +23,6 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,7 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
    */
   @Override
   public void upsertEntity(HiddenDiscrepancy entity) {
-    String gmcId = entity.getGmcReferenceNumber();
+    String gmcId = entity.getGmcId();
     final var repository = getRepository();
 
     try {
@@ -82,7 +81,7 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
         if (alreadyHidden) {
           log.info(
               "gmcReferenceNumber: {} already has a hidden discrepancy for designated body: {}",
-              entity.getGmcReferenceNumber(), entity.getHiddenForDesignatedBodyCode());
+              entity.getGmcId(), entity.getHiddenForDesignatedBodyCode());
           return;
         }
 
@@ -103,7 +102,7 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
 
   @Override
   public void deleteEntity(HiddenDiscrepancy entity) {
-    String gmcId = entity.getGmcReferenceNumber();
+    String gmcId = entity.getGmcId();
     final var repository = getRepository();
 
     try {

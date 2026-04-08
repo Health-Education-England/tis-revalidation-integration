@@ -41,7 +41,7 @@ public class ConnectionLogMessageListener {
   @Value("${app.rabbit.reval.exchange}")
   private String revalExchange;
 
-  @Value("${app.rabbit.reval.routingKey.hiddendiscrepancies.essyncstart}")
+  @Value("${app.rabbit.reval.routingKey.hiddendiscrepancy.essyncstart}")
   private String hiddenDiscrepanciesSyncRoutingKey;
 
   private final DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;

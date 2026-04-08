@@ -167,7 +167,7 @@ public class DoctorUpsertElasticSearchService {
       List<HiddenDiscrepancy> hiddenDiscrepancies) {
     hiddenDiscrepancies.forEach(hiddenDiscrepancy -> {
       Map<String, Map<String, Object>> updates = new HashMap<>();
-      String gmcReferenceNumber = hiddenDiscrepancy.getGmcReferenceNumber();
+      String gmcReferenceNumber = hiddenDiscrepancy.getGmcId();
       var existing = repository.findByGmcReferenceNumber(gmcReferenceNumber);
       if (existing.size() > 1) {
         log.warn(
@@ -189,7 +189,7 @@ public class DoctorUpsertElasticSearchService {
         if (alreadyHidden) {
           log.info(
               "gmcReferenceNumber: {} already has a hidden discrepancy for designated body: {}",
-              hiddenDiscrepancy.getGmcReferenceNumber(),
+              hiddenDiscrepancy.getGmcId(),
               hiddenDiscrepancy.getHiddenForDesignatedBodyCode());
           return;
         } else {
@@ -208,7 +208,6 @@ public class DoctorUpsertElasticSearchService {
       }
     });
   }
-
 
   private List<MasterDoctorView> findMasterDoctorRecordByGmcNumberPersonId(
       MasterDoctorView dataToSave) {
