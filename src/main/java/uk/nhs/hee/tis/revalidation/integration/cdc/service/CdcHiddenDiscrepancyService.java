@@ -38,18 +38,13 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 @Service
 public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
-
-  private final EsDocUpdateHelper esUpdateHelper;
-
   /**
    * Service responsible for updating the hidden discrepancy nested fields used for searching.
    */
   public CdcHiddenDiscrepancyService(
-      MasterDoctorElasticSearchRepository repository,
-      EsDocUpdateHelper esUpdateHelper
+      MasterDoctorElasticSearchRepository repository
   ) {
     super(repository);
-    this.esUpdateHelper = esUpdateHelper;
   }
 
   /**

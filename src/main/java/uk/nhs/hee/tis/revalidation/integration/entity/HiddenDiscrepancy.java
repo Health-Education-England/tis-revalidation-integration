@@ -37,14 +37,13 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTime
 
 /**
  * A class that represents a hidden discrepancy.
- *
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HiddenDiscrepancy{
+public class HiddenDiscrepancy {
 
   private String id;
   private String gmcId;

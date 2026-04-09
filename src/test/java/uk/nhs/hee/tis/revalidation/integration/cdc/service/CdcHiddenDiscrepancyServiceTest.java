@@ -68,8 +68,6 @@ class CdcHiddenDiscrepancyServiceTest {
   @Captor
   ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
-  private static final String HIDDEN_DISCREPANCIES_KEY = "hiddenDiscrepancies";
-
   @Test
   void shouldAddNewField() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
