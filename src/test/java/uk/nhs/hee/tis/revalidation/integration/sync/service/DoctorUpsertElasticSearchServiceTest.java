@@ -91,10 +91,10 @@ class DoctorUpsertElasticSearchServiceTest {
   private ArgumentCaptor<String> routingKeyCaptor;
   @Captor
   private ArgumentCaptor<List<MasterDoctorView>> updateListCaptor;
+  @Captor
+  private ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
   @InjectMocks
   private DoctorUpsertElasticSearchService service;
-  @Mock
-  private MasterDoctorView masterDoctorViewMock;
   private MasterDoctorView currentDoctorView;
   private MasterDoctorView dataToSave;
   private MasterDoctorView mappedView;
@@ -402,47 +402,36 @@ class DoctorUpsertElasticSearchServiceTest {
   }
 
   @Test
-  void shouldBulkUpdateExistingDoctorsWithHiddenDiscrepancies() {
+  void shouldUpdateExistingDoctorsWithHiddenDiscrepancies() {
+    MasterDoctorView masterDoctorViewInitial = MasterDoctorView.builder()
+        .id(DOCUMENT_ID)
+        .tcsPersonId(TIS_ID)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME)
+        .doctorLastName(DOCTOR_LAST_NAME)
+        .build();
+
+    MasterDoctorView masterDoctorViewUpdated = MasterDoctorView.builder()
+        .id(DOCUMENT_ID)
+        .tcsPersonId(TIS_ID)
+        .gmcReferenceNumber(GMC_NUMBER)
+        .doctorFirstName(DOCTOR_FIRST_NAME)
+        .doctorLastName(DOCTOR_LAST_NAME)
+        .hiddenDiscrepancies(List.of(hiddenDiscrepancy1))
+        .build();
+
     when(repository.findByGmcReferenceNumber(GMC_NUMBER)).thenReturn(
-        List.of(masterDoctorViewMock));
-    when(masterDoctorViewMock.getId()).thenReturn(DOCUMENT_ID);
-    when(masterDoctorViewMock.getHiddenDiscrepancies())
-        .thenReturn(null, List.of(hiddenDiscrepancy1));
+        List.of(masterDoctorViewInitial), List.of(masterDoctorViewUpdated));
 
     service.populateMasterIndexByHiddenDiscrepancies(
         List.of(hiddenDiscrepancy1, hiddenDiscrepancy2));
 
-    verify(esDocUpdateHelper, times(2)).bulkPartialUpdate(eq(MASTER_DOCTOR_INDEX),
-        bulkUpdateCaptor.capture());
-
-    Map<String, Object> savedFields1 = Map.of();
-    Map<String, Object> savedFields2 = Map.of();
-    String updatedId1 = "";
-    String updatedId2 = "";
-
-    var result1 = bulkUpdateCaptor.getAllValues().get(0);
-    var result2 = bulkUpdateCaptor.getAllValues().get(1);
-
-    for (var entry : result1.entrySet()) {
-      savedFields1 = entry.getValue();
-      updatedId1 = entry.getKey();
-    }
-
-    for (var entry : result2.entrySet()) {
-      savedFields2 = entry.getValue();
-      updatedId2 = entry.getKey();
-    }
-
-    assertEquals(List.of(hiddenDiscrepancy1), savedFields1.get("hiddenDiscrepancies"));
-    assertEquals(DOCUMENT_ID, updatedId1);
-    assertFalse(savedFields1.containsKey(TIS_ID_KEY)); // Fields from TIS/TCS not updated
-    assertFalse(savedFields1.containsKey(GMC_NUMBER_KEY)); // Fields from Recommendation not updated
-
+    verify(repository, times(2)).save(masterDoctorViewCaptor.capture());
+    var savedDoctor1 = masterDoctorViewCaptor.getAllValues().get(0);
+    var savedDoctor2 = masterDoctorViewCaptor.getAllValues().get(1);
+    assertEquals(List.of(hiddenDiscrepancy1), savedDoctor1.getHiddenDiscrepancies());
     assertEquals(List.of(hiddenDiscrepancy1, hiddenDiscrepancy2),
-        savedFields2.get("hiddenDiscrepancies"));
-    assertEquals(DOCUMENT_ID, updatedId2);
-    assertFalse(savedFields2.containsKey(TIS_ID_KEY)); // Fields from TIS/TCS not updated
-    assertFalse(savedFields2.containsKey(GMC_NUMBER_KEY)); // Fields from Recommendation not updated
+        savedDoctor2.getHiddenDiscrepancies());
   }
 
   @Test
@@ -454,12 +443,12 @@ class DoctorUpsertElasticSearchServiceTest {
     service.populateMasterIndexByHiddenDiscrepancies(
         List.of(hiddenDiscrepancy1, hiddenDiscrepancy2));
 
-    verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
+    verify(repository, never()).save(any());
   }
 
   @Test
   void shouldHandleEmptyHiddenDiscrepanciesList() {
     service.populateMasterIndexByHiddenDiscrepancies(Collections.emptyList());
-    verify(esDocUpdateHelper, never()).bulkPartialUpdate(any(), any());
+    verify(repository, never()).save(any());
   }
 }

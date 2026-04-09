@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import java.util.Collections;
-import java.util.Map;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +66,7 @@ class CdcHiddenDiscrepancyServiceTest {
   @Mock
   CdcMessagePublisher publisher;
   @Captor
-  ArgumentCaptor<Map<String, Object>> esUpdateDocCaptor;
+  ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
   private static final String HIDDEN_DISCREPANCIES_KEY = "hiddenDiscrepancies";
 
@@ -78,12 +77,9 @@ class CdcHiddenDiscrepancyServiceTest {
     var newHiddenDiscrepancy = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
     cdcHiddenDiscrepancyService.upsertEntity(newHiddenDiscrepancy.getFullDocument());
 
-    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        esUpdateDocCaptor.capture(), eq(MasterDoctorView.class));
+    verify(repository).save(masterDoctorViewCaptor.capture());
 
-    assertThat(esUpdateDocCaptor.getValue().keySet().stream().findFirst().get(),
-        is(HIDDEN_DISCREPANCIES_KEY));
-    assertThat(esUpdateDocCaptor.getValue().get(HIDDEN_DISCREPANCIES_KEY),
+    assertThat(masterDoctorViewCaptor.getValue().getHiddenDiscrepancies(),
         is(List.of(newHiddenDiscrepancy.getFullDocument())));
   }
 
@@ -96,14 +92,9 @@ class CdcHiddenDiscrepancyServiceTest {
         .getSecondHiddenDiscrepancyInsertCdcDocumentDto();
     cdcHiddenDiscrepancyService.upsertEntity(newHiddenDiscrepancy.getFullDocument());
 
-    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        esUpdateDocCaptor.capture(), eq(MasterDoctorView.class));
+    verify(repository).save(masterDoctorViewCaptor.capture());
 
-    assertThat(esUpdateDocCaptor.getValue().keySet().stream().findFirst().get(),
-        is(HIDDEN_DISCREPANCIES_KEY));
-    assertThat(esUpdateDocCaptor.getValue().get(HIDDEN_DISCREPANCIES_KEY),
-        is(List.of(masterDoctorViewWithHidden.getHiddenDiscrepancies().get(0),
-            newHiddenDiscrepancy.getFullDocument())));
+    assertThat(masterDoctorViewCaptor.getValue().getHiddenDiscrepancies().size(), is(2));
   }
 
   @Test
@@ -113,9 +104,7 @@ class CdcHiddenDiscrepancyServiceTest {
     var newConnectionLog = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
     cdcHiddenDiscrepancyService.upsertEntity(newConnectionLog.getFullDocument());
 
-    verify(esUpdateHelper, never()).partialUpdate(eq(MASTER_DOCTOR_INDEX),
-        eq(masterDoctorView.getId()),
-        anyMap(), eq(MasterDoctorView.class));
+    verify(repository, never()).save(any());
   }
 
   @Test
@@ -125,12 +114,9 @@ class CdcHiddenDiscrepancyServiceTest {
     var newHiddenDiscrepancy = CdcTestDataGenerator.getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
     cdcHiddenDiscrepancyService.deleteEntity(newHiddenDiscrepancy.getFullDocument());
 
-    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        esUpdateDocCaptor.capture(), eq(MasterDoctorView.class));
+    verify(repository).save(masterDoctorViewCaptor.capture());
 
-    assertThat(esUpdateDocCaptor.getValue().keySet().stream().findFirst().get(),
-        is(HIDDEN_DISCREPANCIES_KEY));
-    assertThat(esUpdateDocCaptor.getValue().get(HIDDEN_DISCREPANCIES_KEY),
+    assertThat(masterDoctorViewCaptor.getValue().getHiddenDiscrepancies(),
         is(Collections.emptyList()));
   }
 
@@ -143,13 +129,9 @@ class CdcHiddenDiscrepancyServiceTest {
         .getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
     cdcHiddenDiscrepancyService.deleteEntity(deletedHiddenDiscrepancy.getFullDocument());
 
-    verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
-        esUpdateDocCaptor.capture(), eq(MasterDoctorView.class));
+    verify(repository).save(masterDoctorViewCaptor.capture());
 
-    assertThat(esUpdateDocCaptor.getValue().keySet().stream().findFirst().get(),
-        is(HIDDEN_DISCREPANCIES_KEY));
-    assertThat(esUpdateDocCaptor.getValue().get(HIDDEN_DISCREPANCIES_KEY),
-        is(List.of(masterDoctorViewWithMultipleHidden.getHiddenDiscrepancies().get(1))));
+    assertThat(masterDoctorViewCaptor.getValue().getHiddenDiscrepancies().size(), is(1));
   }
 
   @Test

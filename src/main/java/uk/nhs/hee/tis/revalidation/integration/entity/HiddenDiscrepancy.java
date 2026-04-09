@@ -30,7 +30,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
 
 /**
@@ -42,16 +44,16 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTime
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HiddenDiscrepancy {
+public class HiddenDiscrepancy{
 
-  @Id
   private String id;
   private String gmcId;
   private String hiddenForDesignatedBodyCode;
-  @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
-  @JsonSerialize(using = LocalDateTimeSerializer.class)
-  private LocalDateTime hiddenDateTime;
   private String hiddenBy;
   private String reason;
+  @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
+  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
+  private LocalDateTime hiddenDateTime;
 }
 

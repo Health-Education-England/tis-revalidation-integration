@@ -166,17 +166,16 @@ public class DoctorUpsertElasticSearchService {
   public void populateMasterIndexByHiddenDiscrepancies(
       List<HiddenDiscrepancy> hiddenDiscrepancies) {
     hiddenDiscrepancies.forEach(hiddenDiscrepancy -> {
-      Map<String, Map<String, Object>> updates = new HashMap<>();
-      String gmcReferenceNumber = hiddenDiscrepancy.getGmcId();
-      var existing = repository.findByGmcReferenceNumber(gmcReferenceNumber);
+      List<HiddenDiscrepancy> hiddenDiscrepancyList = new ArrayList<>();
+      String gmcId = hiddenDiscrepancy.getGmcId();
+      var existing = repository.findByGmcReferenceNumber(gmcId);
       if (existing.size() > 1) {
         log.warn(
             "Multiple doctors found for gmcID: {} while syncing ES hidden discrepancy records,"
                 + " no hidden discrepancy records will be saved.",
-            gmcReferenceNumber);
+            gmcId);
       } else if (existing.size() == 1) {
         var masterDoctorView = existing.get(0);
-        List<HiddenDiscrepancy> hiddenDiscrepancyList = new ArrayList<>();
 
         if (masterDoctorView.getHiddenDiscrepancies() != null) {
           hiddenDiscrepancyList.addAll(masterDoctorView.getHiddenDiscrepancies());
@@ -196,15 +195,8 @@ public class DoctorUpsertElasticSearchService {
           hiddenDiscrepancyList.add(hiddenDiscrepancy);
         }
 
-        Map<String, Object> doc = new HashMap<>();
-        doc.put("hiddenDiscrepancies", hiddenDiscrepancyList);
-
-        updates.put(existing.get(0).getId(), doc);
-      }
-
-      if (!updates.isEmpty()) {
-        log.info("Updating {} master doctor records with hidden discrepancy data", updates.size());
-        esDocUpdateHelper.bulkPartialUpdate(MASTER_DOCTOR_INDEX, updates);
+        masterDoctorView.setHiddenDiscrepancies(hiddenDiscrepancyList);
+        repository.save(masterDoctorView);
       }
     });
   }

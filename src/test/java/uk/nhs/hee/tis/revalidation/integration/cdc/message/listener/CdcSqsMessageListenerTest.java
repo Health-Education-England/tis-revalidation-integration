@@ -110,9 +110,8 @@ class CdcSqsMessageListenerTest {
   @Test
   void shouldPassHiddenDiscrepancyInsertMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto()
-    );
+    var dto = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
+    var testMessage = objectMapper.writeValueAsString(dto);
     cdcSqsMessageListener.getHiddenDiscrepancyMessage(testMessage);
 
     verify(cdcHiddenDiscrepancyMessageHandler).handleMessage(

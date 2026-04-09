@@ -26,7 +26,7 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcHiddenDiscrepancyS
 import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 
 /**
- * A component class to handle cdc connection log messages.
+ * A component class to handle cdc hidden discrepancy messages.
  */
 @Component
 public class CdcHiddenDiscrepancyMessageHandler extends CdcMessageHandler<HiddenDiscrepancy> {

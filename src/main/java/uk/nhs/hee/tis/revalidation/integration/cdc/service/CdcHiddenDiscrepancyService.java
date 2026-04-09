@@ -21,12 +21,10 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
@@ -35,7 +33,7 @@ import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElast
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
 /**
- * A service class that updates connection log fields.
+ * A service class that updates hidden discrepancy fields.
  */
 @Slf4j
 @Service
@@ -44,7 +42,7 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
   private final EsDocUpdateHelper esUpdateHelper;
 
   /**
-   * Service responsible for updating the ConnectionLog composite fields used for searching.
+   * Service responsible for updating the hidden discrepancy nested fields used for searching.
    */
   public CdcHiddenDiscrepancyService(
       MasterDoctorElasticSearchRepository repository,
@@ -55,9 +53,9 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
   }
 
   /**
-   * Add new connection to index (this is an aggregation, updating an existing record).
+   * Add new hidden discrepancy to index (this is an aggregation, updating an existing record).
    *
-   * @param entity connectionlog to add to index
+   * @param entity hidden discrepancy to add to index
    */
   @Override
   public void upsertEntity(HiddenDiscrepancy entity) {
@@ -86,12 +84,10 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
         }
 
         hiddenDiscrepancies.add(entity);
+        masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
+        masterDoctorView.setHiddenDiscrepancies(hiddenDiscrepancies);
 
-        // Partial updates on fields related to connection logs
-        Map<String, Object> doc = new HashMap<>();
-        doc.put("hiddenDiscrepancies", hiddenDiscrepancies);
-        esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
-            masterDoctorView.getId(), doc, MasterDoctorView.class);
+        repository.save(masterDoctorView);
       }
     } catch (Exception e) {
       log.error("CDC error adding hidden discrepancy: {}, exception: {}", entity, e.getMessage(),
@@ -116,11 +112,11 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
               .filter(h -> !h.getHiddenForDesignatedBodyCode()
                   .equals(entity.getHiddenForDesignatedBodyCode())).toList();
         }
-        // Partial updates on fields related to connection logs
-        Map<String, Object> doc = new HashMap<>();
-        doc.put("hiddenDiscrepancies", updatedList);
-        esUpdateHelper.partialUpdate(MASTER_DOCTOR_INDEX,
-            masterDoctorView.getId(), doc, MasterDoctorView.class);
+
+        masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
+        masterDoctorView.setHiddenDiscrepancies(updatedList);
+
+        repository.save(masterDoctorView);
       }
 
     } catch (Exception e) {
