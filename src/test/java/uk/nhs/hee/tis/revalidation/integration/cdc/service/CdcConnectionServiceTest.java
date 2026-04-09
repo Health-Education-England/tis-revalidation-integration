@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +34,7 @@ import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.
 
 import java.util.Collections;
 import java.util.Map;
+import org.apache.commons.lang3.NotImplementedException;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,5 +128,14 @@ class CdcConnectionServiceTest {
 
     verify(esUpdateHelper).partialUpdate(eq(MASTER_DOCTOR_INDEX), eq(masterDoctorView.getId()),
         anyMap(), eq(MasterDoctorView.class));
+  }
+
+  @Test
+  void shouldThrowNotImplementedExceptionOnDeleteEntityCall() {
+    var testEntity = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto()
+        .getFullDocument();
+    assertThrows(NotImplementedException.class,
+        () -> cdcConnectionService.deleteEntity(testEntity)
+    );
   }
 }

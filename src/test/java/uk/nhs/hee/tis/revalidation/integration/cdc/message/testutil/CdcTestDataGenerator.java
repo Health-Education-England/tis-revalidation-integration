@@ -29,11 +29,13 @@ import static uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice.YES;
 import com.mongodb.client.model.changestream.OperationType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
@@ -63,6 +65,7 @@ public class CdcTestDataGenerator {
   private static final String SUCCESSFUL_REQUEST_RESPONSE_CODE = "0";
   private static final String INTERNAL_ERROR_RESPONSE_CODE = "98";
   private static final String UPDATED_BY_GMC = "Updated by GMC";
+  private static final String HIDDEN_REASON_VAL = "reason";
 
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -111,6 +114,55 @@ public class CdcTestDataGenerator {
         .lastUpdatedDate(LocalDate.now())
         .admin("old" + ADMIN)
         .existsInGmc(false)
+        .build();
+  }
+
+  /**
+   * Get a test instance of MasterDoctorView.
+   *
+   * @return MasterDoctorView test instance with hidden discrepancies
+   */
+  public static MasterDoctorView getTestMasterDoctorViewWithHidden() {
+    return MasterDoctorView.builder()
+        .id("1")
+        .tcsPersonId(1L)
+        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+        .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
+        .doctorLastName("old" + DOCTOR_LAST_NAME_VAL)
+        .submissionDate(LocalDate.now())
+        .designatedBody("old" + DESIGNATED_BODY_CODE_VAL)
+        .tisStatus(DRAFT)
+        .lastUpdatedDate(LocalDate.now())
+        .admin("old" + ADMIN)
+        .existsInGmc(false)
+        .hiddenDiscrepancies(List.of(
+            getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument()
+        ))
+        .build();
+  }
+
+  /**
+   * Get a test instance of MasterDoctorView.
+   *
+   * @return MasterDoctorView test instance with hidden discrepancies
+   */
+  public static MasterDoctorView getTestMasterDoctorViewWithMultipleHidden() {
+    return MasterDoctorView.builder()
+        .id("1")
+        .tcsPersonId(1L)
+        .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
+        .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
+        .doctorLastName("old" + DOCTOR_LAST_NAME_VAL)
+        .submissionDate(LocalDate.now())
+        .designatedBody("old" + DESIGNATED_BODY_CODE_VAL)
+        .tisStatus(DRAFT)
+        .lastUpdatedDate(LocalDate.now())
+        .admin("old" + ADMIN)
+        .existsInGmc(false)
+        .hiddenDiscrepancies(List.of(
+            getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument(),
+            getSecondHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument()
+        ))
         .build();
   }
 
@@ -165,16 +217,15 @@ public class CdcTestDataGenerator {
    *
    * @return CdcDocumentDto CdcRecommendation insert test instance
    */
-  public static CdcDocumentDto<Recommendation>
-      getCdcRecommendationInsertCdcDocumentDtoNullOutcome() {
-        Recommendation recommendation = Recommendation.builder()
-          .id("1")
-          .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
-          .recommendationType(RecommendationType.REVALIDATE)
-          .recommendationStatus(DRAFT)
-          .gmcSubmissionDate(LocalDate.now().plusMonths(6))
-          .admin(ADMIN_VAL)
-          .build();
+  public static CdcDocumentDto<Recommendation> getRecommendationInsertCdcDocumentDtoNullOutcome() {
+    Recommendation recommendation = Recommendation.builder()
+        .id("1")
+        .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
+        .recommendationType(RecommendationType.REVALIDATE)
+        .recommendationStatus(DRAFT)
+        .gmcSubmissionDate(LocalDate.now().plusMonths(6))
+        .admin(ADMIN_VAL)
+        .build();
 
     return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
   }
@@ -305,4 +356,62 @@ public class CdcTestDataGenerator {
 
     return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
   }
+
+  /**
+   * Get a test instance of an insert HiddenDiscrepancy CdcDocumentDto.
+   *
+   * @return CdcDocumentDto HiddenDiscrepancy insert test instance
+   */
+  public static CdcDocumentDto<HiddenDiscrepancy> getCdcHiddenDiscrepancyInsertCdcDocumentDto() {
+    HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
+        .id("1")
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
+        .hiddenDateTime(LocalDateTime.now())
+        .hiddenBy(ADMIN_VAL)
+        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL)
+        .reason(HIDDEN_REASON_VAL)
+        .build();
+
+    return new CdcDocumentDto<HiddenDiscrepancy>(OperationType.INSERT.getValue(),
+        hiddenDiscrepancy);
+  }
+
+  /**
+   * Get a test instance of a second insert HiddenDiscrepancy CdcDocumentDto.
+   *
+   * @return CdcDocumentDto HiddenDiscrepancy insert test instance
+   */
+  public static CdcDocumentDto<HiddenDiscrepancy> getSecondHiddenDiscrepancyInsertCdcDocumentDto() {
+    HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
+        .id("2")
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
+        .hiddenDateTime(LocalDateTime.now())
+        .hiddenBy(ADMIN_VAL)
+        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL + "2")
+        .reason(HIDDEN_REASON_VAL)
+        .build();
+
+    return new CdcDocumentDto<HiddenDiscrepancy>(OperationType.INSERT.getValue(),
+        hiddenDiscrepancy);
+  }
+
+  /**
+   * Get a test instance of a deleted HiddenDiscrepancy CdcDocumentDto.
+   *
+   * @return CdcDocumentDto HiddenDiscrepancy deleted test instance
+   */
+  public static CdcDocumentDto<HiddenDiscrepancy> getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
+    HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
+        .id("2")
+        .gmcId(GMC_REFERENCE_NUMBER_VAL)
+        .hiddenDateTime(LocalDateTime.now())
+        .hiddenBy(ADMIN_VAL)
+        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL)
+        .reason(HIDDEN_REASON_VAL)
+        .build();
+
+    return new CdcDocumentDto<HiddenDiscrepancy>(OperationType.DELETE.getValue(),
+        hiddenDiscrepancy);
+  }
+
 }

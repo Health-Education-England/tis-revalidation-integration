@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
@@ -103,5 +104,10 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
       log.error("CDC error adding connection: {}, exception: {}", entity, e.getMessage(), e);
       throw e;
     }
+  }
+
+  @Override
+  public void deleteEntity(ConnectionLog entity) {
+    throw new NotImplementedException();
   }
 }

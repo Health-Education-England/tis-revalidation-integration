@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2025 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,10 +24,8 @@ package uk.nhs.hee.tis.revalidation.integration.sync.listener;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,53 +33,28 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionLogDto;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.router.message.payload.IndexSyncMessage;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService;
 import uk.nhs.hee.tis.revalidation.integration.sync.service.ElasticsearchIndexService;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectionLogMessageListenerTest {
+class HiddenDiscrepancyMessageListenerTest {
 
   @Captor
-  ArgumentCaptor<List<ConnectionLogDto>> payloadArgCaptor;
+  ArgumentCaptor<List<HiddenDiscrepancy>> payloadArgCaptor;
   @Mock
   private DoctorUpsertElasticSearchService doctorUpsertElasticSearchService;
   @Mock
   private ElasticsearchIndexService elasticsearchIndexService;
-  @Mock
-  private RabbitTemplate rabbitTemplate;
   @InjectMocks
-  private ConnectionLogMessageListener listener;
-
-  @BeforeEach
-  void setup() {
-    setField(listener, "revalExchange", "exchange");
-    setField(listener, "hiddenDiscrepanciesSyncRoutingKey", "routingKey");
-  }
-
-  @Test
-  void shouldTriggerHiddenDiscrepanciesSyncWhenAllConnectionLogsSaved() {
-    // given
-    IndexSyncMessage<List<ConnectionLogDto>> msg = new IndexSyncMessage<>();
-    msg.setSyncEnd(true);
-
-    // when
-    listener.receiveConnectionLogMessage(msg);
-
-    // then
-    verify(rabbitTemplate)
-        .convertAndSend(
-            "exchange", "routingKey", "hiddenDiscrepancySyncStart"
-        );
-  }
+  private HiddenDiscrepancyMessageListener listener;
 
   @Test
   void shouldPopulateMasterIndexWhenSyncEndIsFalse() {
     // given
-    List<ConnectionLogDto> payload = List.of(new ConnectionLogDto());
-    IndexSyncMessage<List<ConnectionLogDto>> msg = new IndexSyncMessage<>();
+    List<HiddenDiscrepancy> payload = List.of(new HiddenDiscrepancy());
+    IndexSyncMessage<List<HiddenDiscrepancy>> msg = new IndexSyncMessage<>();
     msg.setSyncEnd(false);
     msg.setPayload(payload);
 
@@ -89,7 +62,7 @@ class ConnectionLogMessageListenerTest {
     listener.receiveConnectionLogMessage(msg);
 
     // then
-    verify(doctorUpsertElasticSearchService).populateMasterIndexByConnectionLogs(
+    verify(doctorUpsertElasticSearchService).populateMasterIndexByHiddenDiscrepancies(
         payloadArgCaptor.capture());
     verifyNoInteractions(elasticsearchIndexService);
     assertEquals(payload, payloadArgCaptor.getValue());

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2022 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,27 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.service;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
-import lombok.extern.slf4j.Slf4j;
-import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
+import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcHiddenDiscrepancyService;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 
-@Slf4j
-public abstract class CdcService<T> {
+/**
+ * A component class to handle cdc hidden discrepancy messages.
+ */
+@Component
+public class CdcHiddenDiscrepancyMessageHandler extends CdcMessageHandler<HiddenDiscrepancy> {
 
-  private MasterDoctorElasticSearchRepository repository;
-
-  protected CdcService(
-      MasterDoctorElasticSearchRepository repository
-  ) {
-    this.repository = repository;
+  public CdcHiddenDiscrepancyMessageHandler(
+      CdcHiddenDiscrepancyService cdcHiddenDiscrepancyService) {
+    super(cdcHiddenDiscrepancyService);
   }
-
-  protected MasterDoctorElasticSearchRepository getRepository() {
-    return this.repository;
-  }
-
-  public abstract void upsertEntity(T entity);
-
-  public abstract void deleteEntity(T entity);
 }
