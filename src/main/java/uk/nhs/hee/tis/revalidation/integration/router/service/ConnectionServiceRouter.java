@@ -21,10 +21,6 @@
 
 package uk.nhs.hee.tis.revalidation.integration.router.service;
 
-import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.GET_TOKEN_METHOD;
-import static uk.nhs.hee.tis.revalidation.integration.router.helper.Constants.OIDC_ACCESS_TOKEN_HEADER;
-
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
@@ -36,28 +32,21 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.ConnectionHiddenAggregationStrategy;
-import uk.nhs.hee.tis.revalidation.integration.router.aggregation.DoctorConnectionAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedConnectionsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
+import uk.nhs.hee.tis.revalidation.integration.router.dto.HiddenDiscrepancySummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.AttachNotesToConnectionProcessor;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.GmcIdProcessorBean;
-import uk.nhs.hee.tis.revalidation.integration.router.processor.KeycloakBean;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedConnectionsIntoSummaryProcessor;
 
 @Component
 public class ConnectionServiceRouter extends RouteBuilder {
 
-  public static final String GMC_IDS_HEADER = "gmcIds";
-  private static final String API_CONNECTION =
-      "/api/revalidation/connection/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_ADD = "/api/connections/add?bridgeEndpoint=true";
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
-  private static final String API_DISCREPANCY_HIDE =
+  private static final String API_DISCREPANCY_HIDDEN =
       "/api/connections/discrepancies/hidden?bridgeEndpoint=true";
-  private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCREPANCIES =
@@ -66,11 +55,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/connected?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCONNECTED =
       "/api/connections/disconnected?bridgeEndpoint=true";
-  private static final String API_CONNECTION_TCS_HIDDEN =
-      "/api/revalidation/connection/hidden/${header.gmcIds}?searchQuery=${header.searchQuery}"
-          + "&pageNumber=${header.pageNumber}&bridgeEndpoint=true";
-  private static final String API_CONNECTION_DOCTOR_UNHIDDEN =
-      "/api/v1/doctors/unhidden/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID =
       "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String GET_DOCTORS_BY_GMC_IDS =
@@ -87,10 +71,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private final AttachNotesToConnectionProcessor attachNotesToConnectionProcessor;
   private final MergeEnrichedConnectionsIntoSummaryProcessor
       mergeEnrichedConnectionsIntoSummaryProcessor;
-  private final KeycloakBean keycloakBean;
-  private final GmcIdProcessorBean gmcIdProcessorBean;
-  private final DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy;
-  private final ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy;
 
   @Value("${service.tcs.url}")
   private String tcsServiceUrl;
@@ -108,19 +88,11 @@ public class ConnectionServiceRouter extends RouteBuilder {
    * Constructor of ConnectionServiceRouter.
    */
   public ConnectionServiceRouter(@Qualifier("notesExecutor") ExecutorService notesExecutor,
-      KeycloakBean keycloakBean,
-      GmcIdProcessorBean gmcIdProcessorBean,
-      DoctorConnectionAggregationStrategy doctorConnectionAggregationStrategy,
-      ConnectionHiddenAggregationStrategy connectionHiddenAggregationStrategy,
       EnrichedConnectionsAggregationStrategy enrichedConnectionsAggregationStrategy,
       AttachNotesToConnectionProcessor attachNotesToConnectionProcessor,
       MergeEnrichedConnectionsIntoSummaryProcessor mergeEnrichedConnectionsIntoSummaryProcessor) {
     this.notesExecutor = notesExecutor;
-    this.keycloakBean = keycloakBean;
-    this.gmcIdProcessorBean = gmcIdProcessorBean;
-    this.doctorConnectionAggregationStrategy = doctorConnectionAggregationStrategy;
     this.enrichedConnectionsAggregationStrategy = enrichedConnectionsAggregationStrategy;
-    this.connectionHiddenAggregationStrategy = connectionHiddenAggregationStrategy;
     this.attachNotesToConnectionProcessor = attachNotesToConnectionProcessor;
     this.mergeEnrichedConnectionsIntoSummaryProcessor =
         mergeEnrichedConnectionsIntoSummaryProcessor;
@@ -128,24 +100,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
   @Override
   public void configure() {
-
-    // Connection summary page - All, Connected, Disconnected tab
-    from("direct:connection-summary")
-        .to("direct:connection-hidden-manually")
-        .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "getHiddenGmcIds")
-        .to("direct:v1-doctors-all-unhidden")
-        .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "process")
-        .enrich("direct:tcs-connection", doctorConnectionAggregationStrategy);
-    from("direct:connection-hidden-manually")
-        .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
-    from("direct:v1-doctors-all-unhidden")
-        .toD(recommendationServiceUrl + API_CONNECTION_DOCTOR_UNHIDDEN)
-        .streamCaching()
-        .unmarshal().json(JsonLibrary.Jackson, Map.class);
-    from("direct:tcs-connection")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(tcsServiceUrl + API_CONNECTION)
-        .unmarshal().json(JsonLibrary.Jackson, Map.class);
 
     // Connection summary page - exception queue tab
     from("direct:connection-exception-summary")
@@ -169,18 +123,10 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .to(serviceUrlConnection + API_CONNECTION_DISCONNECTED)
         .unmarshal().json(JsonLibrary.Jackson);
 
-    // Connection summary page - Hidden tab
-    from("direct:connection-hidden")
-        .to("direct:connection-hidden-gmcIds")
-        .setHeader(GMC_IDS_HEADER).method(gmcIdProcessorBean, "getHiddenGmcIds")
-        .to("direct:v1-doctors-by-ids")
-        .enrich("direct:connection-tcs-hidden", connectionHiddenAggregationStrategy);
-    from("direct:connection-hidden-gmcIds")
-        .to(serviceUrlConnection + API_CONNECTION_HIDDEN);
-    from("direct:connection-tcs-hidden")
-        .setHeader(OIDC_ACCESS_TOKEN_HEADER).method(keycloakBean, GET_TOKEN_METHOD)
-        .toD(tcsServiceUrl + API_CONNECTION_TCS_HIDDEN)
-        .unmarshal().json(JsonLibrary.Jackson);
+    // Hidden Discrepancies page - Hidden Discrepancies tab
+    from("direct:connection-hidden-discrepancies-summary")
+        .to(serviceUrlConnection + API_DISCREPANCY_HIDDEN)
+        .unmarshal().json(JsonLibrary.Jackson, HiddenDiscrepancySummaryDto.class);
 
     from("direct:v1-doctors-by-ids")
         .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
@@ -220,7 +166,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
     from("direct:connection-discrepancies-hide")
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
-        .toD(serviceUrlConnection + API_DISCREPANCY_HIDE);
+        .toD(serviceUrlConnection + API_DISCREPANCY_HIDDEN);
 
     // Connection Exception Logs
     from("direct:connection-exception-log-today")

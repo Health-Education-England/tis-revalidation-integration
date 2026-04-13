@@ -24,6 +24,7 @@ package uk.nhs.hee.tis.revalidation.integration.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
 
 /**
  * A class that represents a hidden discrepancy.
@@ -50,7 +50,7 @@ public class HiddenDiscrepancy {
   private String hiddenForDesignatedBodyCode;
   private String hiddenBy;
   private String reason;
-  @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime hiddenDateTime;
