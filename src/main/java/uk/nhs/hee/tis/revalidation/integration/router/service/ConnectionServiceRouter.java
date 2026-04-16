@@ -57,6 +57,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
   private static final String API_CONNECTION_REMOVE = "/api/connections/remove?bridgeEndpoint=true";
   private static final String API_DISCREPANCY_HIDE =
       "/api/connections/discrepancies/hidden?bridgeEndpoint=true";
+  private static final String API_DISCREPANCY_SHOW =
+      "/api/connections/discrepancies/hidden?${header.discrepancyId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
@@ -221,6 +223,12 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.POST))
         .setHeader(Exchange.CONTENT_TYPE, constant(MediaType.APPLICATION_JSON))
         .toD(serviceUrlConnection + API_DISCREPANCY_HIDE);
+
+    // Show discrepancy
+    from("direct:connection-discrepancies-show")
+        .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
+        .toD(serviceUrlConnection + API_DISCREPANCY_SHOW);
+
 
     // Connection Exception Logs
     from("direct:connection-exception-log-today")

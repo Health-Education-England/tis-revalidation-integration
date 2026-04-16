@@ -50,6 +50,8 @@ public class ConnectionApiRouter extends RouteBuilder {
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
         .post("/discrepancies/hidden").bindingMode(RestBindingMode.off)
-        .to("direct:connection-discrepancies-hide");
+        .to("direct:connection-discrepancies-hide")
+        .delete("/discrepancies/hidden").bindingMode(RestBindingMode.auto)
+        .to("direct:connection-discrepancies-show");
   }
 }
