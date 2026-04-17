@@ -125,12 +125,7 @@ public class ConnectionServiceRouter extends RouteBuilder {
 
     // Hidden Discrepancies page - Hidden Discrepancies tab
     from("direct:connection-hidden-discrepancies-summary")
-        .to(serviceUrlConnection + API_DISCREPANCY_HIDDEN)
-        .unmarshal().json(JsonLibrary.Jackson, HiddenDiscrepancySummaryDto.class);
-
-    from("direct:v1-doctors-by-ids")
-        .toD(recommendationServiceUrl + GET_DOCTORS_BY_GMC_IDS)
-        .unmarshal().json(JsonLibrary.Jackson);
+        .to(serviceUrlConnection + API_DISCREPANCY_HIDDEN);
 
     // TODO: Change to use tis-revalidation-core when deployed.
     from("direct:v1-doctors")
