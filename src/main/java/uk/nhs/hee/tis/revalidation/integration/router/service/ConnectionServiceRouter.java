@@ -35,7 +35,6 @@ import uk.nhs.hee.tis.revalidation.integration.router.aggregation.AggregationKey
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.EnrichedConnectionsAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.aggregation.JsonStringAggregationStrategy;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.ConnectionSummaryDto;
-import uk.nhs.hee.tis.revalidation.integration.router.dto.HiddenDiscrepancySummaryDto;
 import uk.nhs.hee.tis.revalidation.integration.router.dto.TraineeNotesDto;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.AttachNotesToConnectionProcessor;
 import uk.nhs.hee.tis.revalidation.integration.router.processor.MergeEnrichedConnectionsIntoSummaryProcessor;
@@ -57,8 +56,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/disconnected?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID =
       "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
-  private static final String GET_DOCTORS_BY_GMC_IDS =
-      "/api/v1/doctors/gmcIds/${header.gmcIds}?bridgeEndpoint=true";
   private static final String API_CONNECTION_HISTORY =
       "/api/connections/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTIONLOG_TODAY =
