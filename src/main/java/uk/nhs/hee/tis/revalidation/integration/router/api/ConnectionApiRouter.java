@@ -33,7 +33,6 @@ public class ConnectionApiRouter extends RouteBuilder {
     restConfiguration().component("servlet");
 
     rest("/connection")
-        .get().bindingMode(RestBindingMode.auto).to("direct:connection-summary")
         .get("/exception").bindingMode(RestBindingMode.auto)
         .to("direct:connection-exception-summary")
         .get("/discrepancies").bindingMode(RestBindingMode.auto)
@@ -47,6 +46,8 @@ public class ConnectionApiRouter extends RouteBuilder {
         .get("/hidden").bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
         .get("/exceptionLog/today").bindingMode(RestBindingMode.auto)
         .to("direct:connection-exception-log-today")
+        .get("/discrepancies/hidden").bindingMode(RestBindingMode.off)
+        .to("direct:connection-hidden-discrepancies-summary")
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
         .post("/discrepancies/hidden").bindingMode(RestBindingMode.off)
