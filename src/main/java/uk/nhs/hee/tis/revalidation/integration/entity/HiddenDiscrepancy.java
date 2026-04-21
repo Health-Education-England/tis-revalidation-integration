@@ -33,7 +33,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDateDeserializer;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
 
 /**
  * A class that represents a hidden discrepancy.
@@ -50,7 +50,7 @@ public class HiddenDiscrepancy {
   private String hiddenForDesignatedBodyCode;
   private String hiddenBy;
   private String reason;
-  @JsonDeserialize(using = CdcDateDeserializer.class)
+  @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime hiddenDateTime;
