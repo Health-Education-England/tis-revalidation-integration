@@ -40,7 +40,7 @@ import java.time.format.DateTimeParseException;
 public class CdcLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
 
   private static final DateTimeFormatter CDC_DATE_FORMAT =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
   private final LocalDateTimeDeserializer localDateTimeDeserializer;
 
