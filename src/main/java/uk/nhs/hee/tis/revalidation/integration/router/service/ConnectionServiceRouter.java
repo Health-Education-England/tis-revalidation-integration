@@ -48,7 +48,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/discrepancies/hidden?bridgeEndpoint=true";
   private static final String API_DISCREPANCY_SHOW =
       "/api/connections/discrepancies/hidden?${header.discrepancyId}?bridgeEndpoint=true";
-  private static final String API_CONNECTION_HIDDEN = "/api/connections/hidden?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCREPANCIES =
