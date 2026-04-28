@@ -31,7 +31,6 @@ public class ConnectionApiRouter extends RouteBuilder {
   private static final String EXCEPTION_PATH = "/exception";
   private static final String DISCREPANCIES_PATH = "/discrepancies";
   private static final String CONNECTED_PATH = "/connected";
-  private static final String DISCONNECTED_PATH = "/disconnected";
   private static final String GMC_ID_PATH = "/{gmcId}";
   private static final String HIDDEN_PATH = "/hidden";
   private static final String EXCEPTION_LOG_TODAY_PATH = "/exceptionLog/today";
@@ -50,8 +49,6 @@ public class ConnectionApiRouter extends RouteBuilder {
         .to("direct:connection-discrepancies-summary")
         .get(CONNECTED_PATH).bindingMode(RestBindingMode.auto)
         .to("direct:connection-connected-summary")
-        .get(DISCONNECTED_PATH).bindingMode(RestBindingMode.auto)
-        .to("direct:connection-disconnected-summary")
         .get(GMC_ID_PATH).bindingMode(RestBindingMode.auto)
         .to("direct:connection-gmc-id-aggregation")
         .get(HIDDEN_PATH).bindingMode(RestBindingMode.auto).to("direct:connection-hidden")

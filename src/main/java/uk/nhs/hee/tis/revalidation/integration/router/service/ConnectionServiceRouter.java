@@ -54,8 +54,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/discrepancies?bridgeEndpoint=true";
   private static final String API_CONNECTION_CONNECTED =
       "/api/connections/connected?bridgeEndpoint=true";
-  private static final String API_CONNECTION_DISCONNECTED =
-      "/api/connections/disconnected?bridgeEndpoint=true";
   private static final String API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID =
       "/api/v1/doctors/designated-body/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_HISTORY =
@@ -116,11 +114,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .to(serviceUrlConnection + API_CONNECTION_CONNECTED)
         .unmarshal().json(JsonLibrary.Jackson, ConnectionSummaryDto.class)
         .to(ENRICH_CONNECTED_SUMMARY_WITH_NOTES);
-
-    // Disconnection summary page - Disconnected queue tab
-    from("direct:connection-disconnected-summary")
-        .to(serviceUrlConnection + API_CONNECTION_DISCONNECTED)
-        .unmarshal().json(JsonLibrary.Jackson);
 
     // Hidden Discrepancies page - Hidden Discrepancies tab
     from("direct:connection-hidden-discrepancies-summary")
