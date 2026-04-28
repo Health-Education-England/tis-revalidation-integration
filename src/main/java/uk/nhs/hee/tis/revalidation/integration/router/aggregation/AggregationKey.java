@@ -34,4 +34,5 @@ public class AggregationKey {
   public static final String CONNECTION = "connection";
   public static final String DESIGNATED_BODY_CODE = "designatedBodyCode";
   public static final String PROGRAMME = "programme";
+  public static final String HIDDEN_DISCREPANCIES = "hiddenDiscrepancies";
 }

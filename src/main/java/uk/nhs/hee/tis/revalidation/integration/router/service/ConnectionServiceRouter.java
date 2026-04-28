@@ -48,6 +48,8 @@ public class ConnectionServiceRouter extends RouteBuilder {
       "/api/connections/discrepancies/hidden?bridgeEndpoint=true";
   private static final String API_DISCREPANCY_SHOW =
       "/api/connections/discrepancies/hidden/${header.discrepancyId}?bridgeEndpoint=true";
+  private static final String API_DISCREPANCY_HIDDEN_DETAILS =
+      "/api/connections/discrepancies/hidden/${header.gmcId}?bridgeEndpoint=true";
   private static final String API_CONNECTION_EXCEPTION =
       "/api/connections/exception?bridgeEndpoint=true";
   private static final String API_CONNECTION_DISCREPANCIES =
@@ -129,13 +131,17 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .multicast(AGGREGATOR)
         .parallelProcessing()
         .to("direct:doctor-designated-body")
-        .to("direct:connection-history");
+        .to("direct:connection-history")
+        .to("direct:doctor-hidden-discrepancies");
     from("direct:doctor-designated-body")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.DESIGNATED_BODY_CODE)
         .toD(recommendationServiceUrl + API_DOCTORS_DESIGNATED_BODY_BY_GMC_ID);
     from("direct:connection-history")
         .setHeader(AggregationKey.HEADER).constant(AggregationKey.CONNECTION)
         .toD(serviceUrlConnection + API_CONNECTION_HISTORY);
+    from("direct:doctor-hidden-discrepancies")
+        .setHeader(AggregationKey.HEADER).constant(AggregationKey.HIDDEN_DISCREPANCIES)
+        .toD(serviceUrlConnection + API_DISCREPANCY_HIDDEN_DETAILS);
 
     // Add connection
     from("direct:connection-add")
