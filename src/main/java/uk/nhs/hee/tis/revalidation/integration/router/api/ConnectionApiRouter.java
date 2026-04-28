@@ -28,40 +28,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectionApiRouter extends RouteBuilder {
 
-  private static final String EXCEPTION_PATH = "/exception";
-  private static final String DISCREPANCIES_PATH = "/discrepancies";
-  private static final String CONNECTED_PATH = "/connected";
-  private static final String GMC_ID_PATH = "/{gmcId}";
-  private static final String HIDDEN_PATH = "/hidden";
-  private static final String EXCEPTION_LOG_TODAY_PATH = "/exceptionLog/today";
-  private static final String DISCREPANCIES_HIDDEN_PATH = "/discrepancies/hidden";
-  private static final String ADD_PATH = "/add";
-  private static final String REMOVE_PATH = "/remove";
-
   @Override
   public void configure() {
     restConfiguration().component("servlet");
 
     rest("/connection")
-        .get(EXCEPTION_PATH).bindingMode(RestBindingMode.auto)
+        .get("/exception").bindingMode(RestBindingMode.auto)
         .to("direct:connection-exception-summary")
-        .get(DISCREPANCIES_PATH).bindingMode(RestBindingMode.auto)
+        .get("/discrepancies").bindingMode(RestBindingMode.auto)
         .to("direct:connection-discrepancies-summary")
-        .get(CONNECTED_PATH).bindingMode(RestBindingMode.auto)
+        .get("/connected").bindingMode(RestBindingMode.auto)
         .to("direct:connection-connected-summary")
-        .get(GMC_ID_PATH).bindingMode(RestBindingMode.auto)
+        .get("/disconnected").bindingMode(RestBindingMode.auto)
+        .to("direct:connection-disconnected-summary")
+        .get("/{gmcId}").bindingMode(RestBindingMode.auto)
         .to("direct:connection-gmc-id-aggregation")
-        .get(HIDDEN_PATH).bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
-        .get(EXCEPTION_LOG_TODAY_PATH).bindingMode(RestBindingMode.auto)
+        .get("/hidden").bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
+        .get("/exceptionLog/today").bindingMode(RestBindingMode.auto)
         .to("direct:connection-exception-log-today")
-        .get(DISCREPANCIES_HIDDEN_PATH).bindingMode(RestBindingMode.off)
+        .get("/discrepancies/hidden").bindingMode(RestBindingMode.off)
         .to("direct:connection-hidden-discrepancies-summary")
-        .post(ADD_PATH).bindingMode(RestBindingMode.off).to("direct:connection-add")
-        .post(REMOVE_PATH).bindingMode(RestBindingMode.off).to("direct:connection-remove")
-        .post(DISCREPANCIES_HIDDEN_PATH).bindingMode(RestBindingMode.off)
+        .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
+        .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
+        .post("/discrepancies/hidden").bindingMode(RestBindingMode.off)
         .to("direct:connection-discrepancies-hide")
-        .delete(DISCREPANCIES_HIDDEN_PATH).bindingMode(RestBindingMode.auto)
+        .delete("/discrepancies/hidden/{discrepancyId}").bindingMode(RestBindingMode.off)
         .to("direct:connection-discrepancies-show");
   }
 }
-
