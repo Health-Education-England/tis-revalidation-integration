@@ -22,10 +22,19 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 
+import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.springframework.stereotype.Service;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
@@ -38,13 +47,18 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Slf4j
 @Service
 public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
+
+  private final RestHighLevelClient restHighLevelClient;
+
   /**
    * Service responsible for updating the hidden discrepancy nested fields used for searching.
    */
   public CdcHiddenDiscrepancyService(
-      MasterDoctorElasticSearchRepository repository
+      MasterDoctorElasticSearchRepository repository,
+      RestHighLevelClient restHighLevelClient
   ) {
     super(repository);
+    this.restHighLevelClient = restHighLevelClient;
   }
 
   /**
@@ -79,15 +93,25 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
         }
 
         hiddenDiscrepancies.add(entity);
-        masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
-        masterDoctorView.setHiddenDiscrepancies(hiddenDiscrepancies);
 
-        repository.save(masterDoctorView);
+        // Partial updates on fields related to connection logs
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("hiddenDiscrepancies", objectMapper.writeValueAsString(hiddenDiscrepancies));
+
+        UpdateRequest request = new UpdateRequest(MASTER_DOCTOR_INDEX, masterDoctorView.getId())
+            .fetchSource(true)
+            .retryOnConflict(5);
+
+        Script inline = new Script(ScriptType.INLINE, "painless",
+            "ctx._source.hiddenDiscrepancies.add(params)", doc);
+        request.script(inline);
+
+        restHighLevelClient.update(request, RequestOptions.DEFAULT);
       }
     } catch (Exception e) {
       log.error("CDC error adding hidden discrepancy: {}, exception: {}", entity, e.getMessage(),
           e);
-      throw e;
     }
   }
 
