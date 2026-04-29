@@ -39,8 +39,6 @@ public class ConnectionApiRouter extends RouteBuilder {
         .to("direct:connection-discrepancies-summary")
         .get("/connected").bindingMode(RestBindingMode.auto)
         .to("direct:connection-connected-summary")
-        .get("/disconnected").bindingMode(RestBindingMode.auto)
-        .to("direct:connection-disconnected-summary")
         .get("/{gmcId}").bindingMode(RestBindingMode.auto)
         .to("direct:connection-gmc-id-aggregation")
         .get("/hidden").bindingMode(RestBindingMode.auto).to("direct:connection-hidden")
@@ -51,6 +49,8 @@ public class ConnectionApiRouter extends RouteBuilder {
         .post("/add").bindingMode(RestBindingMode.off).to("direct:connection-add")
         .post("/remove").bindingMode(RestBindingMode.off).to("direct:connection-remove")
         .post("/discrepancies/hidden").bindingMode(RestBindingMode.off)
-        .to("direct:connection-discrepancies-hide");
+        .to("direct:connection-discrepancies-hide")
+        .delete("/discrepancies/hidden/{discrepancyId}").bindingMode(RestBindingMode.off)
+        .to("direct:connection-discrepancies-show");
   }
 }
