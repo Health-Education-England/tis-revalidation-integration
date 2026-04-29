@@ -160,7 +160,6 @@ public class ConnectionServiceRouter extends RouteBuilder {
         .setHeader(Exchange.HTTP_METHOD, constant(HttpMethod.DELETE))
         .toD(serviceUrlConnection + API_DISCREPANCY_SHOW);
 
-
     // Connection Exception Logs
     from("direct:connection-exception-log-today")
         .toD(serviceUrlConnection + API_CONNECTION_EXCEPTIONLOG_TODAY)
