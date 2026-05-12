@@ -30,6 +30,7 @@ import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -134,8 +135,9 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
     if (result.isPresent()) {
       return result.get().getContent().getGmcReferenceNumber();
     } else {
-      throw new RuntimeException(
-          String.format("No hidden discrepancy found to delete with id: %s", key));
+      throw new ResourceNotFoundException(
+          String.format("No elasticsearch record found to delete hidden discrepancy with id: %s",
+              key));
     }
   }
 

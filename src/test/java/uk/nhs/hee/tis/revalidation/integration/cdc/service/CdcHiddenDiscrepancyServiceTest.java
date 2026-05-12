@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
 
 import java.util.Collections;
+import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -186,11 +187,11 @@ class CdcHiddenDiscrepancyServiceTest {
     when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
         .thenReturn(searchHitsResult);
 
-    RuntimeException exception = assertThrows(RuntimeException.class,
+    RuntimeException exception = assertThrows(ResourceNotFoundException.class,
         () -> cdcHiddenDiscrepancyService.deleteEntity(nonExistentId));
 
     assertThat(exception.getMessage(),
-        is("No hidden discrepancy found to delete with id: " + nonExistentId));
+        is("No elasticsearch record found to delete hidden discrepancy with id: " + nonExistentId));
     verify(repository, never()).save(any());
   }
 
