@@ -69,37 +69,31 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
     String gmcId = entity.getGmcId();
     final var repository = getRepository();
 
-    try {
-      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-      if (!masterDoctorViewList.isEmpty()) {
-        MasterDoctorView masterDoctorView = handleDuplicateRecords(masterDoctorViewList);
+    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+    if (!masterDoctorViewList.isEmpty()) {
+      MasterDoctorView masterDoctorView = handleDuplicateRecords(masterDoctorViewList);
 
-        List<HiddenDiscrepancy> hiddenDiscrepancies = new ArrayList<>();
+      List<HiddenDiscrepancy> hiddenDiscrepancies = new ArrayList<>();
 
-        if (masterDoctorView.getHiddenDiscrepancies() != null) {
-          hiddenDiscrepancies.addAll(masterDoctorView.getHiddenDiscrepancies());
-        }
-
-        boolean alreadyHidden = hiddenDiscrepancies.stream().anyMatch(h ->
-            h.getHiddenForDesignatedBodyCode().equals(entity.getHiddenForDesignatedBodyCode()));
-
-        if (alreadyHidden) {
-          log.info(
-              "gmcReferenceNumber: {} already has a hidden discrepancy for designated body: {}",
-              entity.getGmcId(), entity.getHiddenForDesignatedBodyCode());
-          return;
-        }
-
-        hiddenDiscrepancies.add(entity);
-        masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
-        masterDoctorView.setHiddenDiscrepancies(hiddenDiscrepancies);
-
-        repository.save(masterDoctorView);
+      if (masterDoctorView.getHiddenDiscrepancies() != null) {
+        hiddenDiscrepancies.addAll(masterDoctorView.getHiddenDiscrepancies());
       }
-    } catch (Exception e) {
-      log.error("CDC error adding hidden discrepancy: {}, exception: {}", entity, e.getMessage(),
-          e);
-      throw e;
+
+      boolean alreadyHidden = hiddenDiscrepancies.stream().anyMatch(h ->
+          h.getHiddenForDesignatedBodyCode().equals(entity.getHiddenForDesignatedBodyCode()));
+
+      if (alreadyHidden) {
+        log.info(
+            "gmcReferenceNumber: {} already has a hidden discrepancy for designated body: {}",
+            entity.getGmcId(), entity.getHiddenForDesignatedBodyCode());
+        return;
+      }
+
+      hiddenDiscrepancies.add(entity);
+      masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
+      masterDoctorView.setHiddenDiscrepancies(hiddenDiscrepancies);
+
+      repository.save(masterDoctorView);
     }
   }
 
