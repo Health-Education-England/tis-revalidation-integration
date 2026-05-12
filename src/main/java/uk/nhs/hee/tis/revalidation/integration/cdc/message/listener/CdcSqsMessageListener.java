@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
@@ -132,12 +133,26 @@ public class CdcSqsMessageListener {
   @SqsListener("${cloud.aws.end-point.cdc.hiddendiscrepancy}")
   public void getHiddenDiscrepancyMessage(String message) throws IOException {
     try {
+      String objectId = extractObjectIdFromMessage(message);
       CdcDocumentDto<HiddenDiscrepancy> cdcDocument =
           mapper.readValue(message, new TypeReference<>() {
           });
+      if(cdcDocument.getFullDocument()!= null) {
+        cdcDocument.getFullDocument().setId(objectId);
+      }
+      cdcDocument.setTargetObjectId(objectId);
       cdcHiddenDiscrepancyMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
     }
+  }
+
+  private String extractObjectIdFromMessage(String message) throws JsonProcessingException {
+      var id = mapper.readTree(message).findValue("documentKey").findValue("_id");
+      if(id.findValue("$oid") != null) {
+        return id.findValue("$oid").asText();
+      } else  {
+        return id.asText();
+      }
   }
 }

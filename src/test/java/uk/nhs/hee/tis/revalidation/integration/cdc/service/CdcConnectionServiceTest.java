@@ -135,7 +135,7 @@ class CdcConnectionServiceTest {
     var testEntity = CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto()
         .getFullDocument();
     assertThrows(NotImplementedException.class,
-        () -> cdcConnectionService.deleteEntity(testEntity)
+        () -> cdcConnectionService.deleteEntity("foo")
     );
   }
 }

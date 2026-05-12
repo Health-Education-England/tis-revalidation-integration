@@ -48,7 +48,7 @@ public abstract class CdcMessageHandler<T> implements MessageHandler<CdcDocument
         cdcService.upsertEntity(message.getFullDocument());
         break;
       case DELETE:
-        cdcService.deleteEntity(message.getFullDocument());
+        cdcService.deleteEntity(message.getTargetObjectId());
         break;
       default:
         throw new OperationNotSupportedException("CDC operation not supported: " + operation);

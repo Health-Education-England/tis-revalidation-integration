@@ -35,4 +35,5 @@ import lombok.NoArgsConstructor;
 public class CdcDocumentDto<T> {
   private String operationType;
   private T fullDocument;
+  private String targetObjectId;
 }

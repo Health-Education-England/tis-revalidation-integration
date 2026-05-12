@@ -85,7 +85,7 @@ public class CdcRecommendationService extends CdcService<Recommendation> {
   }
 
   @Override
-  public void deleteEntity(Recommendation entity) {
+  public void deleteEntity(String key) {
     throw new NotImplementedException();
   }
 }

@@ -247,6 +247,7 @@ class CdcTraineeUpdateServiceTest {
   @Test
   void shouldThrowNotImplementedExceptionOnDeleteEntityCall() {
     assertThrows(NotImplementedException.class,
-        () -> cdcTraineeUpdateService.deleteEntity(traineeUpdate));
+        () -> cdcTraineeUpdateService
+            .deleteEntity("foo"));
   }
 }

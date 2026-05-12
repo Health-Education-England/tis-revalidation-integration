@@ -66,6 +66,113 @@ public class CdcTestDataGenerator {
   private static final String INTERNAL_ERROR_RESPONSE_CODE = "98";
   private static final String UPDATED_BY_GMC = "Updated by GMC";
   private static final String HIDDEN_REASON_VAL = "reason";
+  private static final String DOCUMENT_KEY = "0a0a0a0a0a0a0a0a0a";
+
+  public static final String CDC_DOC_JSON =
+      """
+          {
+            "_id":{"_data":"01625a0706000001c001000001c000020042"},
+            "operationType":"replace",
+            "clusterTime":"Timestamp(1650067206, 448)",
+            "ns":{"db":"revalidation","coll":"doctorsForDB"},
+            "documentKey":{"_id":"1234567"},
+            "fullDocument":{
+                              "_id":"1234567","doctorFirstName":"First",
+                              "doctorLastName":"Last",
+                              "submissionDate":"2017-10-19 00:00:00",
+                              "dateAdded":"2015-10-07 00:00:00",
+                              "underNotice":"NO","sanction":"No",
+                              "doctorStatus":"COMPLETED",
+                              "lastUpdatedDate":"2022-04-15 00:00:00",
+                              "designatedBodyCode":"1-AIIDWI",
+                              "existsInGmc":false,
+                              "_class":"uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"}
+          }
+          """;
+
+  public static final String CDC_DOCDB_EVENT_JSON =
+      """
+          {
+            "_id": {"_data": "016819321a00000001010000000000020042"},
+            "clusterTime": {"$timestamp": {"t": 1746481690, "i": 1}},
+            "documentKey": {"_id": "1234567"},
+            "fullDocument": {
+                              "_id": "1234567", "doctorFirstName": "AAA", "doctorLastName": "BBB",
+                              "submissionDate": {"$date": "2024-08-05T00:00:00Z"},
+                              "dateAdded": {"$date": "2015-10-07T00:00:00Z"}, "underNotice": "NO",
+                              "sanction": "No", "doctorStatus": "DRAFT",
+                              "lastUpdatedDate": {"$date": "2025-04-29T00:00:00Z"},
+                              "gmcLastUpdatedDateTime": {"$date": "2025-04-29T00:00:54.956Z"},
+                              "designatedBodyCode": "1-1RSSQ05", "existsInGmc": false,
+                              "_class": "uk.nhs.hee.tis.revalidation.entity.DoctorsForDB"},
+            "ns": {"db": "revalidation", "coll": "doctorsForDB"},
+            "operationType": "update",
+            "updateDescription": {"removedFields": [], "truncatedArrays": [],
+                                  "updatedFields": {"underNotice": "YES"}}
+          }
+          """;
+
+  public static final String CDC_CONNECTION_LOG_EVENT_JSON =
+      """
+          {
+            "_id": {"_data": "016819321a00000001010000000000020042"},
+            "clusterTime": {"$timestamp": {"t": 1746481690, "i": 1}},
+            "documentKey": {"_id": "1234567"},
+            "fullDocument": {
+                              "_id": "1234567",
+                              "gmcId": "1234567",
+                              "newDesignatedBodyCode": "1-1RSSQ05",
+                              "previousDesignatedBodyCode": "1-AIIDWI",
+                              "updatedBy": "admin",
+                              "requestTime": {"$date": "2025-04-29T00:00:00Z"},
+                              "responseCode": "0",
+                              "_class": "uk.nhs.hee.tis.revalidation.entity.ConnectionLog"},
+            "ns": {"db": "revalidation", "coll": "connectionLog"},
+            "operationType": "insert"
+          }
+        """;
+
+  public static final String CDC_RECOMMENDATION_EVENT_JSON =
+      """
+          {
+            "_id": {"_data": "0168220a440000000b01000000000002d1b5"},
+            "clusterTime": {"$timestamp": {"t": 1747061316, "i": 11}},
+            "documentKey": {"_id": {"$oid": "67fcf9ea74f4e44093b9f327"}},
+            "fullDocument": {
+                              "_id": {"$oid": "67fcf9ea74f4e44093b9f327"},
+                              "gmcNumber": "1234567", "recommendationType": "REVALIDATE",
+                              "recommendationStatus": "SUBMITTED_TO_GMC",
+                              "gmcSubmissionDate": {"$date": "2025-04-28T00:00:00Z"},
+                              "comments": ["test"], "admin": "aaa.bbb@ccc.com",
+                              "_class": "uk.nhs.hee.tis.revalidation.entity.Recommendation"},
+            "ns": {"db": "revalidation", "coll": "recommendation"},
+            "operationType": "update",
+            "updateDescription": {"removedFields": [], "truncatedArrays": [],
+                                  "updatedFields": {"recommendationStatus": "SUBMITTED_TO_GMC"}}}
+          """;
+
+  public static final String CDC_HIDDEN_DISCREPANCY_INSERT_EVENT =
+      """
+          {"_id": {"_data": "0169fdb35100000006010000000000053ab4"},
+           "clusterTime": {"$timestamp": {"t": 1778234193, "i": 6}},
+            "documentKey": {"_id": {"$oid": "69fdb35117c18114b019a064"}},
+             "fullDocument": {"_id": {"$oid": "69fdb35117c18114b019a064"},
+              "gmcId": "1234567", "hiddenForDesignatedBodyCode": "1-1RSSQ05",
+               "hiddenBy": "test", "reason": "test", "hiddenDateTime":
+                {"$date": "2026-05-08T09:56:33.453Z"}, "_class":
+                 "uk.nhs.hee.tis.revalidation.connection.entity.HiddenDiscrepancy"},
+                  "ns": {"db": "revalidation", "coll": "hiddenDiscrepancy"},
+                   "operationType": "insert"}
+          """;
+
+  public static final String CDC_HIDDEN_DISCREPANCY_DELETE_EVENT =
+      """
+        {"_id": {"_data": "0169fcab1b00000003010000000000053ab4"},
+         "clusterTime": {"$timestamp": {"t": 1778166555, "i": 3}},
+          "documentKey": {"_id": {"$oid": "69fdb35117c18114b019a064"}},
+           "ns": {"db": "revalidation", "coll": "hiddenDiscrepancy"},
+            "operationType": "delete"}
+      """;
 
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -172,7 +279,8 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorInsertCdcDocumentDto() {
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.INSERT.getValue(), doctorsForDB);
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.INSERT.getValue(), doctorsForDB,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -181,7 +289,8 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorReplaceCdcDocumentDto() {
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.REPLACE.getValue(), doctorsForDB);
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.REPLACE.getValue(), doctorsForDB,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -190,7 +299,8 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcDoctor test instance
    */
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUpdateCdcDocumentDto() {
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.UPDATE.getValue(), doctorsForDB);
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.UPDATE.getValue(), doctorsForDB,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -209,7 +319,8 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
+    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -227,7 +338,8 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation);
+    return new CdcDocumentDto<Recommendation>(OperationType.INSERT.getValue(), recommendation,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -245,7 +357,8 @@ public class CdcTestDataGenerator {
         .admin(ADMIN_VAL)
         .build();
 
-    return new CdcDocumentDto<Recommendation>(OperationType.REPLACE.getValue(), recommendation);
+    return new CdcDocumentDto<Recommendation>(OperationType.REPLACE.getValue(), recommendation,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -256,7 +369,8 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<DoctorsForDB> getCdcDoctorUnsupportedCdcDocumentDto() {
     DoctorsForDB doctorsForDb = DoctorsForDB.builder().build();
 
-    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDb);
+    return new CdcDocumentDto<DoctorsForDB>(OperationType.DROP.getValue(), doctorsForDb,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -267,7 +381,8 @@ public class CdcTestDataGenerator {
   public static CdcDocumentDto<Recommendation> getCdcRecommendationUnsupportedCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder().build();
 
-    return new CdcDocumentDto<Recommendation>(OperationType.DROP.getValue(), recommendation);
+    return new CdcDocumentDto<Recommendation>(OperationType.DROP.getValue(), recommendation,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -321,7 +436,8 @@ public class CdcTestDataGenerator {
         .responseCode(SUCCESSFUL_REQUEST_RESPONSE_CODE)
         .build();
 
-    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
+    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -338,7 +454,8 @@ public class CdcTestDataGenerator {
         .responseCode(INTERNAL_ERROR_RESPONSE_CODE)
         .build();
 
-    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
+    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -354,7 +471,8 @@ public class CdcTestDataGenerator {
         .updatedBy(UPDATED_BY_GMC)
         .build();
 
-    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog);
+    return new CdcDocumentDto<ConnectionLog>(OperationType.INSERT.getValue(), connectionLog,
+        DOCUMENT_KEY);
   }
 
   /**
@@ -372,8 +490,8 @@ public class CdcTestDataGenerator {
         .reason(HIDDEN_REASON_VAL)
         .build();
 
-    return new CdcDocumentDto<HiddenDiscrepancy>(OperationType.INSERT.getValue(),
-        hiddenDiscrepancy);
+    return new CdcDocumentDto<>(OperationType.INSERT.getValue(),
+        hiddenDiscrepancy, DOCUMENT_KEY);
   }
 
   /**
@@ -391,8 +509,8 @@ public class CdcTestDataGenerator {
         .reason(HIDDEN_REASON_VAL)
         .build();
 
-    return new CdcDocumentDto<HiddenDiscrepancy>(OperationType.INSERT.getValue(),
-        hiddenDiscrepancy);
+    return new CdcDocumentDto<>(OperationType.INSERT.getValue(),
+        hiddenDiscrepancy, DOCUMENT_KEY);
   }
 
   /**
@@ -410,8 +528,8 @@ public class CdcTestDataGenerator {
         .reason(HIDDEN_REASON_VAL)
         .build();
 
-    return new CdcDocumentDto<HiddenDiscrepancy>(OperationType.DELETE.getValue(),
-        hiddenDiscrepancy);
+    return new CdcDocumentDto<>(OperationType.DELETE.getValue(),
+        hiddenDiscrepancy, DOCUMENT_KEY);
   }
 
 }

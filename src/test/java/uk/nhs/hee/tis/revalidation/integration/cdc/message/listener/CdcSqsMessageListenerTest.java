@@ -21,14 +21,21 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_CONNECTION_LOG_EVENT_JSON;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_DOC_JSON;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_HIDDEN_DISCREPANCY_DELETE_EVENT;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_HIDDEN_DISCREPANCY_INSERT_EVENT;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_RECOMMENDATION_EVENT_JSON;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -46,6 +53,9 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @ExtendWith(MockitoExtension.class)
 class CdcSqsMessageListenerTest {
+
+  private static final String GMC_ID = "1234567";
+  private static final String HIDDEN_DISCREPANCY_OID = "69fdb35117c18114b019a064";
 
   @InjectMocks
   CdcSqsMessageListener cdcSqsMessageListener;
@@ -65,72 +75,85 @@ class CdcSqsMessageListenerTest {
   @Spy
   ObjectMapper objectMapper;
 
-  @Test
-  void shouldPassDoctorInsertMessageFromSqsQueueToHandler()
-      throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcDoctorInsertCdcDocumentDto()
-    );
-    cdcSqsMessageListener.getDoctorMessage(testMessage);
+  @Captor
+  ArgumentCaptor<String> messageCaptor;
 
-    verify(cdcDoctorMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<DoctorsForDB>>() {
-        })
-    );
+  @Captor
+  ArgumentCaptor<CdcDocumentDto<DoctorsForDB>> doctorMessageCaptor;
+
+  @Captor
+  ArgumentCaptor<CdcDocumentDto<Recommendation>> recommendationMessageCaptor;
+
+  @Captor
+  ArgumentCaptor<CdcDocumentDto<ConnectionLog>> connectionMessageCaptor;
+
+  @Captor
+  ArgumentCaptor<CdcDocumentDto<HiddenDiscrepancy>> hiddenDiscrepancyMessageCaptor;
+
+  @Test
+  void shouldPassDoctorMessageFromSqsQueueToHandler()
+      throws OperationNotSupportedException, IOException {
+
+    cdcSqsMessageListener.getDoctorMessage(CDC_DOC_JSON);
+
+    verify(cdcDoctorMessageHandler).handleMessage(doctorMessageCaptor.capture());
+
+    var result = doctorMessageCaptor.getValue();
+    assertEquals(GMC_ID, result.getFullDocument().getGmcReferenceNumber());
+    assertEquals("replace", result.getOperationType());
   }
 
   @Test
   void shouldPassRecommendationInsertMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto()
-    );
-    cdcSqsMessageListener.getRecommendationMessage(testMessage);
 
-    verify(cdcRecommendationMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<Recommendation>>() {
-        })
-    );
+    cdcSqsMessageListener.getRecommendationMessage(CDC_RECOMMENDATION_EVENT_JSON);
+
+    verify(cdcRecommendationMessageHandler).handleMessage(recommendationMessageCaptor.capture());
+
+    var result = recommendationMessageCaptor.getValue();
+    assertEquals(GMC_ID, result.getFullDocument().getGmcNumber());
+    assertEquals("update", result.getOperationType());
   }
 
   @Test
-  void shouldPassConnectionLogInsertMessageFromSqsQueueToHandler()
+  void shouldPassConnectionLogMessagesFromSqsQueueToHandler()
       throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcConnectionLogInsertCdcDocumentDto()
-    );
-    cdcSqsMessageListener.getConnectionMessage(testMessage);
 
-    verify(cdcConnectionMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<ConnectionLog>>() {
-        })
-    );
+    cdcSqsMessageListener.getConnectionMessage(CDC_CONNECTION_LOG_EVENT_JSON);
+
+    verify(cdcConnectionMessageHandler).handleMessage(connectionMessageCaptor.capture());
+
+    var result = connectionMessageCaptor.getValue();
+    assertEquals(GMC_ID, result.getFullDocument().getGmcId());
+    assertEquals("insert", result.getOperationType());
   }
 
   @Test
-  void shouldPassHiddenDiscrepancyInsertMessageFromSqsQueueToHandler()
+  void shouldPassHiddenDiscrepancyInsertMessageFromSqsQueueToHandlerWithObjectId()
       throws OperationNotSupportedException, IOException {
-    var dto = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
-    var testMessage = objectMapper.writeValueAsString(dto);
-    cdcSqsMessageListener.getHiddenDiscrepancyMessage(testMessage);
 
-    verify(cdcHiddenDiscrepancyMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<HiddenDiscrepancy>>() {
-        })
-    );
+    cdcSqsMessageListener.getHiddenDiscrepancyMessage(CDC_HIDDEN_DISCREPANCY_INSERT_EVENT);
+
+    verify(cdcHiddenDiscrepancyMessageHandler)
+        .handleMessage(hiddenDiscrepancyMessageCaptor.capture());
+
+    var result = hiddenDiscrepancyMessageCaptor.getValue();
+    assertEquals(GMC_ID, result.getFullDocument().getGmcId());
+    assertEquals(HIDDEN_DISCREPANCY_OID, result.getFullDocument().getId());
+    assertEquals("insert", result.getOperationType());
   }
 
   @Test
-  void shouldPassHiddenDiscrepancyDeleteMessageFromSqsQueueToHandler()
+  void shouldPassHiddenDiscrepancyDeleteMessageFromSqsQueueToHandlerWithObjectId()
       throws OperationNotSupportedException, IOException {
-    var testMessage = objectMapper.writeValueAsString(
-        CdcTestDataGenerator.getCdcHiddenDiscrepancyDeleteCdcDocumentDto()
-    );
-    cdcSqsMessageListener.getHiddenDiscrepancyMessage(testMessage);
+    cdcSqsMessageListener.getHiddenDiscrepancyMessage(CDC_HIDDEN_DISCREPANCY_DELETE_EVENT);
 
-    verify(cdcHiddenDiscrepancyMessageHandler).handleMessage(
-        objectMapper.readValue(testMessage, new TypeReference<CdcDocumentDto<HiddenDiscrepancy>>() {
-        })
-    );
+    verify(cdcHiddenDiscrepancyMessageHandler)
+        .handleMessage(hiddenDiscrepancyMessageCaptor.capture());
+
+    var result = hiddenDiscrepancyMessageCaptor.getValue();
+    assertEquals(HIDDEN_DISCREPANCY_OID, result.getTargetObjectId());
+    assertEquals("delete", result.getOperationType());
   }
 }

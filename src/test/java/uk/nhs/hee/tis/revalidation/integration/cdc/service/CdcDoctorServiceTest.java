@@ -138,6 +138,6 @@ class CdcDoctorServiceTest {
   void shouldThrowNotImplementedExceptionOnDeleteEntityCall() {
     var testEntity = CdcTestDataGenerator.getCdcDoctor();
     assertThrows(NotImplementedException.class,
-        () -> cdcDoctorService.deleteEntity(testEntity));
+        () -> cdcDoctorService.deleteEntity("foo"));
   }
 }

@@ -108,7 +108,7 @@ class CdcRecommendationServiceTest {
         .getFullDocument();
     assertThrows(NotImplementedException.class,
         () -> cdcRecommendationService.deleteEntity(
-            testEntity
+            "foo"
         ));
   }
 }

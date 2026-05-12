@@ -92,7 +92,7 @@ public class CdcDoctorService extends CdcService<DoctorsForDB> {
   }
 
   @Override
-  public void deleteEntity(DoctorsForDB entity) {
+  public void deleteEntity(String key) {
     throw new NotImplementedException();
   }
 }

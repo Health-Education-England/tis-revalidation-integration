@@ -151,7 +151,7 @@ public class CdcTraineeUpdateService extends CdcService<ConnectionInfoDto> {
   }
 
   @Override
-  public void deleteEntity(ConnectionInfoDto entity) {
+  public void deleteEntity(String key) {
     throw new NotImplementedException();
   }
 }
