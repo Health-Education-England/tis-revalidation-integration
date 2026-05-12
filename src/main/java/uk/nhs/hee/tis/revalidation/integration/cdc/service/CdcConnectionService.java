@@ -107,7 +107,7 @@ public class CdcConnectionService extends CdcService<ConnectionLog> {
   }
 
   @Override
-  public void deleteEntity(ConnectionLog entity) {
+  public void deleteEntity(String entity) {
     throw new NotImplementedException();
   }
 }

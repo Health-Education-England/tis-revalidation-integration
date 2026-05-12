@@ -41,5 +41,5 @@ public abstract class CdcService<T> {
 
   public abstract void upsertEntity(T entity);
 
-  public abstract void deleteEntity(T entity);
+  public abstract void deleteEntity(String key);
 }

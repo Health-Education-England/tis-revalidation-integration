@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2022 Crown Copyright (Health Education England)
+ * Copyright 2025 Crown Copyright (Health Education England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,21 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.dto;
+package uk.nhs.hee.tis.revalidation.integration.cdc.message.util;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CdcDocumentDto<T> {
-  private String operationType;
-  private T fullDocument;
-  private CdcDocumentKey documentKey;
+public class CdcDocumentKeyDeserializer extends JsonDeserializer<String> {
+
+  @Override
+  public String deserialize(JsonParser p, DeserializationContext ctx)
+      throws IOException {
+
+    JsonNode node = p.getCodec().readTree(p);
+
+    JsonNode oidNode = node.get("$oid");
+
+    if (oidNode != null) {
+      return oidNode.asText();
+    }
+
+    return null;
+  }
 }

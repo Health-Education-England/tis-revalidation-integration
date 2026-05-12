@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -34,6 +35,7 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDocumentKeyDeserializer;
 
 /**
  * A class that represents a hidden discrepancy.
@@ -45,6 +47,8 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTime
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HiddenDiscrepancy {
 
+  @JsonProperty("_id")
+  @JsonDeserialize(using = CdcDocumentKeyDeserializer.class)
   private String id;
   private String gmcId;
   private String hiddenForDesignatedBodyCode;
