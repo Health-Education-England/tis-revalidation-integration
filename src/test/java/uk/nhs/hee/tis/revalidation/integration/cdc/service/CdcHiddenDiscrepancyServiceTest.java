@@ -246,8 +246,6 @@ class CdcHiddenDiscrepancyServiceTest {
   void shouldHandleMultipleDoctorsWithSameGmcNumberDuringDelete() {
     var deletedHiddenDiscrepancy = CdcTestDataGenerator
         .getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
-    String hiddenDiscrepancyId = deletedHiddenDiscrepancy.getFullDocument().getId();
-    String gmcId = deletedHiddenDiscrepancy.getFullDocument().getGmcId();
 
     MasterDoctorView duplicateDoctor = CdcTestDataGenerator.getTestMasterDoctorView();
 
@@ -255,6 +253,9 @@ class CdcHiddenDiscrepancyServiceTest {
     when(searchHitsResult.getSearchHits()).thenReturn(List.of(searchHit));
     when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
         .thenReturn(searchHitsResult);
+
+    String hiddenDiscrepancyId = deletedHiddenDiscrepancy.getFullDocument().getId();
+    String gmcId = deletedHiddenDiscrepancy.getFullDocument().getGmcId();
 
     // Multiple doctors with same GMC number
     when(repository.findByGmcReferenceNumber(gmcId)).thenReturn(

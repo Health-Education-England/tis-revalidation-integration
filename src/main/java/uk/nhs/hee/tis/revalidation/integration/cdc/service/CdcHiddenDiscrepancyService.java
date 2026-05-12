@@ -108,28 +108,21 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
     String gmcId = findGmcIdAssociatedWithHiddenDiscrepancy(key);
     final var repository = getRepository();
 
-    try {
-      List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-      if (!masterDoctorViewList.isEmpty()) {
-        MasterDoctorView masterDoctorView = handleDuplicateRecords(masterDoctorViewList);
+    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
+    if (!masterDoctorViewList.isEmpty()) {
+      MasterDoctorView masterDoctorView = handleDuplicateRecords(masterDoctorViewList);
 
-        List<HiddenDiscrepancy> updatedList = new ArrayList<>();
-        if (masterDoctorView.getHiddenDiscrepancies() != null) {
-          updatedList = masterDoctorView.getHiddenDiscrepancies().stream()
-              .filter(h -> !h.getId()
-                  .equals(key)).toList();
-        }
-
-        masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
-        masterDoctorView.setHiddenDiscrepancies(updatedList);
-
-        repository.save(masterDoctorView);
+      List<HiddenDiscrepancy> updatedList = new ArrayList<>();
+      if (masterDoctorView.getHiddenDiscrepancies() != null) {
+        updatedList = masterDoctorView.getHiddenDiscrepancies().stream()
+            .filter(h -> !h.getId()
+                .equals(key)).toList();
       }
 
-    } catch (Exception e) {
-      log.error("CDC error removing hidden discrepancy: {}, exception: {}", key, e.getMessage(),
-          e);
-      throw e;
+      masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
+      masterDoctorView.setHiddenDiscrepancies(updatedList);
+
+      repository.save(masterDoctorView);
     }
   }
 
