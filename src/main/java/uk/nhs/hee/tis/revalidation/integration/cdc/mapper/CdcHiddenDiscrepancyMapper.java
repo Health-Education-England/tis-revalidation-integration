@@ -26,6 +26,9 @@ import org.mapstruct.Mapper;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
 import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 
+/**
+ * A mapper class to map cdc hidden discrepancy dto to hidden discrepancy entity.
+ */
 @Mapper(componentModel = "spring")
 public interface CdcHiddenDiscrepancyMapper {
 

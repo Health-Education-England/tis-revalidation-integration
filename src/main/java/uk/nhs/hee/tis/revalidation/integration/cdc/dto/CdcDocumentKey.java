@@ -29,6 +29,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDocumentKeyDeserializer;
 
+/**
+ * A class that represents the object id of a document received via CDC.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

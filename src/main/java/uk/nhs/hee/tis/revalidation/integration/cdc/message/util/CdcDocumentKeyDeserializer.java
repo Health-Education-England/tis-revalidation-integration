@@ -27,6 +27,9 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 
+/**
+ * A custom deserializer to extract the object id from the document key of a cdc message.
+ */
 public class CdcDocumentKeyDeserializer extends JsonDeserializer<String> {
 
   @Override
