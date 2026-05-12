@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2022 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,21 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package uk.nhs.hee.tis.revalidation.integration.cdc.dto;
+package uk.nhs.hee.tis.revalidation.integration.cdc.mapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
+import org.mapstruct.Mapper;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CdcDocumentDto<T> {
-  private String operationType;
-  private T fullDocument;
-  private CdcDocumentKey documentKey;
+@Mapper(componentModel = "spring")
+public interface CdcHiddenDiscrepancyMapper {
+
+  HiddenDiscrepancy toEntity(CdcHiddenDiscrepancyDto cdcHiddenDiscrepancyDto);
+
+  List<HiddenDiscrepancy> toEntityList(List<CdcHiddenDiscrepancyDto> cdcHiddenDiscrepancyDtoList);
 }

@@ -41,13 +41,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcHiddenDiscrepancyMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,7 +87,7 @@ class CdcSqsMessageListenerTest {
   ArgumentCaptor<CdcDocumentDto<ConnectionLog>> connectionMessageCaptor;
 
   @Captor
-  ArgumentCaptor<CdcDocumentDto<HiddenDiscrepancy>> hiddenDiscrepancyMessageCaptor;
+  ArgumentCaptor<CdcDocumentDto<CdcHiddenDiscrepancyDto>> hiddenDiscrepancyMessageCaptor;
 
   @Test
   void shouldPassDoctorMessageFromSqsQueueToHandler()
@@ -152,7 +152,7 @@ class CdcSqsMessageListenerTest {
         .handleMessage(hiddenDiscrepancyMessageCaptor.capture());
 
     var result = hiddenDiscrepancyMessageCaptor.getValue();
-    assertEquals(HIDDEN_DISCREPANCY_OID, result.getTargetObjectId());
+    assertEquals(HIDDEN_DISCREPANCY_OID, result.getDocumentKey().getId());
     assertEquals("delete", result.getOperationType());
   }
 }

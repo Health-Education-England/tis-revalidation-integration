@@ -30,13 +30,13 @@ import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcHiddenDiscrepancyMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 /**
@@ -133,26 +133,12 @@ public class CdcSqsMessageListener {
   @SqsListener("${cloud.aws.end-point.cdc.hiddendiscrepancy}")
   public void getHiddenDiscrepancyMessage(String message) throws IOException {
     try {
-      String objectId = extractObjectIdFromMessage(message);
-      CdcDocumentDto<HiddenDiscrepancy> cdcDocument =
+      CdcDocumentDto<CdcHiddenDiscrepancyDto> cdcDocument =
           mapper.readValue(message, new TypeReference<>() {
           });
-      if (cdcDocument.getFullDocument() != null) {
-        cdcDocument.getFullDocument().setId(objectId);
-      }
-      cdcDocument.setTargetObjectId(objectId);
       cdcHiddenDiscrepancyMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
-    }
-  }
-
-  private String extractObjectIdFromMessage(String message) throws JsonProcessingException {
-    var id = mapper.readTree(message).findValue("documentKey").findValue("_id");
-    if (id.findValue("$oid") != null) {
-      return id.findValue("$oid").asText();
-    } else {
-      return id.asText();
     }
   }
 }

@@ -36,6 +36,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.mapper.CdcHiddenDiscrepancyMapper;
 import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -45,19 +47,22 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
  */
 @Slf4j
 @Service
-public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
+public class CdcHiddenDiscrepancyService extends CdcService<CdcHiddenDiscrepancyDto> {
 
   private final ElasticsearchOperations elasticsearchOperations;
+  private final CdcHiddenDiscrepancyMapper cdcHiddenDiscrepancyMapper;
 
   /**
    * Service responsible for updating the hidden discrepancy nested fields used for searching.
    */
   public CdcHiddenDiscrepancyService(
       MasterDoctorElasticSearchRepository repository,
-      ElasticsearchOperations elasticsearchOperations
+      ElasticsearchOperations elasticsearchOperations,
+      CdcHiddenDiscrepancyMapper cdcHiddenDiscrepancyMapper
   ) {
     super(repository);
     this.elasticsearchOperations = elasticsearchOperations;
+    this.cdcHiddenDiscrepancyMapper = cdcHiddenDiscrepancyMapper;
   }
 
   /**
@@ -66,7 +71,7 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
    * @param entity hidden discrepancy to add to index
    */
   @Override
-  public void upsertEntity(HiddenDiscrepancy entity) {
+  public void upsertEntity(CdcHiddenDiscrepancyDto entity) {
     String gmcId = entity.getGmcId();
     final var repository = getRepository();
 
@@ -90,7 +95,7 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
         return;
       }
 
-      hiddenDiscrepancies.add(entity);
+      hiddenDiscrepancies.add(cdcHiddenDiscrepancyMapper.toEntity(entity));
       masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
       masterDoctorView.setHiddenDiscrepancies(hiddenDiscrepancies);
 

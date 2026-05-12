@@ -22,14 +22,14 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
 import org.springframework.stereotype.Component;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.service.CdcHiddenDiscrepancyService;
-import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 
 /**
  * A component class to handle cdc hidden discrepancy messages.
  */
 @Component
-public class CdcHiddenDiscrepancyMessageHandler extends CdcMessageHandler<HiddenDiscrepancy> {
+public class CdcHiddenDiscrepancyMessageHandler extends CdcMessageHandler<CdcHiddenDiscrepancyDto> {
 
   public CdcHiddenDiscrepancyMessageHandler(
       CdcHiddenDiscrepancyService cdcHiddenDiscrepancyService) {

@@ -32,10 +32,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentKey;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.ConnectionInfoDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.mapper.CdcHiddenDiscrepancyMapper;
+import uk.nhs.hee.tis.revalidation.integration.cdc.mapper.CdcHiddenDiscrepancyMapperImpl;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 import uk.nhs.hee.tis.revalidation.integration.entity.RecommendationStatus;
 import uk.nhs.hee.tis.revalidation.integration.entity.UnderNotice;
@@ -49,6 +52,8 @@ import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 @Component
 public class CdcTestDataGenerator {
 
+  private static final CdcHiddenDiscrepancyMapper cdcHiddenDiscrepancyMapper =
+      new CdcHiddenDiscrepancyMapperImpl();
   public static final String GMC_REFERENCE_NUMBER_VAL = "111";
   public static final String DOCTOR_FIRST_NAME_VAL = "firstName";
   public static final String DOCTOR_LAST_NAME_VAL = "lastName";
@@ -66,7 +71,7 @@ public class CdcTestDataGenerator {
   private static final String INTERNAL_ERROR_RESPONSE_CODE = "98";
   private static final String UPDATED_BY_GMC = "Updated by GMC";
   private static final String HIDDEN_REASON_VAL = "reason";
-  private static final String DOCUMENT_KEY = "0a0a0a0a0a0a0a0a0a";
+  private static final CdcDocumentKey DOCUMENT_KEY = CdcDocumentKey.builder().id("1234567").build();
 
   public static final String CDC_DOC_JSON =
       """
@@ -114,23 +119,23 @@ public class CdcTestDataGenerator {
 
   public static final String CDC_CONNECTION_LOG_EVENT_JSON =
       """
-          {
-            "_id": {"_data": "016819321a00000001010000000000020042"},
-            "clusterTime": {"$timestamp": {"t": 1746481690, "i": 1}},
-            "documentKey": {"_id": "1234567"},
-            "fullDocument": {
-                              "_id": "1234567",
-                              "gmcId": "1234567",
-                              "newDesignatedBodyCode": "1-1RSSQ05",
-                              "previousDesignatedBodyCode": "1-AIIDWI",
-                              "updatedBy": "admin",
-                              "requestTime": {"$date": "2025-04-29T00:00:00Z"},
-                              "responseCode": "0",
-                              "_class": "uk.nhs.hee.tis.revalidation.entity.ConnectionLog"},
-            "ns": {"db": "revalidation", "coll": "connectionLog"},
-            "operationType": "insert"
-          }
-        """;
+            {
+              "_id": {"_data": "016819321a00000001010000000000020042"},
+              "clusterTime": {"$timestamp": {"t": 1746481690, "i": 1}},
+              "documentKey": {"_id": "1234567"},
+              "fullDocument": {
+                                "_id": "1234567",
+                                "gmcId": "1234567",
+                                "newDesignatedBodyCode": "1-1RSSQ05",
+                                "previousDesignatedBodyCode": "1-AIIDWI",
+                                "updatedBy": "admin",
+                                "requestTime": {"$date": "2025-04-29T00:00:00Z"},
+                                "responseCode": "0",
+                                "_class": "uk.nhs.hee.tis.revalidation.entity.ConnectionLog"},
+              "ns": {"db": "revalidation", "coll": "connectionLog"},
+              "operationType": "insert"
+            }
+          """;
 
   public static final String CDC_RECOMMENDATION_EVENT_JSON =
       """
@@ -167,12 +172,12 @@ public class CdcTestDataGenerator {
 
   public static final String CDC_HIDDEN_DISCREPANCY_DELETE_EVENT =
       """
-        {"_id": {"_data": "0169fcab1b00000003010000000000053ab4"},
-         "clusterTime": {"$timestamp": {"t": 1778166555, "i": 3}},
-          "documentKey": {"_id": {"$oid": "69fdb35117c18114b019a064"}},
-           "ns": {"db": "revalidation", "coll": "hiddenDiscrepancy"},
-            "operationType": "delete"}
-      """;
+            {"_id": {"_data": "0169fcab1b00000003010000000000053ab4"},
+             "clusterTime": {"$timestamp": {"t": 1778166555, "i": 3}},
+              "documentKey": {"_id": {"$oid": "69fdb35117c18114b019a064"}},
+               "ns": {"db": "revalidation", "coll": "hiddenDiscrepancy"},
+                "operationType": "delete"}
+          """;
 
   private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
@@ -243,7 +248,8 @@ public class CdcTestDataGenerator {
         .admin("old" + ADMIN)
         .existsInGmc(false)
         .hiddenDiscrepancies(List.of(
-            getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument()
+            cdcHiddenDiscrepancyMapper.toEntity(
+                getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument())
         ))
         .build();
   }
@@ -267,8 +273,10 @@ public class CdcTestDataGenerator {
         .admin("old" + ADMIN)
         .existsInGmc(false)
         .hiddenDiscrepancies(List.of(
-            getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument(),
-            getSecondHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument()
+            cdcHiddenDiscrepancyMapper.toEntity(
+                getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument()),
+            cdcHiddenDiscrepancyMapper.toEntity(
+                getSecondHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument())
         ))
         .build();
   }
@@ -480,8 +488,9 @@ public class CdcTestDataGenerator {
    *
    * @return CdcDocumentDto HiddenDiscrepancy insert test instance
    */
-  public static CdcDocumentDto<HiddenDiscrepancy> getCdcHiddenDiscrepancyInsertCdcDocumentDto() {
-    HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
+  public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
+  getCdcHiddenDiscrepancyInsertCdcDocumentDto() {
+    CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id("1")
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
@@ -495,12 +504,13 @@ public class CdcTestDataGenerator {
   }
 
   /**
-   * Get a test instance of a second insert HiddenDiscrepancy CdcDocumentDto.
+   * Get a test instance of a second insert CdcHiddenDiscrepancyDto CdcDocumentDto.
    *
-   * @return CdcDocumentDto HiddenDiscrepancy insert test instance
+   * @return CdcDocumentDto CdcHiddenDiscrepancyDto insert test instance
    */
-  public static CdcDocumentDto<HiddenDiscrepancy> getSecondHiddenDiscrepancyInsertCdcDocumentDto() {
-    HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
+  public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
+  getSecondHiddenDiscrepancyInsertCdcDocumentDto() {
+    CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id("2")
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
@@ -514,12 +524,13 @@ public class CdcTestDataGenerator {
   }
 
   /**
-   * Get a test instance of a deleted HiddenDiscrepancy CdcDocumentDto.
+   * Get a test instance of a deleted CdcHiddenDiscrepancyDto CdcDocumentDto.
    *
-   * @return CdcDocumentDto HiddenDiscrepancy deleted test instance
+   * @return CdcDocumentDto CdcHiddenDiscrepancyDto deleted test instance
    */
-  public static CdcDocumentDto<HiddenDiscrepancy> getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
-    HiddenDiscrepancy hiddenDiscrepancy = HiddenDiscrepancy.builder()
+  public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
+  getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
+    CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id("2")
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())

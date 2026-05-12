@@ -47,9 +47,11 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Query;
+import uk.nhs.hee.tis.revalidation.integration.cdc.mapper.CdcHiddenDiscrepancyMapper;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -80,6 +82,8 @@ class CdcHiddenDiscrepancyServiceTest {
   EsDocUpdateHelper esUpdateHelper;
   @Mock
   CdcMessagePublisher publisher;
+  @Mock
+  CdcHiddenDiscrepancyMapper cdcHiddenDiscrepancyMapper;
   @Captor
   ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
@@ -88,12 +92,23 @@ class CdcHiddenDiscrepancyServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var newHiddenDiscrepancy = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
-    cdcHiddenDiscrepancyService.upsertEntity(newHiddenDiscrepancy.getFullDocument());
+    var dto = newHiddenDiscrepancy.getFullDocument();
+    var entity = HiddenDiscrepancy.builder()
+        .id(dto.getId())
+        .gmcId(dto.getGmcId())
+        .hiddenForDesignatedBodyCode(dto.getHiddenForDesignatedBodyCode())
+        .hiddenBy(dto.getHiddenBy())
+        .reason(dto.getReason())
+        .hiddenDateTime(dto.getHiddenDateTime())
+        .build();
+    when(cdcHiddenDiscrepancyMapper.toEntity(dto)).thenReturn(entity);
+
+    cdcHiddenDiscrepancyService.upsertEntity(dto);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 
     assertThat(masterDoctorViewCaptor.getValue().getHiddenDiscrepancies(),
-        is(List.of(newHiddenDiscrepancy.getFullDocument())));
+        is(List.of(entity)));
   }
 
   @Test
@@ -103,7 +118,18 @@ class CdcHiddenDiscrepancyServiceTest {
 
     var newHiddenDiscrepancy = CdcTestDataGenerator
         .getSecondHiddenDiscrepancyInsertCdcDocumentDto();
-    cdcHiddenDiscrepancyService.upsertEntity(newHiddenDiscrepancy.getFullDocument());
+    var dto = newHiddenDiscrepancy.getFullDocument();
+    var entity = HiddenDiscrepancy.builder()
+        .id(dto.getId())
+        .gmcId(dto.getGmcId())
+        .hiddenForDesignatedBodyCode(dto.getHiddenForDesignatedBodyCode())
+        .hiddenBy(dto.getHiddenBy())
+        .reason(dto.getReason())
+        .hiddenDateTime(dto.getHiddenDateTime())
+        .build();
+    when(cdcHiddenDiscrepancyMapper.toEntity(dto)).thenReturn(entity);
+
+    cdcHiddenDiscrepancyService.upsertEntity(dto);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 

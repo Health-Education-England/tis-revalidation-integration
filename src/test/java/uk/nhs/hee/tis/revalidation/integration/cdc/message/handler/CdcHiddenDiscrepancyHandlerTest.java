@@ -54,6 +54,6 @@ class CdcHiddenDiscrepancyHandlerTest {
     var testMessage = CdcTestDataGenerator.getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
     cdcHiddenDiscrepancyMessageHandler.handleMessage(testMessage);
 
-    verify(cdcHiddenDiscrepancyService).deleteEntity(testMessage.getTargetObjectId());
+    verify(cdcHiddenDiscrepancyService).deleteEntity(testMessage.getDocumentKey().getId());
   }
 }

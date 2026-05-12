@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright 2022 Crown Copyright (Health Education England)
+ * Copyright 2026 Crown Copyright (NHS England)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,18 +22,36 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDocumentKeyDeserializer;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
 
+/**
+ * A class that represents a hidden discrepancy received via CDC.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CdcDocumentDto<T> {
-  private String operationType;
-  private T fullDocument;
-  private CdcDocumentKey documentKey;
+public class CdcHiddenDiscrepancyDto {
+
+  @JsonProperty("_id")
+  @JsonDeserialize(using = CdcDocumentKeyDeserializer.class)
+  private String id;
+  private String gmcId;
+  private String hiddenForDesignatedBodyCode;
+  private String hiddenBy;
+  private String reason;
+  @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
+  private LocalDateTime hiddenDateTime;
 }
