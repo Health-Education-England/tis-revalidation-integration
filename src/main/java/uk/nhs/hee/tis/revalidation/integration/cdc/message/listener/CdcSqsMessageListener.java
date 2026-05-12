@@ -137,7 +137,7 @@ public class CdcSqsMessageListener {
       CdcDocumentDto<HiddenDiscrepancy> cdcDocument =
           mapper.readValue(message, new TypeReference<>() {
           });
-      if(cdcDocument.getFullDocument()!= null) {
+      if (cdcDocument.getFullDocument() != null) {
         cdcDocument.getFullDocument().setId(objectId);
       }
       cdcDocument.setTargetObjectId(objectId);
@@ -148,11 +148,11 @@ public class CdcSqsMessageListener {
   }
 
   private String extractObjectIdFromMessage(String message) throws JsonProcessingException {
-      var id = mapper.readTree(message).findValue("documentKey").findValue("_id");
-      if(id.findValue("$oid") != null) {
-        return id.findValue("$oid").asText();
-      } else  {
-        return id.asText();
-      }
+    var id = mapper.readTree(message).findValue("documentKey").findValue("_id");
+    if (id.findValue("$oid") != null) {
+      return id.findValue("$oid").asText();
+    } else {
+      return id.asText();
+    }
   }
 }

@@ -45,7 +45,6 @@ import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnection
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcHiddenDiscrepancyMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
-import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
 import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;

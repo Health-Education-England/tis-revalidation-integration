@@ -27,7 +27,6 @@ import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,6 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
-import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
 import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
@@ -142,7 +140,8 @@ public class CdcHiddenDiscrepancyService extends CdcService<HiddenDiscrepancy> {
     NativeSearchQuery searchQueryEsResult = new NativeSearchQueryBuilder()
         .withQuery(rootQuery)
         .build();
-    var result = elasticsearchOperations.search(searchQueryEsResult, MasterDoctorView.class).getSearchHits()
+    var result = elasticsearchOperations.search(searchQueryEsResult, MasterDoctorView.class)
+        .getSearchHits()
         .stream()
         .findFirst();
     if (result.isPresent()) {

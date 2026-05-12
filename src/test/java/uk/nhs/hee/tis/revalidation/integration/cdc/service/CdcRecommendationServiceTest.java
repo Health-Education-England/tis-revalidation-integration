@@ -104,8 +104,6 @@ class CdcRecommendationServiceTest {
 
   @Test
   void shouldThrowNotImplementedExceptionOnDeleteEntityCall() {
-    var testEntity = CdcTestDataGenerator.getCdcRecommendationInsertCdcDocumentDto()
-        .getFullDocument();
     assertThrows(NotImplementedException.class,
         () -> cdcRecommendationService.deleteEntity(
             "foo"
