@@ -71,8 +71,8 @@ public class CdcTestDataGenerator {
   private static final String INTERNAL_ERROR_RESPONSE_CODE = "98";
   private static final String UPDATED_BY_GMC = "Updated by GMC";
   private static final String HIDDEN_REASON_VAL = "reason";
-  private static final CdcDocumentKey DOCUMENT_KEY = CdcDocumentKey.builder().id("1234567").build();
 
+  public static final CdcDocumentKey DOCUMENT_KEY = CdcDocumentKey.builder().id("1234567").build();
   public static final String CDC_DOC_JSON =
       """
           {
@@ -142,9 +142,9 @@ public class CdcTestDataGenerator {
           {
             "_id": {"_data": "0168220a440000000b01000000000002d1b5"},
             "clusterTime": {"$timestamp": {"t": 1747061316, "i": 11}},
-            "documentKey": {"_id": {"$oid": "67fcf9ea74f4e44093b9f327"}},
+            "documentKey": {"_id": {"$oid": "1234567"}},
             "fullDocument": {
-                              "_id": {"$oid": "67fcf9ea74f4e44093b9f327"},
+                              "_id": {"$oid": "1234567"},
                               "gmcNumber": "1234567", "recommendationType": "REVALIDATE",
                               "recommendationStatus": "SUBMITTED_TO_GMC",
                               "gmcSubmissionDate": {"$date": "2025-04-28T00:00:00Z"},
@@ -160,8 +160,8 @@ public class CdcTestDataGenerator {
       """
           {"_id": {"_data": "0169fdb35100000006010000000000053ab4"},
            "clusterTime": {"$timestamp": {"t": 1778234193, "i": 6}},
-            "documentKey": {"_id": {"$oid": "69fdb35117c18114b019a064"}},
-             "fullDocument": {"_id": {"$oid": "69fdb35117c18114b019a064"},
+            "documentKey": {"_id": {"$oid": "1234567"}},
+             "fullDocument": {"_id": {"$oid": "1234567"},
               "gmcId": "1234567", "hiddenForDesignatedBodyCode": "1-1RSSQ05",
                "hiddenBy": "test", "reason": "test", "hiddenDateTime":
                 {"$date": "2026-05-08T09:56:33.453Z"}, "_class":
@@ -174,7 +174,7 @@ public class CdcTestDataGenerator {
       """
             {"_id": {"_data": "0169fcab1b00000003010000000000053ab4"},
              "clusterTime": {"$timestamp": {"t": 1778166555, "i": 3}},
-              "documentKey": {"_id": {"$oid": "69fdb35117c18114b019a064"}},
+              "documentKey": {"_id": {"$oid": "1234567"}},
                "ns": {"db": "revalidation", "coll": "hiddenDiscrepancy"},
                 "operationType": "delete"}
           """;

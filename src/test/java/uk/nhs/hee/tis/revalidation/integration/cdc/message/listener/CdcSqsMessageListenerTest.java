@@ -28,6 +28,7 @@ import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTe
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_HIDDEN_DISCREPANCY_DELETE_EVENT;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_HIDDEN_DISCREPANCY_INSERT_EVENT;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_RECOMMENDATION_EVENT_JSON;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.model.changestream.OperationType;
@@ -55,7 +56,6 @@ import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 class CdcSqsMessageListenerTest {
 
   private static final String GMC_ID = "1234567";
-  private static final String HIDDEN_DISCREPANCY_OID = "69fdb35117c18114b019a064";
 
   @InjectMocks
   CdcSqsMessageListener cdcSqsMessageListener;
@@ -140,7 +140,7 @@ class CdcSqsMessageListenerTest {
 
     var result = hiddenDiscrepancyMessageCaptor.getValue();
     assertEquals(GMC_ID, result.getFullDocument().getGmcId());
-    assertEquals(HIDDEN_DISCREPANCY_OID, result.getFullDocument().getId());
+    assertEquals(DOCUMENT_KEY.getId(), result.getFullDocument().getId());
     assertEquals(OperationType.INSERT.getValue(), result.getOperationType());
   }
 
@@ -153,7 +153,7 @@ class CdcSqsMessageListenerTest {
         .handleMessage(hiddenDiscrepancyMessageCaptor.capture());
 
     var result = hiddenDiscrepancyMessageCaptor.getValue();
-    assertEquals(HIDDEN_DISCREPANCY_OID, result.getDocumentKey().getId());
+    assertEquals(DOCUMENT_KEY.getId(), result.getDocumentKey().getId());
     assertEquals(OperationType.DELETE.getValue(), result.getOperationType());
   }
 }
