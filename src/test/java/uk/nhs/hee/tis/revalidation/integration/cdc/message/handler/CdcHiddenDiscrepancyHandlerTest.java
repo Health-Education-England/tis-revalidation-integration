@@ -22,6 +22,7 @@
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.handler;
 
 import static org.mockito.Mockito.verify;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY;
 
 import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,8 @@ class CdcHiddenDiscrepancyHandlerTest {
 
   @Test
   void shouldHandleInserts() throws OperationNotSupportedException {
-    var testMessage = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
+    var testMessage = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     cdcHiddenDiscrepancyMessageHandler.handleMessage(testMessage);
 
     verify(cdcHiddenDiscrepancyService).upsertEntity(testMessage.getFullDocument());
@@ -54,6 +56,6 @@ class CdcHiddenDiscrepancyHandlerTest {
     var testMessage = CdcTestDataGenerator.getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
     cdcHiddenDiscrepancyMessageHandler.handleMessage(testMessage);
 
-    verify(cdcHiddenDiscrepancyService).deleteEntity(testMessage.getFullDocument());
+    verify(cdcHiddenDiscrepancyService).deleteEntity(testMessage.getDocumentKey().getId());
   }
 }

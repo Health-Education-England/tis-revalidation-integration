@@ -21,6 +21,7 @@
 
 package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
@@ -29,13 +30,13 @@ import javax.naming.OperationNotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcDocumentDto;
+import uk.nhs.hee.tis.revalidation.integration.cdc.dto.CdcHiddenDiscrepancyDto;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcConnectionMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcDoctorMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcHiddenDiscrepancyMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.handler.CdcRecommendationMessageHandler;
 import uk.nhs.hee.tis.revalidation.integration.entity.ConnectionLog;
 import uk.nhs.hee.tis.revalidation.integration.entity.DoctorsForDB;
-import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.entity.Recommendation;
 
 /**
@@ -132,7 +133,7 @@ public class CdcSqsMessageListener {
   @SqsListener("${cloud.aws.end-point.cdc.hiddendiscrepancy}")
   public void getHiddenDiscrepancyMessage(String message) throws IOException {
     try {
-      CdcDocumentDto<HiddenDiscrepancy> cdcDocument =
+      CdcDocumentDto<CdcHiddenDiscrepancyDto> cdcDocument =
           mapper.readValue(message, new TypeReference<>() {
           });
       cdcHiddenDiscrepancyMessageHandler.handleMessage(cdcDocument);

@@ -23,15 +23,17 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.MASTER_DOCTOR_INDEX;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY_2;
 
 import java.util.Collections;
+import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.common.collect.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,9 +43,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.Query;
+import uk.nhs.hee.tis.revalidation.integration.cdc.mapper.CdcHiddenDiscrepancyMapper;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.publisher.CdcMessagePublisher;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator;
 import uk.nhs.hee.tis.revalidation.integration.cdc.repository.custom.EsDocUpdateHelper;
+import uk.nhs.hee.tis.revalidation.integration.entity.HiddenDiscrepancy;
 import uk.nhs.hee.tis.revalidation.integration.sync.repository.MasterDoctorElasticSearchRepository;
 import uk.nhs.hee.tis.revalidation.integration.sync.view.MasterDoctorView;
 
@@ -56,15 +64,26 @@ class CdcHiddenDiscrepancyServiceTest {
       .getTestMasterDoctorViewWithHidden();
   private final MasterDoctorView masterDoctorViewWithMultipleHidden = CdcTestDataGenerator
       .getTestMasterDoctorViewWithMultipleHidden();
+
+  // Mock empty Elasticsearch search result
+  @Mock
+  SearchHits<MasterDoctorView> searchHitsResult;
+  @Mock
+  SearchHit<MasterDoctorView> searchHit;
+
   @InjectMocks
   @Spy
   CdcHiddenDiscrepancyService cdcHiddenDiscrepancyService;
   @Mock
   MasterDoctorElasticSearchRepository repository;
   @Mock
+  ElasticsearchOperations elasticsearchOperations;
+  @Mock
   EsDocUpdateHelper esUpdateHelper;
   @Mock
   CdcMessagePublisher publisher;
+  @Mock
+  CdcHiddenDiscrepancyMapper cdcHiddenDiscrepancyMapper;
   @Captor
   ArgumentCaptor<MasterDoctorView> masterDoctorViewCaptor;
 
@@ -72,13 +91,25 @@ class CdcHiddenDiscrepancyServiceTest {
   void shouldAddNewField() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
-    var newHiddenDiscrepancy = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
-    cdcHiddenDiscrepancyService.upsertEntity(newHiddenDiscrepancy.getFullDocument());
+    var newHiddenDiscrepancy = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
+    var dto = newHiddenDiscrepancy.getFullDocument();
+    var entity = HiddenDiscrepancy.builder()
+        .id(dto.getId())
+        .gmcId(dto.getGmcId())
+        .hiddenForDesignatedBodyCode(dto.getHiddenForDesignatedBodyCode())
+        .hiddenBy(dto.getHiddenBy())
+        .reason(dto.getReason())
+        .hiddenDateTime(dto.getHiddenDateTime())
+        .build();
+    when(cdcHiddenDiscrepancyMapper.toEntity(dto)).thenReturn(entity);
+
+    cdcHiddenDiscrepancyService.upsertEntity(dto);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 
     assertThat(masterDoctorViewCaptor.getValue().getHiddenDiscrepancies(),
-        is(List.of(newHiddenDiscrepancy.getFullDocument())));
+        is(List.of(entity)));
   }
 
   @Test
@@ -87,8 +118,19 @@ class CdcHiddenDiscrepancyServiceTest {
         List.of(masterDoctorViewWithHidden));
 
     var newHiddenDiscrepancy = CdcTestDataGenerator
-        .getSecondHiddenDiscrepancyInsertCdcDocumentDto();
-    cdcHiddenDiscrepancyService.upsertEntity(newHiddenDiscrepancy.getFullDocument());
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY_2);
+    var dto = newHiddenDiscrepancy.getFullDocument();
+    var entity = HiddenDiscrepancy.builder()
+        .id(dto.getId())
+        .gmcId(dto.getGmcId())
+        .hiddenForDesignatedBodyCode(dto.getHiddenForDesignatedBodyCode())
+        .hiddenBy(dto.getHiddenBy())
+        .reason(dto.getReason())
+        .hiddenDateTime(dto.getHiddenDateTime())
+        .build();
+    when(cdcHiddenDiscrepancyMapper.toEntity(dto)).thenReturn(entity);
+
+    cdcHiddenDiscrepancyService.upsertEntity(dto);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 
@@ -99,7 +141,8 @@ class CdcHiddenDiscrepancyServiceTest {
   void shouldNotInsertRecordIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    var newConnectionLog = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
+    var newConnectionLog = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     cdcHiddenDiscrepancyService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(repository, never()).save(any());
@@ -107,10 +150,20 @@ class CdcHiddenDiscrepancyServiceTest {
 
   @Test
   void shouldRemoveRecordsFromOnDeleteOperation() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
+    var deletedHiddenDiscrepancy = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
 
-    var newHiddenDiscrepancy = CdcTestDataGenerator.getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
-    cdcHiddenDiscrepancyService.deleteEntity(newHiddenDiscrepancy.getFullDocument());
+    when(searchHit.getContent()).thenReturn(masterDoctorView);
+    when(searchHitsResult.getSearchHits()).thenReturn(List.of(searchHit));
+    when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
+        .thenReturn(searchHitsResult);
+
+    String hiddenDiscrepancyId = deletedHiddenDiscrepancy.getFullDocument().getId();
+    String gmcId = deletedHiddenDiscrepancy.getFullDocument().getGmcId();
+
+    when(repository.findByGmcReferenceNumber(gmcId)).thenReturn(List.of(masterDoctorView));
+
+    cdcHiddenDiscrepancyService.deleteEntity(hiddenDiscrepancyId);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 
@@ -120,12 +173,21 @@ class CdcHiddenDiscrepancyServiceTest {
 
   @Test
   void shouldRemoveIndividualRecordsFromFieldOnDeleteOperation() {
-    when(repository.findByGmcReferenceNumber(any())).thenReturn(
-        List.of(masterDoctorViewWithMultipleHidden));
-
     var deletedHiddenDiscrepancy = CdcTestDataGenerator
         .getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
-    cdcHiddenDiscrepancyService.deleteEntity(deletedHiddenDiscrepancy.getFullDocument());
+
+    when(searchHit.getContent()).thenReturn(masterDoctorViewWithMultipleHidden);
+    when(searchHitsResult.getSearchHits()).thenReturn(List.of(searchHit));
+    when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
+        .thenReturn(searchHitsResult);
+
+    String hiddenDiscrepancyId = deletedHiddenDiscrepancy.getFullDocument().getId();
+    String gmcId = deletedHiddenDiscrepancy.getFullDocument().getGmcId();
+
+    when(repository.findByGmcReferenceNumber(gmcId)).thenReturn(
+        List.of(masterDoctorViewWithMultipleHidden));
+
+    cdcHiddenDiscrepancyService.deleteEntity(hiddenDiscrepancyId);
 
     verify(repository).save(masterDoctorViewCaptor.capture());
 
@@ -137,11 +199,78 @@ class CdcHiddenDiscrepancyServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(
         List.of(masterDoctorViewWithHidden));
 
-    var newConnectionLog = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto();
+    var newConnectionLog = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     cdcHiddenDiscrepancyService.upsertEntity(newConnectionLog.getFullDocument());
 
-    verify(esUpdateHelper, never()).partialUpdate(eq(MASTER_DOCTOR_INDEX),
-        eq(masterDoctorView.getId()),
-        anyMap(), eq(MasterDoctorView.class));
+    verify(repository, never()).save(any());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenNoHiddenDiscrepancyFoundToDelete() {
+    String nonExistentId = "nonExistentId";
+
+    when(searchHitsResult.getSearchHits()).thenReturn(Collections.emptyList());
+    when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
+        .thenReturn(searchHitsResult);
+
+    RuntimeException exception = assertThrows(ResourceNotFoundException.class,
+        () -> cdcHiddenDiscrepancyService.deleteEntity(nonExistentId));
+
+    assertThat(exception.getMessage(),
+        is("No elasticsearch record found to delete hidden discrepancy with id: " + nonExistentId));
+    verify(repository, never()).save(any());
+  }
+
+  @Test
+  void shouldDeleteCorrectHiddenDiscrepancyById() {
+    var deletedHiddenDiscrepancy = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
+
+    when(searchHit.getContent()).thenReturn(masterDoctorViewWithMultipleHidden);
+    when(searchHitsResult.getSearchHits()).thenReturn(List.of(searchHit));
+    when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
+        .thenReturn(searchHitsResult);
+
+    String hiddenDiscrepancyId = deletedHiddenDiscrepancy.getFullDocument().getId();
+    String gmcId = deletedHiddenDiscrepancy.getFullDocument().getGmcId();
+
+    when(repository.findByGmcReferenceNumber(gmcId)).thenReturn(
+        List.of(masterDoctorViewWithMultipleHidden));
+
+    cdcHiddenDiscrepancyService.deleteEntity(hiddenDiscrepancyId);
+
+    verify(repository).save(masterDoctorViewCaptor.capture());
+
+    // Verify the correct hidden discrepancy was removed (by ID, not by designated body code)
+    var savedView = masterDoctorViewCaptor.getValue();
+    assertThat(savedView.getHiddenDiscrepancies().size(), is(1));
+    assertThat(savedView.getHiddenDiscrepancies().stream()
+        .noneMatch(h -> h.getId().equals(hiddenDiscrepancyId)), is(true));
+  }
+
+  @Test
+  void shouldHandleMultipleDoctorsWithSameGmcNumberDuringDelete() {
+    var deletedHiddenDiscrepancy = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyDeleteCdcDocumentDto();
+
+    MasterDoctorView duplicateDoctor = CdcTestDataGenerator.getTestMasterDoctorView();
+
+    when(searchHit.getContent()).thenReturn(masterDoctorView);
+    when(searchHitsResult.getSearchHits()).thenReturn(List.of(searchHit));
+    when(elasticsearchOperations.search(any(Query.class), eq(MasterDoctorView.class)))
+        .thenReturn(searchHitsResult);
+
+    String hiddenDiscrepancyId = deletedHiddenDiscrepancy.getFullDocument().getId();
+    String gmcId = deletedHiddenDiscrepancy.getFullDocument().getGmcId();
+
+    // Multiple doctors with same GMC number
+    when(repository.findByGmcReferenceNumber(gmcId)).thenReturn(
+        List.of(masterDoctorView, duplicateDoctor));
+
+    cdcHiddenDiscrepancyService.deleteEntity(hiddenDiscrepancyId);
+
+    // Should still process the first doctor
+    verify(repository).save(any());
   }
 }
