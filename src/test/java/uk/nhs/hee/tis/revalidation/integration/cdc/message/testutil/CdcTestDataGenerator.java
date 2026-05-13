@@ -73,6 +73,8 @@ public class CdcTestDataGenerator {
   private static final String HIDDEN_REASON_VAL = "reason";
 
   public static final CdcDocumentKey DOCUMENT_KEY = CdcDocumentKey.builder().id("1234567").build();
+  public static final CdcDocumentKey DOCUMENT_KEY_2 = CdcDocumentKey.builder().id("7654321")
+      .build();
   public static final String CDC_DOC_JSON =
       """
           {
@@ -215,7 +217,7 @@ public class CdcTestDataGenerator {
    */
   public static MasterDoctorView getTestMasterDoctorView() {
     return MasterDoctorView.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .tcsPersonId(1L)
         .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
         .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
@@ -236,7 +238,7 @@ public class CdcTestDataGenerator {
    */
   public static MasterDoctorView getTestMasterDoctorViewWithHidden() {
     return MasterDoctorView.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .tcsPersonId(1L)
         .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
         .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
@@ -261,12 +263,12 @@ public class CdcTestDataGenerator {
    */
   public static MasterDoctorView getTestMasterDoctorViewWithMultipleHidden() {
     var cdcDocumentDtoLists = List.of(
-        getCdcHiddenDiscrepancyInsertCdcDocumentDto("1").getFullDocument(),
-        getCdcHiddenDiscrepancyInsertCdcDocumentDto("2").getFullDocument());
+        getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY.getId()).getFullDocument(),
+        getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY_2.getId()).getFullDocument());
     var hiddenDiscrepancies = cdcHiddenDiscrepancyMapper.toEntityList(cdcDocumentDtoLists);
 
     return MasterDoctorView.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .tcsPersonId(1L)
         .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
         .doctorFirstName("old" + DOCTOR_FIRST_NAME_VAL)
@@ -318,7 +320,7 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<Recommendation> getCdcRecommendationInsertCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
         .recommendationType(RecommendationType.REVALIDATE)
         .recommendationStatus(DRAFT)
@@ -338,7 +340,7 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<Recommendation> getRecommendationInsertCdcDocumentDtoNullOutcome() {
     Recommendation recommendation = Recommendation.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
         .recommendationType(RecommendationType.REVALIDATE)
         .recommendationStatus(DRAFT)
@@ -357,7 +359,7 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<Recommendation> getCdcRecommendationReplaceCdcDocumentDto() {
     Recommendation recommendation = Recommendation.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .gmcNumber(GMC_REFERENCE_NUMBER_VAL)
         .recommendationType(RecommendationType.REVALIDATE)
         .recommendationStatus(DRAFT)
@@ -437,7 +439,7 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<ConnectionLog> getCdcConnectionLogInsertCdcDocumentDto() {
     ConnectionLog connectionLog = ConnectionLog.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .requestTime(LocalDateTime.now())
         .updatedBy(ADMIN_VAL)
@@ -455,7 +457,7 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<ConnectionLog> getCdcUnsuccessfulConnectionCdcDocumentDto() {
     ConnectionLog connectionLog = ConnectionLog.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .requestTime(LocalDateTime.now())
         .updatedBy(ADMIN_VAL)
@@ -473,7 +475,7 @@ public class CdcTestDataGenerator {
    */
   public static CdcDocumentDto<ConnectionLog> getCdcGmcExternalConnectionCdcDocumentDto() {
     ConnectionLog connectionLog = ConnectionLog.builder()
-        .id("1")
+        .id(DOCUMENT_KEY.getId())
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .requestTime(LocalDateTime.now())
         .updatedBy(UPDATED_BY_GMC)
@@ -489,7 +491,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto HiddenDiscrepancy insert test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-      getCdcHiddenDiscrepancyInsertCdcDocumentDto(String key) {
+  getCdcHiddenDiscrepancyInsertCdcDocumentDto(String key) {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id(key)
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
@@ -509,9 +511,9 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcHiddenDiscrepancyDto deleted test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-      getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
+  getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
-        .id("2")
+        .id(DOCUMENT_KEY.getId())
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenBy(ADMIN_VAL)
