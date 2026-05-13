@@ -179,7 +179,7 @@ public class CdcTestDataGenerator {
                 "operationType": "delete"}
           """;
 
-  private static DoctorsForDB doctorsForDB = DoctorsForDB.builder()
+  private static final DoctorsForDB doctorsForDB = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
       .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
       .doctorLastName(DOCTOR_LAST_NAME_VAL)
@@ -194,7 +194,7 @@ public class CdcTestDataGenerator {
       .existsInGmc(EXISTS_IN_GMC_VAL)
       .build();
 
-  private static DoctorsForDB doctorsForDBNullDbc = DoctorsForDB.builder()
+  private static final DoctorsForDB doctorsForDBNullDbc = DoctorsForDB.builder()
       .gmcReferenceNumber(GMC_REFERENCE_NUMBER_VAL)
       .doctorFirstName(DOCTOR_FIRST_NAME_VAL)
       .doctorLastName(DOCTOR_LAST_NAME_VAL)
@@ -249,7 +249,7 @@ public class CdcTestDataGenerator {
         .existsInGmc(false)
         .hiddenDiscrepancies(List.of(
             cdcHiddenDiscrepancyMapper.toEntity(
-                getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument())
+                getCdcHiddenDiscrepancyInsertCdcDocumentDto("1").getFullDocument())
         ))
         .build();
   }
@@ -260,6 +260,11 @@ public class CdcTestDataGenerator {
    * @return MasterDoctorView test instance with hidden discrepancies
    */
   public static MasterDoctorView getTestMasterDoctorViewWithMultipleHidden() {
+    var cdcDocumentDtoLists = List.of(
+        getCdcHiddenDiscrepancyInsertCdcDocumentDto("1").getFullDocument(),
+        getCdcHiddenDiscrepancyInsertCdcDocumentDto("2").getFullDocument());
+    var hiddenDiscrepancies = cdcHiddenDiscrepancyMapper.toEntityList(cdcDocumentDtoLists);
+
     return MasterDoctorView.builder()
         .id("1")
         .tcsPersonId(1L)
@@ -272,12 +277,7 @@ public class CdcTestDataGenerator {
         .lastUpdatedDate(LocalDate.now())
         .admin("old" + ADMIN)
         .existsInGmc(false)
-        .hiddenDiscrepancies(List.of(
-            cdcHiddenDiscrepancyMapper.toEntity(
-                getCdcHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument()),
-            cdcHiddenDiscrepancyMapper.toEntity(
-                getSecondHiddenDiscrepancyInsertCdcDocumentDto().getFullDocument())
-        ))
+        .hiddenDiscrepancies(hiddenDiscrepancies)
         .build();
   }
 
@@ -489,33 +489,13 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto HiddenDiscrepancy insert test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-      getCdcHiddenDiscrepancyInsertCdcDocumentDto() {
+  getCdcHiddenDiscrepancyInsertCdcDocumentDto(String key) {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
-        .id("1")
+        .id(key)
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenBy(ADMIN_VAL)
-        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL)
-        .reason(HIDDEN_REASON_VAL)
-        .build();
-
-    return new CdcDocumentDto<>(OperationType.INSERT.getValue(),
-        hiddenDiscrepancy, DOCUMENT_KEY);
-  }
-
-  /**
-   * Get a test instance of a second insert CdcHiddenDiscrepancyDto CdcDocumentDto.
-   *
-   * @return CdcDocumentDto CdcHiddenDiscrepancyDto insert test instance
-   */
-  public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-      getSecondHiddenDiscrepancyInsertCdcDocumentDto() {
-    CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
-        .id("2")
-        .gmcId(GMC_REFERENCE_NUMBER_VAL)
-        .hiddenDateTime(LocalDateTime.now())
-        .hiddenBy(ADMIN_VAL)
-        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL + "2")
+        .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL + key)
         .reason(HIDDEN_REASON_VAL)
         .build();
 
@@ -529,7 +509,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcHiddenDiscrepancyDto deleted test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-      getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
+  getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id("2")
         .gmcId(GMC_REFERENCE_NUMBER_VAL)

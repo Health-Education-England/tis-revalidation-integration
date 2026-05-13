@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ResourceNotFoundException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -105,40 +106,38 @@ public class CdcHiddenDiscrepancyService extends CdcService<CdcHiddenDiscrepancy
 
   @Override
   public void deleteEntity(String key) {
-    String gmcId = findGmcIdAssociatedWithHiddenDiscrepancy(key);
+    MasterDoctorView masterDoctorView = findRecordAssociatedWithHiddenDiscrepancy(key);
+    String gmcId = masterDoctorView.getGmcReferenceNumber();
     final var repository = getRepository();
 
-    List<MasterDoctorView> masterDoctorViewList = repository.findByGmcReferenceNumber(gmcId);
-    if (!masterDoctorViewList.isEmpty()) {
-      MasterDoctorView masterDoctorView = handleDuplicateRecords(masterDoctorViewList);
-
-      List<HiddenDiscrepancy> updatedList = new ArrayList<>();
-      if (masterDoctorView.getHiddenDiscrepancies() != null) {
-        updatedList = masterDoctorView.getHiddenDiscrepancies().stream()
-            .filter(h -> !h.getId()
-                .equals(key)).toList();
-      }
-
-      masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
-      masterDoctorView.setHiddenDiscrepancies(updatedList);
-
-      repository.save(masterDoctorView);
+    List<HiddenDiscrepancy> updatedList = new ArrayList<>();
+    if (masterDoctorView.getHiddenDiscrepancies() != null) {
+      updatedList = masterDoctorView.getHiddenDiscrepancies().stream()
+          .filter(h -> !h.getId()
+              .equals(key)).toList();
     }
+
+    masterDoctorView = repository.findByGmcReferenceNumber(gmcId).get(0);
+    masterDoctorView.setHiddenDiscrepancies(updatedList);
+
+    repository.save(masterDoctorView);
   }
 
-  private String findGmcIdAssociatedWithHiddenDiscrepancy(String key) {
+  private MasterDoctorView findRecordAssociatedWithHiddenDiscrepancy(String key) {
     BoolQueryBuilder rootQuery = boolQuery();
     rootQuery.must(boolQuery().filter(nestedQuery("hiddenDiscrepancies", boolQuery()
         .must(matchQuery("hiddenDiscrepancies.id.keyword", key)), None)));
     NativeSearchQuery searchQueryEsResult = new NativeSearchQueryBuilder()
         .withQuery(rootQuery)
         .build();
-    var result = elasticsearchOperations.search(searchQueryEsResult, MasterDoctorView.class)
+    List<MasterDoctorView> result = elasticsearchOperations.search(searchQueryEsResult,
+            MasterDoctorView.class)
         .getSearchHits()
         .stream()
-        .findFirst();
-    if (result.isPresent()) {
-      return result.get().getContent().getGmcReferenceNumber();
+        .map(SearchHit::getContent)
+        .toList();
+    if (!result.isEmpty()) {
+      return handleDuplicateRecords(result);
     } else {
       throw new ResourceNotFoundException(
           String.format("No elasticsearch record found to delete hidden discrepancy with id: %s",

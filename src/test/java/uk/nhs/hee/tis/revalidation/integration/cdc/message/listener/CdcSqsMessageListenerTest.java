@@ -24,12 +24,13 @@ package uk.nhs.hee.tis.revalidation.integration.cdc.message.listener;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_CONNECTION_LOG_EVENT_JSON;
-import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_DOC_JSON;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_DOCDB_EVENT_JSON;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_HIDDEN_DISCREPANCY_DELETE_EVENT;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_HIDDEN_DISCREPANCY_INSERT_EVENT;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.CDC_RECOMMENDATION_EVENT_JSON;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.model.changestream.OperationType;
 import java.io.IOException;
 import javax.naming.OperationNotSupportedException;
 import org.junit.jupiter.api.Test;
@@ -93,13 +94,13 @@ class CdcSqsMessageListenerTest {
   void shouldPassDoctorMessageFromSqsQueueToHandler()
       throws OperationNotSupportedException, IOException {
 
-    cdcSqsMessageListener.getDoctorMessage(CDC_DOC_JSON);
+    cdcSqsMessageListener.getDoctorMessage(CDC_DOCDB_EVENT_JSON);
 
     verify(cdcDoctorMessageHandler).handleMessage(doctorMessageCaptor.capture());
 
     var result = doctorMessageCaptor.getValue();
     assertEquals(GMC_ID, result.getFullDocument().getGmcReferenceNumber());
-    assertEquals("replace", result.getOperationType());
+    assertEquals(OperationType.UPDATE.getValue(), result.getOperationType());
   }
 
   @Test
@@ -112,7 +113,7 @@ class CdcSqsMessageListenerTest {
 
     var result = recommendationMessageCaptor.getValue();
     assertEquals(GMC_ID, result.getFullDocument().getGmcNumber());
-    assertEquals("update", result.getOperationType());
+    assertEquals(OperationType.UPDATE.getValue(), result.getOperationType());
   }
 
   @Test
@@ -125,7 +126,7 @@ class CdcSqsMessageListenerTest {
 
     var result = connectionMessageCaptor.getValue();
     assertEquals(GMC_ID, result.getFullDocument().getGmcId());
-    assertEquals("insert", result.getOperationType());
+    assertEquals(OperationType.INSERT.getValue(), result.getOperationType());
   }
 
   @Test
@@ -140,7 +141,7 @@ class CdcSqsMessageListenerTest {
     var result = hiddenDiscrepancyMessageCaptor.getValue();
     assertEquals(GMC_ID, result.getFullDocument().getGmcId());
     assertEquals(HIDDEN_DISCREPANCY_OID, result.getFullDocument().getId());
-    assertEquals("insert", result.getOperationType());
+    assertEquals(OperationType.INSERT.getValue(), result.getOperationType());
   }
 
   @Test
@@ -153,6 +154,6 @@ class CdcSqsMessageListenerTest {
 
     var result = hiddenDiscrepancyMessageCaptor.getValue();
     assertEquals(HIDDEN_DISCREPANCY_OID, result.getDocumentKey().getId());
-    assertEquals("delete", result.getOperationType());
+    assertEquals(OperationType.DELETE.getValue(), result.getOperationType());
   }
 }
