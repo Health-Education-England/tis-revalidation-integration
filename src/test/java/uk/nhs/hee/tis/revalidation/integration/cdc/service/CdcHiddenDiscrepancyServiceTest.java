@@ -29,8 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.nhs.hee.tis.revalidation
-    .integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY;
 import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY_2;
 
 import java.util.Collections;
