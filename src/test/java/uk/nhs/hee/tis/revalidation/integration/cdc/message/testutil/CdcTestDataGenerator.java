@@ -491,7 +491,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto HiddenDiscrepancy insert test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-  getCdcHiddenDiscrepancyInsertCdcDocumentDto(String key) {
+      getCdcHiddenDiscrepancyInsertCdcDocumentDto(String key) {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id(key)
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
@@ -511,7 +511,7 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto CdcHiddenDiscrepancyDto deleted test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-  getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
+      getCdcHiddenDiscrepancyDeleteCdcDocumentDto() {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
         .id(DOCUMENT_KEY.getId())
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
