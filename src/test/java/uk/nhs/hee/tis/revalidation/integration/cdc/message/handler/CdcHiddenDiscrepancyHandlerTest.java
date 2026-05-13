@@ -45,7 +45,7 @@ class CdcHiddenDiscrepancyHandlerTest {
   @Test
   void shouldHandleInserts() throws OperationNotSupportedException {
     var testMessage = CdcTestDataGenerator
-        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY.getId());
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     cdcHiddenDiscrepancyMessageHandler.handleMessage(testMessage);
 
     verify(cdcHiddenDiscrepancyService).upsertEntity(testMessage.getFullDocument());

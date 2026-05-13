@@ -251,7 +251,7 @@ public class CdcTestDataGenerator {
         .existsInGmc(false)
         .hiddenDiscrepancies(List.of(
             cdcHiddenDiscrepancyMapper.toEntity(
-                getCdcHiddenDiscrepancyInsertCdcDocumentDto("1").getFullDocument())
+                getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY).getFullDocument())
         ))
         .build();
   }

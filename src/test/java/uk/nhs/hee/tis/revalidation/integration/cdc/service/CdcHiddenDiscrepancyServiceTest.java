@@ -29,6 +29,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.nhs.hee.tis.revalidation
+    .integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY;
+import static uk.nhs.hee.tis.revalidation.integration.cdc.message.testutil.CdcTestDataGenerator.DOCUMENT_KEY_2;
 
 import java.util.Collections;
 import org.elasticsearch.ResourceNotFoundException;
@@ -90,7 +93,7 @@ class CdcHiddenDiscrepancyServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(List.of(masterDoctorView));
 
     var newHiddenDiscrepancy = CdcTestDataGenerator
-        .getCdcHiddenDiscrepancyInsertCdcDocumentDto("1");
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     var dto = newHiddenDiscrepancy.getFullDocument();
     var entity = HiddenDiscrepancy.builder()
         .id(dto.getId())
@@ -116,7 +119,7 @@ class CdcHiddenDiscrepancyServiceTest {
         List.of(masterDoctorViewWithHidden));
 
     var newHiddenDiscrepancy = CdcTestDataGenerator
-        .getCdcHiddenDiscrepancyInsertCdcDocumentDto("2");
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY_2);
     var dto = newHiddenDiscrepancy.getFullDocument();
     var entity = HiddenDiscrepancy.builder()
         .id(dto.getId())
@@ -139,7 +142,8 @@ class CdcHiddenDiscrepancyServiceTest {
   void shouldNotInsertRecordIfDoctorDoesNotExist() {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(Collections.emptyList());
 
-    var newConnectionLog = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto("1");
+    var newConnectionLog = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     cdcHiddenDiscrepancyService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(repository, never()).save(any());
@@ -196,7 +200,8 @@ class CdcHiddenDiscrepancyServiceTest {
     when(repository.findByGmcReferenceNumber(any())).thenReturn(
         List.of(masterDoctorViewWithHidden));
 
-    var newConnectionLog = CdcTestDataGenerator.getCdcHiddenDiscrepancyInsertCdcDocumentDto("1");
+    var newConnectionLog = CdcTestDataGenerator
+        .getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY);
     cdcHiddenDiscrepancyService.upsertEntity(newConnectionLog.getFullDocument());
 
     verify(repository, never()).save(any());
