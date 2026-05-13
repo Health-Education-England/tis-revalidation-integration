@@ -263,8 +263,8 @@ public class CdcTestDataGenerator {
    */
   public static MasterDoctorView getTestMasterDoctorViewWithMultipleHidden() {
     var cdcDocumentDtoLists = List.of(
-        getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY.getId()).getFullDocument(),
-        getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY_2.getId()).getFullDocument());
+        getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY).getFullDocument(),
+        getCdcHiddenDiscrepancyInsertCdcDocumentDto(DOCUMENT_KEY_2).getFullDocument());
     var hiddenDiscrepancies = cdcHiddenDiscrepancyMapper.toEntityList(cdcDocumentDtoLists);
 
     return MasterDoctorView.builder()
@@ -491,9 +491,9 @@ public class CdcTestDataGenerator {
    * @return CdcDocumentDto HiddenDiscrepancy insert test instance
    */
   public static CdcDocumentDto<CdcHiddenDiscrepancyDto>
-      getCdcHiddenDiscrepancyInsertCdcDocumentDto(String key) {
+      getCdcHiddenDiscrepancyInsertCdcDocumentDto(CdcDocumentKey key) {
     CdcHiddenDiscrepancyDto hiddenDiscrepancy = CdcHiddenDiscrepancyDto.builder()
-        .id(key)
+        .id(key.getId())
         .gmcId(GMC_REFERENCE_NUMBER_VAL)
         .hiddenDateTime(LocalDateTime.now())
         .hiddenBy(ADMIN_VAL)
@@ -502,7 +502,7 @@ public class CdcTestDataGenerator {
         .build();
 
     return new CdcDocumentDto<>(OperationType.INSERT.getValue(),
-        hiddenDiscrepancy, DOCUMENT_KEY);
+        hiddenDiscrepancy, key);
   }
 
   /**
