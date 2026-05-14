@@ -139,6 +139,8 @@ public class CdcSqsMessageListener {
       cdcHiddenDiscrepancyMessageHandler.handleMessage(cdcDocument);
     } catch (OperationNotSupportedException e) {
       log.error(e.getMessage(), e);
+    } catch (JsonProcessingException e) {
+      log.error("Failed to parse connection log message: {}", message, e);
     }
   }
 }
