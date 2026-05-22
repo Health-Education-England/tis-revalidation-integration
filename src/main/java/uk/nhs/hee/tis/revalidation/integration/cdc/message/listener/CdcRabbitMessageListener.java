@@ -36,7 +36,7 @@ public class CdcRabbitMessageListener {
     this.cdcTraineeUpdateHandler = cdcTraineeUpdateHandler;
   }
 
-  @RabbitListener(queues = "${app.rabbit.reval.queue.programmeinfo.updated.integration}")
+  @RabbitListener(queues = "${app.rabbit.reval.queue.tcsdoctorinfo.updated.integration}")
   public void getTraineeUpdateMessage(ConnectionInfoDto message) {
     if (message.getTcsPersonId() == null) {
       throw new AmqpRejectAndDontRequeueException(
