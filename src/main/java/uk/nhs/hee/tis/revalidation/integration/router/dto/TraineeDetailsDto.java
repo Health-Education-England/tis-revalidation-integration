@@ -47,6 +47,7 @@ public class TraineeDetailsDto {
   private LocalDate programmeEndDate;
   private String programmeMembershipType;
   private String programmeName;
+  private String tcsDesignatedBody;
   private String currentGrade;
   private Integer tisPersonId;
   private List<TraineeNotesInfoDto> notes;

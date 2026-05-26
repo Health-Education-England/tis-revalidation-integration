@@ -83,6 +83,7 @@ class TraineeDetailProcessorTest {
   private String programmeMembershipType;
   private String currentGrade;
   private Integer tisPersonId;
+  private String tcsDesignatedBody;
 
   @BeforeEach
   void setup() {
@@ -117,6 +118,7 @@ class TraineeDetailProcessorTest {
     assertThat(dto.getCurriculumEndDate(), is(curriculumEndDate));
     assertThat(dto.getProgrammeEndDate(), is(programmeEndDate));
     assertThat(dto.getProgrammeMembershipType(), is(programmeMembershipType));
+    assertThat(dto.getTcsDesignatedBody(), is(tcsDesignatedBody));
     assertThat(dto.getTisPersonId(), is(tisPersonId));
     assertThat(dto.getNotes().size(), equalTo(1));
     assertThat(dto.getNotes(), is(notes.getNotes()));
@@ -145,6 +147,7 @@ class TraineeDetailProcessorTest {
     assertThat(dto.getProgrammeEndDate(), is(programmeEndDate));
     assertThat(dto.getProgrammeMembershipType(), is(programmeMembershipType));
     assertThat(dto.getTisPersonId(), is(tisPersonId));
+    assertThat(dto.getTcsDesignatedBody(), is(tcsDesignatedBody));
     assertThat(dto.getNotes().size(), equalTo(1));
     assertThat(dto.getNotes(), is(notes.getNotes()));
   }
@@ -172,6 +175,7 @@ class TraineeDetailProcessorTest {
     assertThat(dto.getProgrammeEndDate(), nullValue());
     assertThat(dto.getProgrammeMembershipType(), nullValue());
     assertThat(dto.getTisPersonId(), nullValue());
+    assertThat(dto.getTcsDesignatedBody(), nullValue());
     assertThat(dto.getNotes().size(), equalTo(1));
     assertThat(dto.getNotes(), is(notes.getNotes()));
   }
@@ -210,6 +214,7 @@ class TraineeDetailProcessorTest {
     programmeMembershipType = faker.lorem().characters(10);
     currentGrade = faker.lorem().characters(10);
     tisPersonId = Integer.valueOf(faker.number().digits(7));
+    tcsDesignatedBody = faker.lorem().characters(7);
 
     final var doctors = List.of(TraineeInfoDto.builder()
         .gmcReferenceNumber(gmcNumber)
@@ -245,6 +250,7 @@ class TraineeDetailProcessorTest {
         .programmeMembershipType(programmeMembershipType)
         .currentGrade(currentGrade)
         .tisPersonId(tisPersonId)
+        .tcsDesignatedBody(tcsDesignatedBody)
         .build();
 
     final var testNotes = List.of(TraineeNotesInfoDto.builder()
