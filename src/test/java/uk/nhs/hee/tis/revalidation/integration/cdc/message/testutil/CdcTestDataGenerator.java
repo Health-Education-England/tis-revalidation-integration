@@ -71,6 +71,7 @@ public class CdcTestDataGenerator {
   private static final String INTERNAL_ERROR_RESPONSE_CODE = "98";
   private static final String UPDATED_BY_GMC = "Updated by GMC";
   private static final String HIDDEN_REASON_VAL = "reason";
+  private static final LocalDate HIDDEN_UNTIL_DATE = LocalDate.of(2026, 12, 31);
 
   public static final CdcDocumentKey DOCUMENT_KEY = CdcDocumentKey.builder().id("1234567").build();
   public static final CdcDocumentKey DOCUMENT_KEY_2 = CdcDocumentKey.builder().id("7654321")
@@ -499,6 +500,7 @@ public class CdcTestDataGenerator {
         .hiddenBy(ADMIN_VAL)
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_VAL + key)
         .reason(HIDDEN_REASON_VAL)
+        .hiddenUntilDate(HIDDEN_UNTIL_DATE)
         .build();
 
     return new CdcDocumentDto<>(OperationType.INSERT.getValue(),

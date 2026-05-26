@@ -25,12 +25,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDateDeserializer;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcDocumentKeyDeserializer;
 import uk.nhs.hee.tis.revalidation.integration.cdc.message.util.CdcLocalDateTimeDeserializer;
 
@@ -54,4 +57,7 @@ public class CdcHiddenDiscrepancyDto {
   @JsonDeserialize(using = CdcLocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   private LocalDateTime hiddenDateTime;
+  @JsonDeserialize(using = CdcDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
+  private LocalDate hiddenUntilDate;
 }
