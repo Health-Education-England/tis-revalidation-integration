@@ -101,6 +101,7 @@ class CdcHiddenDiscrepancyServiceTest {
         .hiddenBy(dto.getHiddenBy())
         .reason(dto.getReason())
         .hiddenDateTime(dto.getHiddenDateTime())
+        .hiddenUntilDate(dto.getHiddenUntilDate())
         .build();
     when(cdcHiddenDiscrepancyMapper.toEntity(dto)).thenReturn(entity);
 

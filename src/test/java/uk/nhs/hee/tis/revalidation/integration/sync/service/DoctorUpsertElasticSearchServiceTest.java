@@ -37,6 +37,7 @@ import static uk.nhs.hee.tis.revalidation.integration.config.EsConstant.Indexes.
 import static uk.nhs.hee.tis.revalidation.integration.sync.service.DoctorUpsertElasticSearchService.ES_DATETIME_FORMATTER;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -116,6 +117,7 @@ class DoctorUpsertElasticSearchServiceTest {
   private static final String DESIGNATED_BODY_CODE_1 = "1111111";
   private static final String DESIGNATED_BODY_CODE_2 = "2222222";
   private static final LocalDateTime LAST_CONNECTION_DATETIME = LocalDateTime.now().minusDays(1);
+  private static final LocalDate HIDDEN_UNTIL_DATE = LocalDate.of(2026, 12, 31);
   private ConnectionLogDto connectionLogDto;
   HiddenDiscrepancy hiddenDiscrepancy1;
   HiddenDiscrepancy hiddenDiscrepancy2;
@@ -168,6 +170,7 @@ class DoctorUpsertElasticSearchServiceTest {
         .hiddenForDesignatedBodyCode(DESIGNATED_BODY_CODE_1)
         .reason("reason1")
         .hiddenBy(UPDATED_BY)
+        .hiddenUntilDate(HIDDEN_UNTIL_DATE)
         .build();
     hiddenDiscrepancy2 = HiddenDiscrepancy.builder()
         .gmcId(GMC_NUMBER)
