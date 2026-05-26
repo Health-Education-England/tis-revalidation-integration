@@ -55,7 +55,7 @@ public class HiddenDiscrepancy {
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime hiddenDateTime;
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date)
   private LocalDate hiddenUntilDate;
 }
 
