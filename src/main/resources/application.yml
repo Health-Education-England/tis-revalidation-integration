@@ -75,7 +75,7 @@ app:
       exchange: ${REVAL_RABBIT_EXCHANGE:reval.exchange}
       queue:
         recommendation.syncstart: ${REVAL_RABBIT_RECOMMENDATION_SYNC_START_QUEUE:reval.queue.recommendation.syncstart}
-        connection.update: ${REVAL_RABBIT_QUEUE:reval.queue.connection.update}
+        tcsdoctorinfo.updated.integration: ${TCSDOCTORINFO_UPDATED_INTEGRATION_QUEUE:reval.queue.tcsdoctorinfo.updated.integration}
         connection.syncstart: ${REVAL_RABBIT_SYNC_START_QUEUE:reval.queue.connection.syncstart}
         connection.syncdata: ${REVAL_RABBIT_SYNC_DATA_QUEUE:reval.queue.connection.syncdata}
         revalidationsummary.essync.integration: ${ESSYNC_GMC_DATA_QUEUE:reval.queue.revalidationsummary.essync.integration}
