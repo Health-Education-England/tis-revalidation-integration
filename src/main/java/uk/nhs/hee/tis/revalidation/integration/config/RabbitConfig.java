@@ -38,9 +38,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-  @Value("${app.rabbit.reval.queue.connection.update}")
-  private String revalQueueName;
-
   @Value("${app.rabbit.reval.queue.connection.syncstart}")
   private String revalSyncQueueName;
 
@@ -58,11 +55,6 @@ public class RabbitConfig {
 
   @Value("${app.rabbit.reval.routingKey.connection.syncdata}")
   private String revalSyncDataRoutingKey;
-
-  @Bean
-  public Queue revalQueue() {
-    return new Queue(revalQueueName, false);
-  }
 
   @Bean
   public Queue revalSyncqueue() {
