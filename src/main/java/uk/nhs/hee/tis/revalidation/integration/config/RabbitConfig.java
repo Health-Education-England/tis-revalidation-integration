@@ -38,54 +38,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-  @Value("${app.rabbit.reval.queue.connection.syncstart}")
-  private String revalSyncQueueName;
-
-  @Value("${app.rabbit.reval.queue.connection.syncdata}")
-  private String revalSyncDataQueueName;
-
-  @Value("${app.rabbit.reval.exchange}")
-  private String revalExchange;
-
-  @Value("${app.rabbit.reval.routingKey.connection.update}")
-  private String revalRoutingKey;
-
-  @Value("${app.rabbit.reval.routingKey.connection.syncstart}")
-  private String revalSyncStartRoutingKey;
-
-  @Value("${app.rabbit.reval.routingKey.connection.syncdata}")
-  private String revalSyncDataRoutingKey;
-
-  @Bean
-  public Queue revalSyncqueue() {
-    return new Queue(revalSyncQueueName, false);
-  }
-
-  @Bean
-  public Queue revalDataqueue() {
-    return new Queue(revalSyncDataQueueName, false);
-  }
-
-  @Bean
-  public DirectExchange exchange() {
-    return new DirectExchange(revalExchange);
-  }
-
-  @Bean
-  public Binding revalBinding(final Queue revalQueue, final DirectExchange exchange) {
-    return BindingBuilder.bind(revalQueue).to(exchange).with(revalRoutingKey);
-  }
-
-  @Bean
-  public Binding revalSyncBinding(final Queue revalSyncqueue, final DirectExchange exchange) {
-    return BindingBuilder.bind(revalSyncqueue).to(exchange).with(revalSyncStartRoutingKey);
-  }
-
-  @Bean
-  public Binding revalDataBinding(final Queue revalDataqueue, final DirectExchange exchange) {
-    return BindingBuilder.bind(revalDataqueue).to(exchange).with(revalSyncDataRoutingKey);
-  }
-
   @Bean
   public MessageConverter jsonMessageConverter() {
     final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
