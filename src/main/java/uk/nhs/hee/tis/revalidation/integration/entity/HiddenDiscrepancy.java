@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,5 +55,7 @@ public class HiddenDiscrepancy {
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime hiddenDateTime;
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  private LocalDate hiddenUntilDate;
 }
 
