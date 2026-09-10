@@ -48,8 +48,9 @@ dependencies {
   implementation "org.apache.camel.springboot:camel-jackson-starter"
 
   // Lombok
-  compileOnly "org.projectlombok:lombok"
-  annotationProcessor "org.projectlombok:lombok"
+  ext.lombokVersion = "1.18.48"
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
   // MapStruct
   implementation "org.mapstruct:mapstruct:1.4.2.Final"
