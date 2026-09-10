@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "uk.nhs.hee.tis.revalidation"
-version = "0.19.0"
+version = "0.19.1"
 sourceCompatibility = "17"
 
 configurations {
@@ -46,11 +46,11 @@ dependencies {
   implementation "org.apache.camel.springboot:camel-http-starter"
   implementation "org.apache.camel.springboot:camel-servlet-starter"
   implementation "org.apache.camel.springboot:camel-jackson-starter"
-  implementation "org.apache.camel.springboot:camel-aws-xray-starter"
 
   // Lombok
-  compileOnly "org.projectlombok:lombok"
-  annotationProcessor "org.projectlombok:lombok"
+  ext.lombokVersion = "1.18.48"
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
   // MapStruct
   implementation "org.mapstruct:mapstruct:1.4.2.Final"

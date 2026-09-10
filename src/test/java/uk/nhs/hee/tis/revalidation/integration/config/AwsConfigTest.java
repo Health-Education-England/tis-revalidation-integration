@@ -21,15 +21,11 @@
 
 package uk.nhs.hee.tis.revalidation.integration.config;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import org.apache.camel.component.aws.xray.TraceAnnotatedTracingStrategy;
-import org.apache.camel.component.aws.xray.XRayTracer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +50,4 @@ class AwsConfigTest {
     assertThat(ctx.getBean(QueueMessagingTemplate.class), notNullValue());
   }
 
-  @Test
-  void testXrayTracerCreated() {
-    XRayTracer actual = ctx.getBean(XRayTracer.class);
-    assertThat(actual, notNullValue());
-    assertThat(actual.getTracingStrategy(), is(instanceOf(TraceAnnotatedTracingStrategy.class)));
-  }
 }
